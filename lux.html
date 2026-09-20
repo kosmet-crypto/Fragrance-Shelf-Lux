@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lux · Perfume Cabinet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#0d0f0e;--bg2:#131614;--surf:#171b19;--surf2:#1d221f;--line:rgba(232,220,190,.09);--line2:rgba(232,220,190,.18);
+--tx:#ece6d6;--tx2:#a8a293;--tx3:#787466;--gold:#caa96b;--gold2:#e6cf98;--goldink:#19130a;--glow:rgba(202,169,107,.11);
+--danger:#dd7565;--ledge:rgba(202,169,107,.34);--scrim:rgba(6,7,6,.66);--glass:rgba(255,255,255,.04);
+--gf:rgba(255,255,255,.05);--gs:rgba(255,255,255,.3);--shn:rgba(255,255,255,.15);
+--serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+--bg:#f4f0e7;--bg2:#ece6d9;--surf:#fbf8f1;--surf2:#f1ebdf;--line:rgba(44,36,20,.10);--line2:rgba(44,36,20,.2);
+--tx:#1e1b15;--tx2:#5f5848;--tx3:#8b8471;--gold:#8f6b28;--gold2:#6e4f17;--goldink:#fff8e8;--glow:rgba(143,107,40,.10);
+--danger:#b4402f;--ledge:rgba(143,107,40,.4);--scrim:rgba(30,24,12,.45);--glass:rgba(0,0,0,.03);
+--gf:rgba(0,0,0,.04);--gs:rgba(40,30,10,.35);--shn:rgba(255,255,255,.55)}}
+:root[data-theme="light"]{
+--bg:#f4f0e7;--bg2:#ece6d9;--surf:#fbf8f1;--surf2:#f1ebdf;--line:rgba(44,36,20,.10);--line2:rgba(44,36,20,.2);
+--tx:#1e1b15;--tx2:#5f5848;--tx3:#8b8471;--gold:#8f6b28;--gold2:#6e4f17;--goldink:#fff8e8;--glow:rgba(143,107,40,.10);
+--danger:#b4402f;--ledge:rgba(143,107,40,.4);--scrim:rgba(30,24,12,.45);--glass:rgba(0,0,0,.03);
+--gf:rgba(0,0,0,.04);--gs:rgba(40,30,10,.35);--shn:rgba(255,255,255,.55)}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+html.lock{overflow:hidden}
+body{font:15px/1.5 var(--sans);color:var(--tx);min-height:100%;-webkit-font-smoothing:antialiased;
+background:radial-gradient(900px 520px at 78% -8%,var(--glow),transparent 65%),var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+h1{font:500 44px/1.02 var(--serif);letter-spacing:.005em}
+h2{font:500 26px/1.1 var(--serif)}
+h3{font:600 20px/1.15 var(--serif)}
+.app{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;align-self:start;height:100vh;padding:38px 20px 26px;display:flex;flex-direction:column;gap:34px;border-right:1px solid var(--line)}
+.mark{font:italic 500 50px/1 var(--serif);color:var(--gold2);letter-spacing:.01em}
+.msub{color:var(--tx3);font-size:13px;margin-top:6px}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nb{display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:14px;color:var(--tx2);text-align:left;transition:background .2s,color .2s}
+.nb svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nb:hover{color:var(--tx);background:var(--glass)}
+.nb.on{color:var(--gold2);background:var(--surf)}
+.rail-foot{margin-top:auto;color:var(--tx3);font-size:12.5px;line-height:1.5}
+#view{padding:44px 48px 90px;max-width:1120px;width:100%}
+.vh{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:30px}
+.sub2{color:var(--tx2);margin-top:10px}
+.acts{display:flex;gap:10px;flex-wrap:wrap}
+.btn{background:var(--gold);color:var(--goldink);border-radius:999px;padding:11px 22px;font-weight:600;font-size:14px;transition:transform .2s,filter .2s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--line2)}
+.btn.ghost:hover{border-color:var(--gold);color:var(--gold2)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--line2)}
+.btn.sm{padding:7px 15px;font-size:13px}
+.note{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 18px;margin-bottom:26px;border:1px solid var(--line2);border-radius:16px;background:var(--surf);color:var(--tx2);font-size:14px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:22px;padding:26px}
+.card+.card{margin-top:18px}
+.muted{color:var(--tx3)}
+/* shelves */
+.shelf{margin-bottom:38px}
+.shelf-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
+.shelf-h span{color:var(--tx3);font-size:13px}
+.rack{--rowh:262px;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));grid-auto-rows:var(--rowh);min-height:var(--rowh);
+background-image:linear-gradient(to bottom,transparent calc(100% - 2px),var(--ledge) calc(100% - 2px));background-size:100% var(--rowh);border-radius:6px;transition:background-color .2s}
+.rack.over{background-color:var(--glow);box-shadow:0 0 0 1px var(--gold) inset}
+.wish .rack{background-image:linear-gradient(to bottom,transparent calc(100% - 1px),var(--line2) calc(100% - 1px))}
+.wish .bt{opacity:.72}
+.empty{grid-column:1/-1;align-self:center;padding:0 10px;color:var(--tx3);max-width:420px}
+.it{position:relative;display:flex;flex-direction:column;align-items:center;padding:8px 8px 14px;cursor:pointer;min-width:0;border-radius:14px;
+-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.it img{-webkit-user-drag:none}
+.it:hover .bt{transform:translateY(-7px)}
+.it.dragging{opacity:.22}
+.it.drop-l::before,.it.drop-r::after{content:"";position:absolute;top:16px;bottom:22px;width:2px;background:var(--gold);border-radius:2px}
+.it.drop-l::before{left:0}.it.drop-r::after{right:0}
+.bt{position:relative;width:88px;height:141px;margin-top:8px;transition:transform .32s cubic-bezier(.2,.7,.2,1);filter:drop-shadow(0 10px 12px rgba(0,0,0,.3))}
+.bsv{width:100%;height:100%;display:block;overflow:visible}
+.bsv .gl{fill:var(--gf);stroke:var(--gs)}
+.bsv .sh{fill:var(--shn)}
+.bt img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:8px;opacity:0}
+.bt.has-img img{opacity:1}.bt.has-img .bsv{opacity:0}
+.gauge{display:none;position:absolute;right:-8px;top:8px;bottom:8px;width:3px;background:var(--line2);border-radius:3px;overflow:hidden}
+.gauge b{position:absolute;bottom:0;left:0;right:0;background:var(--gold)}
+.has-img .gauge{display:block}
+.nm{font:600 18px/1.12 var(--serif);margin-top:12px;text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.br{font-size:12px;color:var(--tx3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv{font-size:11.5px;color:var(--tx2);margin-top:3px;white-space:nowrap}
+.ghost-el{position:fixed;left:0;top:0;z-index:300;pointer-events:none;width:90px;filter:drop-shadow(0 18px 24px rgba(0,0,0,.5))}
+body.dragging-on{cursor:grabbing;-webkit-user-select:none;user-select:none}
+/* forms */
+input,select,textarea{width:100%;background:var(--bg2);border:1px solid var(--line2);color:var(--tx);border-radius:12px;padding:11px 13px;font:inherit;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+input[type=range]{padding:0;height:26px;accent-color:var(--gold);background:none;border:0}
+input[type=file]{display:none}
+textarea{resize:vertical;min-height:84px}
+label,.lb{display:block;font-size:12.5px;color:var(--tx2);margin-bottom:6px}
+.fg{margin-bottom:14px;position:relative;min-width:0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:7px 15px;border-radius:999px;border:1px solid var(--line2);color:var(--tx2);font-size:13.5px;transition:all .2s}
+.chip:hover{border-color:var(--gold)}
+.chip.on{background:var(--gold);color:var(--goldink);border-color:var(--gold);font-weight:600}
+.stars{display:flex;gap:2px}
+.stars button{font-size:24px;line-height:1;color:var(--line2);padding:2px 3px}
+.stars button.on{color:var(--gold)}
+.stars.dots button{font-size:15px}
+.sugg{position:absolute;top:100%;left:0;right:0;z-index:20;margin-top:4px;background:var(--surf2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.sugg:empty{display:none}
+.sugg button{display:block;width:100%;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);font-size:14px}
+.sugg button:last-child{border:0}
+.sugg button:hover{background:var(--glass);color:var(--gold2)}
+.sugg small{color:var(--tx3)}
+/* modal */
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;background:var(--scrim);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.modal[hidden]{display:none}
+.modal.dlg{z-index:200;align-items:center;padding:20px}
+.panel{position:relative;width:min(640px,100%);max-height:92dvh;max-height:92vh;overflow:auto;background:var(--surf);border:1px solid var(--line2);border-radius:26px 26px 0 0;padding:28px 26px calc(24px + env(safe-area-inset-bottom,0px));animation:up .28s cubic-bezier(.2,.8,.2,1)}
+.dlg .panel{width:min(420px,100%);border-radius:24px;padding:26px}
+@keyframes up{from{transform:translateY(28px);opacity:0}to{transform:none;opacity:1}}
+.x{position:absolute;right:16px;top:14px;font-size:26px;color:var(--tx3);width:36px;height:36px;border-radius:50%}
+.x:hover{color:var(--tx);background:var(--glass)}
+.s-top{display:flex;gap:22px;align-items:flex-start;margin-bottom:20px;padding-right:26px}
+.s-bt{flex:none;width:96px}
+.s-bt .bt{width:96px;height:154px;margin:0}
+.s-id{flex:1;min-width:0}
+.s-id input{font:600 22px var(--serif);}
+.s-stats{display:flex;gap:16px;flex-wrap:wrap;color:var(--tx2);font-size:13px;margin-top:4px}
+.s-stats b{color:var(--tx);font-weight:600}
+.foot{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap}
+.foot .sp{margin-right:auto}
+.stepper{display:flex;align-items:center;justify-content:center;gap:26px;margin:18px 0 22px}
+.stepper button{width:52px;height:52px;border-radius:50%;border:1px solid var(--line2);font-size:24px;color:var(--gold2)}
+.stepper button:hover{border-color:var(--gold)}
+.stepper b{font:500 54px/1 var(--serif);min-width:64px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--tx);color:var(--bg);padding:11px 20px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:all .3s;z-index:400;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* insights */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:22px;background:var(--surf);margin-bottom:18px}
+.kpi{padding:22px 22px;border-left:1px solid var(--line)}
+.kpi:first-child{border:0}
+.kpi b{display:block;font:500 34px/1.05 var(--serif);color:var(--gold2)}
+.kpi span{font-size:12.5px;color:var(--tx3)}
+.ctl{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:22px}
+.ctl .fg{margin:0;min-width:170px}
+.donut-wrap{display:grid;grid-template-columns:270px 1fr;gap:34px;align-items:center}
+.dn{position:relative;width:270px;height:270px}
+.dn svg{width:100%;height:100%;display:block}
+.seg{transition:stroke-dasharray .95s cubic-bezier(.2,.7,.2,1),opacity .2s;cursor:pointer}
+.dn.hl .seg{opacity:.25}.dn.hl .seg.on{opacity:1}
+.dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:64px;pointer-events:none}
+.dc b{font:500 34px/1.05 var(--serif)}
+.dc span{font-size:12.5px;color:var(--tx3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lg{display:flex;flex-direction:column}
+.lg-row{display:grid;grid-template-columns:14px 1fr auto auto;gap:12px;align-items:center;padding:10px 6px;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer;border-radius:8px}
+.lg-row:hover,.lg-row.on{background:var(--glass)}
+.lg-row i{width:11px;height:11px;border-radius:4px}
+.lg-row .v{color:var(--tx2);font-variant-numeric:tabular-nums}
+.lg-row .p{color:var(--tx3);width:46px;text-align:right;font-variant-numeric:tabular-nums}
+.bars{display:flex;align-items:flex-end;justify-content:space-between;gap:5px;height:130px;margin-top:6px}
+.bar{flex:1;max-width:46px;background:var(--gold);border-radius:4px 4px 1px 1px;min-height:2px;opacity:.85;transform-origin:bottom;animation:grow .7s cubic-bezier(.2,.7,.2,1) both}
+.bar.z{background:var(--line2);opacity:1}
+@keyframes grow{from{transform:scaleY(0)}}
+.axis{display:flex;justify-content:space-between;color:var(--tx3);font-size:12px;margin-top:8px}
+.row{display:flex;gap:16px;align-items:center;padding:12px 8px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:12px}
+.row:hover{background:var(--glass)}
+.row .th{flex:none;width:34px;height:54px}
+.row .th .bt{width:34px;height:54px;margin:0;filter:none}
+.row .mid{flex:1;min-width:0}
+.row .t1{font:600 18px/1.15 var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{font-size:12.5px;color:var(--tx3)}
+.meter{height:4px;border-radius:4px;background:var(--line);margin-top:8px;overflow:hidden}
+.meter b{display:block;height:100%;background:var(--gold);border-radius:4px}
+.row .rt{flex:none;text-align:right;font-size:13px;color:var(--tx2);min-width:96px}
+/* journal */
+.today{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.today .bt{width:90px;height:144px;margin:0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .dw{font-size:12px;color:var(--tx3);text-align:center;padding-bottom:4px}
+.cal .d{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--tx2);background:var(--glass)}
+.cal .d.t{outline:1px solid var(--gold)}
+.cal .d.e{background:transparent}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ch button{font-size:22px;color:var(--tx2);width:38px;height:38px;border-radius:50%}
+.ch button:hover{background:var(--glass);color:var(--gold2)}
+.day-h{font:500 18px var(--serif);color:var(--gold2);margin:22px 0 4px}
+.wr{display:flex;align-items:center;gap:14px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.wr .th{width:26px;height:42px;flex:none}
+.wr .th .bt{width:26px;height:42px;margin:0;filter:none}
+.wr .mid{flex:1;min-width:0;font-size:14px}
+.wr .mid small{display:block;color:var(--tx3)}
+.wr button{color:var(--tx3);font-size:20px;width:34px;height:34px;border-radius:50%}
+.wr button:hover{color:var(--danger)}
+.g3{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+.g3 .card+.card{margin-top:0}
+/* library */
+.lrow{display:flex;gap:16px;align-items:center;padding:12px 6px;border-bottom:1px solid var(--line)}
+.lrow .th{flex:none;width:34px;height:54px}
+.lrow .th .bt{width:34px;height:54px;margin:0;filter:none}
+.lrow .mid{flex:1;min-width:0}
+.lrow .t1{font:600 18px/1.15 var(--serif)}
+.lrow .t2{font-size:12.5px;color:var(--tx3)}
+.lrow .t3{font-size:12px;color:var(--tx3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .ac{display:flex;gap:8px;flex:none}
+.ic{width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);font-size:17px;color:var(--tx2)}
+.ic:hover{border-color:var(--gold);color:var(--gold2)}
+.ic.on{color:var(--gold);border-color:var(--gold)}
+.filters{display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr;gap:12px;margin-bottom:8px}
+.filters .fg{margin:0}
+.sg{display:inline-flex;border:1px solid var(--line2);border-radius:999px;padding:3px}
+.sg button{padding:7px 16px;border-radius:999px;font-size:13.5px;color:var(--tx2)}
+.sg button.on{background:var(--gold);color:var(--goldink);font-weight:600}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 0;border-bottom:1px solid var(--line)}
+.set-row:last-child{border:0}
+.set-row small{display:block;color:var(--tx3)}
+.shrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.shrow input{flex:1}
+.shrow button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line2);color:var(--tx2)}
+.shrow button:hover{border-color:var(--gold);color:var(--gold2)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi{border-left:0;border-top:1px solid var(--line)}.kpi:nth-child(-n+2){border-top:0}.kpi:nth-child(even){border-left:1px solid var(--line)}.donut-wrap{grid-template-columns:1fr}.dn{margin:0 auto}.g3{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}}
+@media (max-width:820px){
+.app{display:block}
+.rail{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;flex-direction:row;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));gap:0;border-right:0;border-top:1px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);z-index:60}
+.rail .brand,.rail-foot{display:none}
+.nav{flex-direction:row;width:100%;justify-content:space-around}
+.nb{flex-direction:column;gap:3px;padding:7px 10px;font-size:11px;border-radius:12px;align-items:center}
+#view{padding:26px 18px 120px}
+h1{font-size:38px}
+.toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.rack{--rowh:246px;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+.bt{width:82px;height:131px}
+.nm{font-size:16.5px}
+.cols,.g2{grid-template-columns:1fr}
+.panel{padding:26px 18px calc(22px + env(safe-area-inset-bottom,0px))}
+.lrow .ac .ic{width:36px;height:36px}
+}
+@media (min-width:700px){.modal:not(.dlg){align-items:center;padding:24px}.modal:not(.dlg) .panel{border-radius:26px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+<linearGradient id="g-cap" x1="0" x2="1"><stop offset="0" stop-color="#8a7443"/><stop offset=".35" stop-color="#e8d08f"/><stop offset=".7" stop-color="#b99a56"/><stop offset="1" stop-color="#6e5a2e"/></linearGradient>
+<linearGradient id="g-shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></linearGradient>
+<symbol id="i-shelf" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M9 8.5h6M9 12.5h6"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20v-7M12 20V5M19 20v-10"/></symbol>
+<symbol id="i-lib" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M4 7h9M18 7h2M4 17h2M11 17h9"/><circle cx="15.5" cy="7" r="2.3"/><circle cx="8.5" cy="17" r="2.3"/></symbol>
+</defs>
+</svg>
+<div class="app">
+<aside class="rail">
+<div class="brand"><div class="mark">Lux</div><div class="msub">Perfume cabinet</div></div>
+<nav class="nav" id="nav">
+<button class="nb" data-act="tab" data-t="shelf"><svg><use href="#i-shelf"/></svg>Collection</button>
+<button class="nb" data-act="tab" data-t="journal"><svg><use href="#i-book"/></svg>Journal</button>
+<button class="nb" data-act="tab" data-t="ins"><svg><use href="#i-chart"/></svg>Insights</button>
+<button class="nb" data-act="tab" data-t="lib"><svg><use href="#i-lib"/></svg>Library</button>
+<button class="nb" data-act="tab" data-t="set"><svg><use href="#i-set"/></svg>Settings</button>
+</nav>
+<div class="rail-foot" id="railFoot"></div>
+</aside>
+<main id="view"></main>
+</div>
+<div class="modal" id="modal" hidden></div>
+<div class="modal dlg" id="dlg" hidden></div>
+<div class="toast" id="toast" role="status"></div>
+<datalist id="fam-list"></datalist>
+<datalist id="brand-list"></datalist>
+<script>
+'use strict';
+/* ================= utils ================= */
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const DAY=864e5;
+const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
+const dkey=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const sod=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
+const fmt=n=>Math.round(n||0).toLocaleString();
+const mlf=v=>String(Math.round((v||0)*10)/10);
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SEASONS=['Spring','Summer','Autumn','Winter'];
+const season=(t=Date.now())=>{const m=new Date(t).getMonth();return m<2||m===11?'Winter':m<5?'Spring':m<8?'Summer':'Autumn'};
+const CONCS=['EDT','EDP','Parfum','Cologne','Elixir'];
+const FAMLIST=['Aromatic','Woody','Amber','Fresh','Citrus','Floral','Gourmand','Leather','Oud','Fougère','Aquatic','Spicy','Powdery','Green','Chypre','Tobacco','Fruity','Musk','Oriental'];
+
+/* ================= state ================= */
+const defaults=()=>({v:2,demo:false,
+ shelves:[{id:'s1',name:'Daily'},{id:'s2',name:'Niche & special'},{id:'s3',name:'Summer & fresh'}],
+ perfumes:[],wears:[],mine:[],
+ settings:{spm:11,theme:'dark',cur:'€',remind:true,lastBackup:0,snooze:0,ins:{m:'ml',g:'perfume',p:'30'}}});
+function migrate(o){const d=defaults();const s=Object.assign(d,o||{});
+ s.settings=Object.assign(defaults().settings,(o&&o.settings)||{});
+ s.settings.ins=Object.assign(defaults().settings.ins,(o&&o.settings&&o.settings.ins)||{});
+ ['shelves','perfumes','wears','mine'].forEach(k=>{if(!Array.isArray(s[k]))s[k]=d[k]});
+ if(!s.shelves.length)s.shelves=defaults().shelves;return s}
+function loadState(){try{const j=localStorage.getItem('lux.v2');return j?migrate(JSON.parse(j)):null}catch(e){return null}}
+let S=loadState();
+let saveT=null;
+function save(){clearTimeout(saveT);saveT=setTimeout(persist,120)}
+function persist(){try{localStorage.setItem('lux.v2',JSON.stringify(S));autoSnap()}catch(e){console.warn('save failed',e)}}
+function autoSnap(){try{const a=JSON.parse(localStorage.getItem('lux.snaps')||'[]');
+ if(!S.perfumes.length)return;if(a.length&&Date.now()-a[0].t<20*36e5)return;
+ a.unshift({t:Date.now(),why:'Automatic',n:S.perfumes.length,data:JSON.stringify(S)});
+ localStorage.setItem('lux.snaps',JSON.stringify(a.slice(0,6)))}catch(e){}}
+function snapNow(why){try{const a=JSON.parse(localStorage.getItem('lux.snaps')||'[]');
+ a.unshift({t:Date.now(),why,n:S.perfumes.length,data:JSON.stringify(S)});
+ localStorage.setItem('lux.snaps',JSON.stringify(a.slice(0,6)))}catch(e){}}
+const owned=()=>S.perfumes.filter(p=>p.shelf!=='wish');
+const byId=id=>S.perfumes.find(p=>p.id===id);
+const shelfName=id=>id==='wish'?'Wishlist':(S.shelves.find(s=>s.id===id)||{}).name||'—';
+
+/* ================= IndexedDB (photos + imported library) ================= */
+const idb={db:null,
+ open(){return new Promise(res=>{try{const r=indexedDB.open('lux',1);
+  r.onupgradeneeded=()=>{r.result.createObjectStore('kv')};
+  r.onsuccess=()=>{this.db=r.result;res(true)};r.onerror=()=>res(false);r.onblocked=()=>res(false)}catch(e){res(false)}})},
+ op(mode,fn){return new Promise(res=>{if(!this.db)return res(undefined);try{const tx=this.db.transaction('kv',mode);const q=fn(tx.objectStore('kv'));
+  if(q){q.onsuccess=()=>res(q.result);q.onerror=()=>res(undefined)}tx.oncomplete=()=>res(q?q.result:true);tx.onerror=()=>res(undefined)}catch(e){res(undefined)}})},
+ get(k){return this.op('readonly',s=>s.get(k))},
+ set(k,v){return this.op('readwrite',s=>s.put(v,k))},
+ del(k){return this.op('readwrite',s=>s.delete(k))}};
+let PHOTOS={},IMPORTED=[];
+async function loadPhotos(){PHOTOS={};for(const p of S.perfumes){const d=await idb.get('photo:'+p.id);if(d)PHOTOS[p.id]=d}}
+async function loadImported(){const a=await idb.get('imported');IMPORTED=Array.isArray(a)?a:[]}
+function compressImage(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{const im=new Image();im.onerror=rej;
+ im.onload=()=>{const M=420,k=Math.min(1,M/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+ c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.82))};im.src=fr.result};fr.readAsDataURL(file)})}
+
+/* ================= bottle renderer ================= */
+const FAMS=[['oud','#8c3a45'],['leather','#8a5a36'],['tobacco','#94643a'],['gourmand','#c0763f'],['amber','#cf9430'],['orient','#b06a2c'],['spic','#c9583a'],['wood','#a9773f'],['citr','#dcc04a'],['fresh','#5fb3ba'],['aqua','#4d8ecb'],['marine','#4d8ecb'],['flor','#d98ca4'],['powd','#bfaccd'],['green','#76a55f'],['aromat','#86a061'],['fougere','#6a8b76'],['chypre','#8f8154'],['fruit','#dc7f56'],['musk','#cdbca5']];
+const famColor=f=>{const s=norm(f);for(const [k,c] of FAMS)if(s.includes(k))return c;return '#b8a06a'};
+const SHAPES=[
+ {b:{x:20,y:60,w:60,h:88,r:7},n:{x:40,y:48,w:20,h:12},c:{x:35,y:16,w:30,h:32,r:3}},
+ {b:{x:30,y:54,w:40,h:94,r:5},n:{x:44,y:44,w:12,h:10},c:{x:40,y:14,w:20,h:30,r:9}},
+ {b:{x:15,y:72,w:70,h:76,r:10},n:{x:38,y:62,w:24,h:10},c:{x:31,y:30,w:38,h:32,r:4}},
+ {b:{x:26,y:48,w:48,h:100,r:12},n:{x:41,y:40,w:18,h:8},c:{x:37,y:14,w:26,h:26,r:13}}];
+function initials(b){const w=String(b||'?').replace(/[^\p{L}\s]/gu,'').split(/\s+/).filter(Boolean);
+ if(w.length>1)return (w[0][0]+w[1][0]).toUpperCase();const x=w[0]||'?';return x[0].toUpperCase()+(x[1]||'').toLowerCase()}
+function bottle(p,level){
+ const s=SHAPES[hash((p.brand||'')+(p.name||''))%4],b=s.b,col=famColor(p.fam);
+ const lv=clamp(level==null?1:level,0.04,1),lh=(b.h-6)*lv,yb=b.y+b.h-3,ly=yb-lh,lx=b.x+3,lw=b.w-6,r=Math.min(b.r-1,lh);
+ const liq=`M${lx} ${ly}H${lx+lw}V${yb-r}Q${lx+lw} ${yb} ${lx+lw-r} ${yb}H${lx+r}Q${lx} ${yb} ${lx} ${yb-r}Z`;
+ const ty=b.y+b.h*.42;
+ return `<svg viewBox="0 0 100 160" class="bsv" aria-hidden="true"><ellipse cx="50" cy="152" rx="${b.w*.55}" ry="3.2" fill="#000" opacity=".3"/>`+
+ `<rect class="gl" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="${b.r}" stroke-width="1.2"/>`+
+ `<path d="${liq}" fill="${col}" opacity=".9"/><path d="${liq}" fill="url(#g-shade)"/>`+
+ (lv<1?`<rect x="${lx}" y="${ly}" width="${lw}" height="1.3" fill="#fff" opacity=".42"/>`:'')+
+ `<rect class="sh" x="${b.x+7}" y="${b.y+7}" width="4" height="${b.h-14}" rx="2"/>`+
+ `<rect x="${b.x+b.w*.2}" y="${ty}" width="${b.w*.6}" height="22" rx="2" fill="rgba(12,12,10,.58)" stroke="rgba(202,169,107,.55)" stroke-width=".6"/>`+
+ `<text x="50" y="${ty+15}" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-size="13" font-weight="600" fill="#e6cf98">${esc(initials(p.brand))}</text>`+
+ `<rect x="${s.n.x}" y="${s.n.y}" width="${s.n.w}" height="${s.n.h}" fill="#8c7a52"/>`+
+ `<rect x="${s.c.x}" y="${s.c.y}" width="${s.c.w}" height="${s.c.h}" rx="${s.c.r}" fill="url(#g-cap)" stroke="rgba(0,0,0,.35)" stroke-width=".6"/></svg>`}
+function bt(p,level){const img=PHOTOS[p.id];
+ return `<div class="bt">${bottle(p,level)}${img?`<img src="${esc(img)}" alt=""><i class="gauge"><b style="height:${Math.round(clamp(level,0,1)*100)}%"></b></i>`:''}</div>`}
+document.addEventListener('load',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.parentNode&&t.parentNode.classList.contains('bt'))t.parentNode.classList.add('has-img')},true);
+document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.parentNode&&t.parentNode.classList&&t.parentNode.classList.contains('bt'))t.remove()},true);
+
+/* ================= library ================= */
+const FL={AR:'Aromatic',WO:'Woody',AM:'Amber',FR:'Fresh',CI:'Citrus',FL:'Floral',GO:'Gourmand',LE:'Leather',OU:'Oud',FO:'Fougère',AQ:'Aquatic',SP:'Spicy',PO:'Powdery',GR:'Green',CH:'Chypre',TB:'Tobacco',FT:'Fruity',MS:'Musk',OR:'Oriental'};
+const CL={T:'EDT',P:'EDP',X:'Parfum',C:'Cologne',E:'Elixir'};
+const mk=(n,b,f,c,y,s,t,src)=>({n,b,f:f||'',c:c||'',y:+y||0,s:+s||0,t:t||'',src,k:norm(b+' '+n),bk:norm(b)});
+let BUILTIN=[],LIB=[];
+function parseRaw(){RAW.trim().split('\n').forEach(line=>{line=line.trim();if(!line)return;const i=line.indexOf('>');const h=line.slice(0,i),rest=line.slice(i+1);
+ const [brand,ds]=h.split('@');const dsz=+ds||100;
+ rest.split(';').forEach(x=>{const a=x.split('|');if(!a[0]||!a[0].trim())return;BUILTIN.push(mk(a[0].trim(),brand.trim(),FL[a[1]],CL[a[2]]||'EDP',a[3],a[4]||dsz,'','b'))})})}
+function buildLib(){LIB=BUILTIN.concat(IMPORTED.map(a=>mk(a[0],a[1],a[2],a[3],a[4],a[5],a[6],'i')),S.mine.map(e=>mk(e.n,e.b,e.f,e.c,e.y,e.s,e.t,'m')))}
+function libFind(q,f){f=f||{};const words=norm(q).split(/\s+/).filter(Boolean),bq=norm(f.b),out=[];
+ for(let i=0;i<LIB.length;i++){const e=LIB[i];if(bq&&!e.bk.includes(bq))continue;if(f.f&&e.f!==f.f)continue;if(f.c&&e.c!==f.c)continue;
+  if(words.length&&!words.every(w=>e.k.includes(w)))continue;out.push(i)}
+ if(words.length){const q0=words.join(' ');const sc=i=>{const e=LIB[i];return (norm(e.n).startsWith(q0)?3:0)+(e.bk.startsWith(q0)?2:0)+(e.k.includes(q0)?1:0)};out.sort((a,b)=>sc(b)-sc(a))}
+ return out}
+function inferFam(text){const s=norm(text);if(!s)return '';const K=[['Oud',/\boud|agarwood|aoud/],['Leather',/leather|suede|birch tar/],['Tobacco',/tobacco/],['Gourmand',/vanilla|caramel|chocolate|coffee|praline|honey|tonka|almond|cacao/],
+ ['Citrus',/bergamot|lemon|grapefruit|orange|mandarin|lime|yuzu|neroli/],['Floral',/rose|jasmine|iris|tuberose|peony|lily|violet|magnolia|orange blossom|ylang/],
+ ['Woody',/cedar|sandal|vetiver|patchouli|oak|cypress|guaiac|wood/],['Amber',/amber|labdanum|benzoin|resin|incense|myrrh|frankincense|olibanum/],['Aromatic',/lavender|sage|rosemary|mint|basil|thyme|artemisia/],
+ ['Spicy',/pepper|cinnamon|cardamom|saffron|clove|ginger|nutmeg/],['Aquatic',/marine|sea |aquatic|ozone|salt/],['Musk',/musk|ambrette/],['Fruity',/apple|peach|pear|berry|cherry|plum|pineapple|fig|blackcurrant|lychee|mango/]];
+ let best='',bs=0;for(const [n,re] of K){const m=s.match(new RegExp(re.source,'g'));if(m&&m.length>bs){bs=m.length;best=n}}return best}
+/* ================= demo seed ================= */
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function seed(){const s=defaults(),now=Date.now(),rnd=mulberry(7);
+ const D=[['Sauvage Elixir','Dior','Spicy','Elixir','s1',60,41,155,4,9,4,['Autumn','Winter'],'Dense and syrupy. One or two sprays is plenty.'],
+ ['Bleu de Chanel','Chanel','Woody','Parfum','s1',100,78,150,4,8,3,['Spring','Autumn'],'Easy, polished, works everywhere.'],
+ ['Terre d\u2019Herm\u00e8s','Herm\u00e8s','Woody','Parfum','s1',75,52,105,5,9,3,['Autumn','Spring'],''],
+ ['Layton','Parfums de Marly','Spicy','EDP','s2',125,96,230,5,10,4,['Autumn','Winter'],'Apple, vanilla, a warm wood base.'],
+ ['Aventus','Creed','Fruity','EDP','s2',100,62,360,4,8,4,['Spring','Summer'],''],
+ ['Tuscan Leather','Tom Ford','Leather','EDP','s2',50,33,190,4,7,3,['Winter'],'Save it for cold evenings.'],
+ ['Baccarat Rouge 540','Maison Francis Kurkdjian','Amber','EDP','s2',70,58,240,5,12,5,['Autumn','Winter'],''],
+ ['Acqua di Gi\u00f2 Profondo','Armani','Aquatic','EDP','s3',100,70,95,3,6,3,['Summer'],''],
+ ['Silver Mountain Water','Creed','Fresh','EDP','s3',100,84,330,4,6,2,['Spring','Summer'],'Crisp, tea-like, quiet.'],
+ ['Santal 33','Le Labo','Woody','EDP','s2',50,44,205,4,8,3,['Autumn','Spring'],'']];
+ D.forEach((d,i)=>s.perfumes.push({id:uid()+i,name:d[0],brand:d[1],fam:d[2],conc:d[3],year:'',shelf:d[4],type:'Bottle',maxMl:d[5],ml:d[6],price:d[7],rating:d[8],longevity:d[9],proj:d[10],seasons:d[11],notes:d[12],created:now-(70+Math.floor(rnd()*300))*DAY,sprays:20+Math.floor(rnd()*90),demo:true}));
+ [['Interlude Man','Amouage','Spicy'],['Angels\u2019 Share','Kilian','Amber']].forEach((w,i)=>s.perfumes.push({id:uid()+'w'+i,name:w[0],brand:w[1],fam:w[2],conc:'EDP',year:'',shelf:'wish',type:'Bottle',maxMl:50,ml:50,price:'',rating:0,longevity:'',proj:0,seasons:[],notes:'',created:now,sprays:0,demo:true}));
+ const own=s.perfumes.filter(p=>p.shelf!=='wish'),W=[3,3,2,3,2,1,2,2,1,2];
+ for(let d=0;d<75;d++){if(rnd()<.78){let r=rnd()*W.reduce((a,b)=>a+b,0),i=0;while(r>W[i]){r-=W[i];i++}const p=own[i],n=3+Math.floor(rnd()*4);
+  s.wears.push({id:uid()+'x'+d,pid:p.id,t:now-d*DAY-Math.floor(rnd()*5)*36e5,n});p.sprays+=n}}
+ s.demo=true;return s}
+
+/* ================= ui state ================= */
+const ui={tab:'shelf',jm:0,jlim:40,pick:0,llim:60,lq:'',lb:'',lf:'',lc:'',rank:'used'};
+const spm=()=>Math.max(1,+S.settings.spm||11);
+const cur=()=>S.settings.cur||'';
+
+/* ================= collection ================= */
+function item(p){const wish=p.shelf==='wish',lv=p.maxMl?p.ml/p.maxMl:0;
+ return `<div class="it" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.brand+' '+p.name)}">${bt(p,wish?1:lv)}<div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="br">${esc(p.brand)}</div>${wish?'':`<div class="lv">${mlf(p.ml)} / ${mlf(p.maxMl)} ml</div>`}</div>`}
+function rack(id,name,wish){const items=S.perfumes.filter(p=>p.shelf===id),ml=items.reduce((a,p)=>a+p.ml,0);
+ return `<section class="shelf${wish?' wish':''}"><div class="shelf-h"><h2>${esc(name)}</h2><span>${items.length}${wish?'':' \u00b7 '+fmt(ml)+' ml'}</span></div><div class="rack" data-shelf="${id}">${items.map(item).join('')||`<p class="empty">${wish?'Fragrances you want to try. Drag a bottle here, or tap the heart in the Library.':'Nothing on this shelf yet. Drag a bottle here or add a fragrance.'}</p>`}</div></section>`}
+function banners(){let h='';
+ if(S.demo)h+=`<div class="note"><span>You are looking at sample data so you can see how it works.</span><button class="btn ghost sm" data-act="clearDemo">Clear sample data</button></div>`;
+ else if(S.settings.remind&&S.perfumes.length&&Date.now()>(S.settings.snooze||0)&&Date.now()-(S.settings.lastBackup||0)>14*DAY){
+  const d=S.settings.lastBackup?Math.floor((Date.now()-S.settings.lastBackup)/DAY)+' days ago':'never';
+  h+=`<div class="note"><span>Your last backup was ${d}. Your data lives in this browser only.</span><span class="acts"><button class="btn sm" data-act="bkNow">Back up now</button><button class="btn ghost sm" data-act="snooze">Later</button></span></div>`}
+ return h}
+function vShelf(){const own=owned(),ml=own.reduce((a,p)=>a+p.ml,0);
+ return `<header class="vh"><div><h1>Collection</h1><p class="sub2">${own.length} ${own.length===1?'fragrance':'fragrances'} \u00b7 ${fmt(ml)} ml \u00b7 about ${fmt(ml*spm())} sprays left</p></div><div class="acts"><button class="btn" data-act="add">Add fragrance</button></div></header>`+
+ banners()+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
+
+/* ================= journal ================= */
+function lastWorn(pid){let t=0;S.wears.forEach(w=>{if(w.pid===pid&&w.t>t)t=w.t});return t}
+function suggestion(){const ss=season(),now=Date.now();
+ const L=owned().filter(p=>p.ml>0).map(p=>{const lw=lastWorn(p.id),d=lw?(now-lw)/DAY:60;
+  return {p,s:(p.seasons||[]).includes(ss)?2:0,sc:0,d}}).map(x=>{x.sc=x.s+Math.min(x.d,30)/10+(x.p.rating||0)*.3;return x}).sort((a,b)=>b.sc-a.sc);
+ return L.length?L[ui.pick%L.length]:null}
+function streak(){const days=new Set(S.wears.map(w=>dkey(w.t)));let n=0,t=sod(Date.now());if(!days.has(dkey(t)))t-=DAY;while(days.has(dkey(t))){n++;t-=DAY}return n}
+function vJournal(){
+ const sg=suggestion(),now=new Date(),first=new Date(now.getFullYear(),now.getMonth()+ui.jm,1),dim=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+ const cnt={};S.wears.forEach(w=>{const k=dkey(w.t);(cnt[k]=cnt[k]||[]).push(w)});
+ const pad=(first.getDay()+6)%7;let cal=['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>`<div class="dw">${d}</div>`).join('');
+ for(let i=0;i<pad;i++)cal+='<div class="d e"></div>';
+ for(let d=1;d<=dim;d++){const k=dkey(new Date(first.getFullYear(),first.getMonth(),d));const a=cnt[k]||[];const al=a.length?Math.min(.9,.22+a.length*.22):0;
+  const names=a.map(w=>(byId(w.pid)||{}).name).filter(Boolean).join(', ');
+  cal+=`<div class="d${k===dkey(Date.now())?' t':''}" title="${esc(names)}" style="${al?`background:color-mix(in srgb,var(--gold) ${Math.round(al*100)}%,transparent);color:var(--goldink);font-weight:600`:''}">${d}</div>`}
+ const monthWears=S.wears.filter(w=>{const d=new Date(w.t);return d.getMonth()===first.getMonth()&&d.getFullYear()===first.getFullYear()});
+ const distinct=new Set(monthWears.map(w=>w.pid)).size;
+ const sorted=[...S.wears].sort((a,b)=>b.t-a.t),shown=sorted.slice(0,ui.jlim);let list='',lastD='';
+ shown.forEach(w=>{const p=byId(w.pid);if(!p)return;const k=dkey(w.t);if(k!==lastD){lastD=k;const d=new Date(w.t);list+=`<div class="day-h">${d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})}</div>`}
+  list+=`<div class="wr"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n===1?'spray':'sprays'}</small></div><button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button></div>`});
+ if(!list)list='<p class="muted" style="padding:14px 0">No wears logged yet. Log your first wear and the calendar fills in.</p>';
+ const today=sg?`<div class="today"><div>${bt(sg.p,sg.p.maxMl?sg.p.ml/sg.p.maxMl:1)}</div><div style="flex:1;min-width:200px"><div class="muted" style="font-size:13px">A pick for a ${season().toLowerCase()} day</div><h2 style="margin:4px 0 2px">${esc(sg.p.name)}</h2><div class="muted">${esc(sg.p.brand)}</div><p class="sub2" style="font-size:14px">${sg.d>=60?'Not worn yet.':'Last worn '+Math.floor(sg.d)+' days ago.'}</p><div class="acts" style="margin-top:14px"><button class="btn sm" data-act="wearOpen" data-id="${sg.p.id}">Wear it today</button><button class="btn ghost sm" data-act="another">Another idea</button></div></div></div>`:`<p class="muted">Add a fragrance to get daily suggestions.</p>`;
+ return `<header class="vh"><div><h1>Journal</h1><p class="sub2">${streak()} day streak \u00b7 ${S.wears.length} wears logged</p></div><div class="acts"><button class="btn" data-act="wearOpen">Log a wear</button></div></header>
+ <div class="g3"><div class="card">${today}</div><div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div></div>
+ <div class="card" style="margin-top:18px"><h3>History</h3>${list}${sorted.length>ui.jlim?`<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-act="jmore">Show more</button></div>`:''}</div>`}
+
+/* ================= insights ================= */
+const MEAS=[['ml','Remaining volume'],['spr','Sprays left'],['used','Sprays used, all time'],['wears','Wears in period'],['pspr','Sprays in period'],['val','Price paid']];
+const GRPS=[['perfume','Fragrance'],['brand','House'],['shelf','Shelf'],['fam','Scent family'],['type','Bottle or decant']];
+const PERS=[['7','7 days'],['30','30 days'],['90','90 days'],['365','Year'],['all','All time']];
+const PAL=['#caa96b','#8fb08a','#b5654f','#6f8fae','#a58bb5','#d6a27a','#5f9a92'];
+const colorOf=(i,k)=>k==='Other'?'#807b6d':PAL[i%PAL.length];
+function insCompute(){const {m,g,p:per}=S.settings.ins,t0=per==='all'?0:Date.now()-(+per)*DAY,wp={};
+ S.wears.forEach(w=>{if(w.t>=t0){const o=wp[w.pid]||(wp[w.pid]={c:0,n:0});o.c++;o.n+=w.n}});
+ const map=new Map();
+ owned().forEach(p=>{let v=0;const o=wp[p.id]||{c:0,n:0};
+  if(m==='ml')v=p.ml;else if(m==='spr')v=p.ml*spm();else if(m==='used')v=p.sprays||0;else if(m==='wears')v=o.c;else if(m==='pspr')v=o.n;else v=+p.price||0;
+  const key=g==='perfume'?p.name:g==='brand'?p.brand:g==='shelf'?shelfName(p.shelf):g==='fam'?(p.fam||'Unclassified'):(p.type||'Bottle');
+  map.set(key,(map.get(key)||0)+v)});
+ let arr=[...map].map(([k,v])=>({k,v})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+ if(arr.length>7){const rest=arr.slice(7).reduce((a,x)=>a+x.v,0);arr=arr.slice(0,7);arr.push({k:'Other',v:rest})}
+ return {arr,total:arr.reduce((a,x)=>a+x.v,0),wp,t0}}
+function fmtVal(v,m){return m==='val'?cur()+fmt(v):m==='ml'?fmt(v)+' ml':fmt(v)}
+const measUnit=m=>({ml:'ml left',spr:'sprays left',used:'sprays used',wears:'wears',pspr:'sprays',val:'paid'}[m]);
+let DD=null;
+function donutHtml(d){const m=S.settings.ins.m;DD=d;
+ if(!d.arr.length)return `<p class="muted">Nothing to chart for this combination yet.</p>`;
+ const R=76,C=2*Math.PI*R;let off=0;
+ const segs=d.arr.map((x,i)=>{const len=x.v/d.total*C,gap=d.arr.length>1?2.6:0,s=`<circle class="seg" data-i="${i}" cx="100" cy="100" r="${R}" fill="none" stroke="${colorOf(i,x.k)}" stroke-width="24" stroke-dasharray="0 ${C}" data-len="${Math.max(.5,len-gap)}" data-c="${C}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`;off+=len;return s}).join('');
+ const lg=d.arr.map((x,i)=>`<div class="lg-row" data-i="${i}"><i style="background:${colorOf(i,x.k)}"></i><span>${esc(x.k)}</span><span class="v">${fmtVal(x.v,m)}</span><span class="p">${Math.round(x.v/d.total*100)}%</span></div>`).join('');
+ return `<div class="donut-wrap"><div class="dn" id="dn"><svg viewBox="0 0 200 200" role="img" aria-label="Distribution chart"><circle cx="100" cy="100" r="76" fill="none" stroke="var(--line)" stroke-width="24"/>${segs}</svg><div class="dc"><b id="dcv">${fmtVal(d.total,m)}</b><span id="dcl">${measUnit(m)}</span></div></div><div class="lg" id="lg">${lg}</div></div>`}
+function animateDonut(){requestAnimationFrame(()=>requestAnimationFrame(()=>$$('#dn .seg').forEach(c=>c.setAttribute('stroke-dasharray',c.dataset.len+' '+c.dataset.c))))}
+function hl(i){const dn=$('#dn');if(!dn||!DD)return;const m=S.settings.ins.m;
+ $$('#dn .seg').forEach(c=>c.classList.toggle('on',i!=null&&+c.dataset.i===i));$$('#lg .lg-row').forEach(r=>r.classList.toggle('on',i!=null&&+r.dataset.i===i));dn.classList.toggle('hl',i!=null);
+ const x=i!=null?DD.arr[i]:null;$('#dcv').textContent=x?fmtVal(x.v,m):fmtVal(DD.total,m);$('#dcl').textContent=x?x.k+' \u00b7 '+Math.round(x.v/DD.total*100)+'%':measUnit(m)}
+function activityHtml(per){const now=sod(Date.now());let n,unit;if(per==='7'){n=7;unit='d'}else if(per==='30'){n=30;unit='d'}else if(per==='90'){n=13;unit='w'}else{n=12;unit='m'}
+ const B=[];for(let i=0;i<n;i++){let a,b,l;
+  if(unit==='d'){a=now-(n-1-i)*DAY;b=a+DAY;l=new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
+  else if(unit==='w'){b=now+DAY-(n-1-i)*7*DAY;a=b-7*DAY;l='Week of '+new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
+  else{const d=new Date();d.setDate(1);d.setHours(0,0,0,0);d.setMonth(d.getMonth()-(n-1-i));a=d.getTime();const e=new Date(d);e.setMonth(e.getMonth()+1);b=e.getTime();l=MON[d.getMonth()]+' '+d.getFullYear()}
+  B.push({a,b,l,c:S.wears.filter(w=>w.t>=a&&w.t<b).length})}
+ const mx=Math.max(1,...B.map(x=>x.c));
+ return `<div class="bars">${B.map((x,i)=>`<div class="bar${x.c?'':' z'}" title="${esc(x.l)}: ${x.c} ${x.c===1?'wear':'wears'}" style="height:${x.c?Math.max(6,x.c/mx*100):2}%;animation-delay:${i*14}ms"></div>`).join('')}</div><div class="axis"><span>${esc(B[0].l)}</span><span>${esc(B[B.length-1].l)}</span></div>`}
+function kpisHtml(d){const own=owned(),ml=own.reduce((a,p)=>a+p.ml,0),val=own.reduce((a,p)=>a+(+p.price||0),0),per=S.settings.ins.p;
+ const wn=S.wears.filter(w=>w.t>=d.t0).length;
+ const k=[[own.length,'Fragrances'],[fmt(ml)+' ml','Remaining'],[fmt(ml*spm()),'Sprays left'],[val?cur()+fmt(val):'\u2014','Collection value'],[wn,'Wears, '+(PERS.find(x=>x[0]===per)||[])[1].toLowerCase()]];
+ return k.map(x=>`<div class="kpi"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}
+function rankHtml(d){const own=owned(),now=Date.now(),mode=ui.rank;
+ const rows=own.map(p=>{const lw=lastWorn(p.id),idle=lw?Math.floor((now-lw)/DAY):9999,age=Math.max(1,Math.floor((now-p.created)/DAY));
+  const v=mode==='used'?(p.sprays||0):mode==='age'?age:mode==='left'?p.ml:idle;return {p,v,idle,age}});
+ rows.sort((a,b)=>b.v-a.v);const mx=Math.max(1,...rows.filter(r=>r.v<9999).map(r=>r.v));
+ if(!rows.length)return '<p class="muted" style="padding:12px 0">Add fragrances to see the breakdown.</p>';
+ return rows.map(r=>{const p=r.p,pct=r.v>=9999?100:Math.round(r.v/mx*100);
+  return `<div class="row" data-act="open" data-id="${p.id}"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:0)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)}</div><div class="meter"><b style="width:${pct}%"></b></div></div><div class="rt">${p.sprays||0} sprays<br>${r.idle>=9999?'never worn':r.idle===0?'worn today':r.idle+' d ago'}</div></div>`}).join('')}
+function vIns(){const {m,g,p}=S.settings.ins,d=insCompute();
+ const opt=(a,v)=>a.map(x=>`<option value="${x[0]}"${x[0]===v?' selected':''}>${x[1]}</option>`).join('');
+ return `<header class="vh"><div><h1>Insights</h1><p class="sub2">Change the parameters and the charts follow.</p></div></header>
+ <div class="kpis" id="kpis">${kpisHtml(d)}</div>
+ <div class="card"><div class="ctl"><div class="fg"><label for="ins-m">Measure</label><select id="ins-m" data-ch="insM">${opt(MEAS,m)}</select></div><div class="fg"><label for="ins-g">Group by</label><select id="ins-g" data-ch="insG">${opt(GRPS,g)}</select></div>
+ <div><span class="lb">Period</span><div class="sg" id="ins-p">${PERS.map(x=>`<button data-act="insP" data-v="${x[0]}" class="${x[0]===p?'on':''}">${x[1]}</button>`).join('')}</div></div></div><div id="donutBox">${donutHtml(d)}</div></div>
+ <div class="card"><h3>Wear activity</h3><div id="actBox">${activityHtml(p==='all'?'365':p)}</div></div>
+ <div class="card"><div class="ch" style="margin-bottom:6px"><h3>Breakdown</h3><select data-ch="rank" style="width:auto"><option value="used"${ui.rank==='used'?' selected':''}>Most used</option><option value="idle"${ui.rank==='idle'?' selected':''}>Waiting longest</option><option value="age"${ui.rank==='age'?' selected':''}>Longest in collection</option><option value="left"${ui.rank==='left'?' selected':''}>Most remaining</option></select></div><div id="rankBox">${rankHtml(d)}</div></div>`}
+function updateIns(){if(ui.tab!=='ins')return;const d=insCompute();$('#kpis').innerHTML=kpisHtml(d);$('#donutBox').innerHTML=donutHtml(d);animateDonut();const p=S.settings.ins.p;$('#actBox').innerHTML=activityHtml(p==='all'?'365':p);$('#rankBox').innerHTML=rankHtml(d);
+ $$('#ins-p button').forEach(b=>b.classList.toggle('on',b.dataset.v===p))}
+
+/* ================= library ================= */
+let LIBV=[];
+function libRows(){LIBV=libFind(ui.lq,{b:ui.lb,f:ui.lf,c:ui.lc});const show=LIBV.slice(0,ui.llim);
+ const wished=new Set(S.perfumes.filter(p=>p.shelf==='wish').map(p=>norm(p.brand+' '+p.name)));
+ if(!show.length)return '<p class="muted" style="padding:22px 4px">No matches. Try fewer words, or add it as your own entry.</p>';
+ return show.map(i=>{const e=LIB[i],w=wished.has(e.k);
+  return `<div class="lrow"><div class="th">${bt({name:e.n,brand:e.b,fam:e.f},.7)}</div><div class="mid"><div class="t1">${esc(e.n)}</div><div class="t2">${[esc(e.b),esc(e.f),esc(e.c),e.y||''].filter(Boolean).join(' \u00b7 ')}${e.s?' \u00b7 '+e.s+' ml':''}</div>${e.t?`<div class="t3">${esc(e.t)}</div>`:''}</div><div class="ac"><button class="ic${w?' on':''}" data-act="lwish" data-i="${i}" aria-label="Add to wishlist">${w?'\u2665':'\u2661'}</button><button class="btn sm" data-act="ladd" data-i="${i}">Add</button></div></div>`}).join('')+(LIBV.length>ui.llim?`<div style="text-align:center;padding:18px"><button class="btn ghost sm" data-act="lmore">Show more (${fmt(LIBV.length-ui.llim)} left)</button></div>`:'')}
+function updateLib(){const r=$('#libres');if(!r)return;r.innerHTML=libRows();$('#libcount').textContent=fmt(LIBV.length)+' of '+fmt(LIB.length)+' fragrances'}
+function vLib(){const nI=IMPORTED.length,nM=S.mine.length;
+ return `<header class="vh"><div><h1>Library</h1><p class="sub2" id="libcount">${fmt(LIB.length)} fragrances</p></div><div class="acts"><button class="btn ghost" data-act="impPick">Import CSV or JSON</button><button class="btn" data-act="lnew">New entry</button></div></header>
+ <input type="file" id="impFile" accept=".csv,.json,.txt,text/csv,application/json">
+ <div class="card"><div class="filters"><div class="fg"><label for="lq">Search</label><input id="lq" data-in="lq" placeholder="Name or house" autocomplete="off" value="${esc(ui.lq)}"></div>
+ <div class="fg"><label for="lb">House</label><input id="lb" data-in="lb" list="brand-list" placeholder="Any" autocomplete="off" value="${esc(ui.lb)}"></div>
+ <div class="fg"><label for="lf">Family</label><select id="lf" data-ch="lf"><option value="">Any</option>${FAMLIST.map(f=>`<option${ui.lf===f?' selected':''}>${f}</option>`).join('')}</select></div>
+ <div class="fg"><label for="lc">Concentration</label><select id="lc" data-ch="lc"><option value="">Any</option>${CONCS.map(f=>`<option${ui.lc===f?' selected':''}>${f}</option>`).join('')}</select></div></div>
+ <p class="muted" style="font-size:12.5px;margin:6px 0 4px">${fmt(BUILTIN.length)} built in \u00b7 ${fmt(nI)} imported \u00b7 ${fmt(nM)} yours. Built-in details are written from memory, so check anything important.</p>
+ <div id="libres">${libRows()}</div></div>`}
+
+/* ================= settings ================= */
+function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorage.getItem('lux.snaps')||'[]')}catch(e){return[]}})();
+ const lb=s.lastBackup?new Date(s.lastBackup).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'never';
+ return `<header class="vh"><div><h1>Settings</h1><p class="sub2">Everything is stored in this browser. Back up to keep it safe.</p></div></header>
+ <div class="card"><h3>Appearance and units</h3>
+ <div class="set-row"><div>Theme</div><div class="sg">${[['dark','Dark'],['light','Light'],['auto','Match device']].map(x=>`<button data-act="theme" data-v="${x[0]}" class="${s.theme===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></div>
+ <div class="set-row"><div>Sprays per ml<small>Used to estimate sprays left</small></div><input type="number" min="1" max="30" step="0.5" value="${s.spm}" data-ch="spm" style="width:100px"></div>
+ <div class="set-row"><div>Currency symbol</div><input value="${esc(s.cur)}" maxlength="4" data-ch="cur" style="width:100px"></div></div>
+ <div class="card"><h3>Shelves</h3><p class="muted" style="margin:6px 0 14px">Rename, reorder or remove shelves. Removing one moves its bottles to the first shelf.</p>
+ ${S.shelves.map((sh,i)=>`<div class="shrow"><input value="${esc(sh.name)}" data-ch="shName" data-id="${sh.id}" aria-label="Shelf name"><button data-act="shUp" data-i="${i}" aria-label="Move up">\u2191</button><button data-act="shDn" data-i="${i}" aria-label="Move down">\u2193</button><button data-act="shDel" data-i="${i}" aria-label="Remove shelf">\u00d7</button></div>`).join('')}
+ <button class="btn ghost sm" data-act="shAdd" style="margin-top:6px">Add shelf</button></div>
+ <div class="card"><h3>Backup and restore</h3><p class="muted" style="margin:6px 0 16px">Last backup: ${lb}. A backup holds your collection, journal, settings, photos and own library entries.</p>
+ <div class="acts"><button class="btn" data-act="bkNow">Download backup</button><button class="btn ghost" data-act="bkCopy">Copy as text</button><button class="btn ghost" data-act="bkFile">Restore from file</button></div>
+ <input type="file" id="bkFile" accept=".json,application/json,text/plain">
+ <div class="fg" style="margin-top:18px"><label for="bk-text">Or paste a backup here</label><textarea id="bk-text" placeholder="Paste backup text"></textarea></div>
+ <button class="btn ghost sm" data-act="bkText">Restore from text</button>
+ <div class="set-row" style="margin-top:16px"><div>Remind me to back up<small>A gentle note on the Collection page every two weeks</small></div><button class="chip${s.remind?' on':''}" data-act="remind">${s.remind?'On':'Off'}</button></div>
+ <h3 style="margin:22px 0 4px">Automatic snapshots</h3><p class="muted" style="margin-bottom:8px;font-size:13.5px">Saved in this browser about once a day, and before every restore.</p>
+ ${snaps.length?snaps.map((x,i)=>`<div class="set-row"><div>${new Date(x.t).toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}<small>${esc(x.why)} \u00b7 ${x.n} fragrances</small></div><button class="btn ghost sm" data-act="snapRestore" data-i="${i}">Restore</button></div>`).join(''):'<p class="muted">None yet.</p>'}</div>
+ <div class="card"><h3>Library and data</h3>
+ <div class="set-row"><div>Imported library<small>${fmt(IMPORTED.length)} entries. Your own entries are kept.</small></div><button class="btn ghost sm" data-act="clrImp">Clear imported</button></div>
+ <div class="set-row"><div>Erase everything<small>Removes the collection, journal, photos and own entries</small></div><button class="btn danger sm" data-act="reset">Erase all</button></div></div>`}
+
+/* ================= render ================= */
+function render(){const v=$('#view');
+ v.innerHTML=({shelf:vShelf,journal:vJournal,ins:vIns,lib:vLib,set:vSet}[ui.tab]||vShelf)();
+ $$('#nav .nb').forEach(b=>b.classList.toggle('on',b.dataset.t===ui.tab));
+ const own=owned();$('#railFoot').innerHTML=`${own.length} in the cabinet<br>${fmt(LIB.length)} in the library`;
+ if(ui.tab==='ins')animateDonut();
+ if(ui.tab==='lib'){const bl=$('#brand-list');if(bl&&!bl.children.length){bl.innerHTML=[...new Set(LIB.map(e=>e.b))].sort().slice(0,4000).map(b=>`<option value="${esc(b)}">`).join('')}}}
+/* ================= built-in library (compact: Brand@defaultSize>Name|family|conc|year|size;...) ================= */
+const RAW=`
+Dior@100>Sauvage EDT|AR|T|2015;Sauvage EDP|AR|P|2018;Sauvage Parfum|AR|X|2019;Sauvage Elixir|SP|E|2021|60;Homme Intense|PO|P|2011;Homme Parfum|WO|X|2014;Homme Cologne|CI|C|2013;Homme Sport|CI|T|2008;Homme EDP|WO|P|2020;Fahrenheit|LE|T|1988;Eau Sauvage|CI|T|1966;Higher|WO|T|2001;Hypnotic Poison|GO|P|1998;J'adore|FL|P|1999;Poison Girl|GO|P|2016|50;Ambre Nuit|AM|P|2009|125;Oud Ispahan|OU|P|2012|125;Gris Dior|CI|P|2013|125;Fahrenheit Le Parfum|LE|X|2014
+Chanel@100>Bleu de Chanel EDT|WO|T|2010;Bleu de Chanel EDP|WO|P|2014;Bleu de Chanel Parfum|WO|X|2018;Allure Homme|CI|T|1999;Allure Homme Sport|CI|T|2004;Allure Homme Sport Cologne|CI|C|2008;Égoïste|WO|T|1990;Égoïste Platinum|AR|T|1993;Pour Monsieur|CH|T|1955;Chance|FL|T|2002;Chance Eau Tendre|FT|P|2010;Chance Eau Fraîche|CI|T|2007;Coco Mademoiselle|CH|P|2001;No 5|FL|P|1986;Gabrielle|FL|P|2017;Sycomore|WO|P||75;Bois des Îles|WO|P||75;Coromandel|AM|P|2007|75;Cristalle|CI|T|1974;Antaeus|LE|T|1981
+Creed@100>Aventus|FT|P|2010;Absolu Aventus|FT|P|2021;Aventus Cologne|CI|P|2019;Green Irish Tweed|GR|P|1985;Silver Mountain Water|FR|P|1995;Millésime Imperial|AQ|P|1995;Viking|SP|P|2017;Royal Oud|OU|P|2011;Original Santal|WO|P|2005;Himalaya|FR|P|2002;Virgin Island Water|CI|P|2007;Bois du Portugal|WO|P|1987;Spice and Wood|SP|P;Erolfa|AQ|P;Royal Mayfair|FR|P;Original Vetiver|WO|P;Aventus for Her|FT|P|2019;Love in White|FL|P|2005
+Parfums de Marly@125>Layton|SP|P|2016;Layton Exclusif|SP|X;Herod|TB|P|2012;Pegasus|AM|P|2011;Carlisle|GO|P|2019;Percival|AR|P|2019;Perseus|AR|P;Althair|GO|P|2019;Haltane|OU|P;Sedley|CI|P;Greenley|CI|P;Kalan|AR|P;Darley|AR|P;Galloway|FR|P;Godolphin|LE|P;Akaster|WO|P;Oajan|OU|P;Valaya|FL|P;Delina|FL|P|2017|75;Delina Exclusif|FL|X|2019|75;Delina La Rosée|FL|P||75
+Maison Francis Kurkdjian@70>Baccarat Rouge 540 EDP|AM|P|2015;Baccarat Rouge 540 Extrait|AM|X|2017;Oud Satin Mood|OU|P|2015;Grand Soir|AM|P|2016;Aqua Universalis|FR|P|2009;Aqua Celestia|FR|P|2010;Gentle Fluidity Gold|AM|P|2019;Gentle Fluidity Silver|WO|P|2019;À la Rose|FL|P|2014;Amyris Homme|WO|P|2012;Oud Silk Mood|OU|P|2011;Aqua Vitae|CI|P
+Tom Ford@50>Tuscan Leather|LE|P|2007;Oud Wood|OU|P|2007;Tobacco Vanille|TB|P|2007;Lost Cherry|GO|P|2018;Fucking Fabulous|LE|P|2017;Soleil Blanc|AM|P|2016;Neroli Portofino|CI|P|2011;Black Orchid|OR|P|2006|100;Ombré Leather|LE|P|2018|100;Noir Extreme|AM|P|2015|100;Noir|OR|P|2012|100;Grey Vetiver|WO|P|2009|100;Costa Azzurra|AQ|P|2015;Bitter Peach|FT|P;Ébène Fumé|WO|P;Beau de Jour|FO|P|2012|100;Oud Minérale|OU|P|2021;Rive d'Ambre|AM|P;Sole di Positano|CI|P;Noir de Noir|OR|P|2007;Jasmin Rouge|FL|P;Santal Blush|WO|P;Plum Japonais|OR|P
+Yves Saint Laurent@100>Y EDP|AR|P|2018;Y EDT|AR|T|2017;Y Le Parfum|WO|X|2021;MYSLF EDP|WO|P|2023;MYSLF Le Parfum|WO|X|2024;La Nuit de L'Homme|SP|T|2009;La Nuit de L'Homme Bleu Électrique|AR|T|2015;L'Homme|WO|T|2006;L'Homme Le Parfum|WO|X|2017;Libre|FL|P|2019|90;Black Opium|GO|P|2014|90;Kouros|LE|T|1981;Mon Paris|FT|P|2016|90;Tuxedo|CH|P|2012|75;Rive Gauche|FL|T|1970
+Armani@100>Acqua di Giò|AQ|T|1996;Acqua di Giò Profumo|AQ|X|2015;Acqua di Giò Absolu|AQ|P|2018;Acqua di Giò Profondo|AQ|P|2020;Stronger With You|SP|T|2017;Stronger With You Intensely|SP|P|2018;Stronger With You Absolutely|AM|X|2021;Armani Code|SP|T|2004;Armani Code Profumo|AM|X|2016;Sì|CH|P|2013;My Way|FL|P|2020;Armani Privé Bois d'Encens|WO|P|2009;Armani Privé Oud Royal|OU|P;Armani Privé Vétiver Babylone|WO|P;Armani Privé Rouge Malachite|FL|P;Armani Privé Cuir Zerzura|LE|P
+Jean Paul Gaultier@125>Le Male|FO|T|1995;Le Male Le Parfum|AM|X|2020;Le Male Elixir|AM|E|2023;Ultra Male|GO|T|2015;Scandal Pour Homme|GO|T|2017;Classique|AM|T|1993|100;Le Beau|FT|T|2019;Scandal|GO|P|2017|80;La Belle|FT|P|2021|100
+Versace@100>Eros|FR|T|2012;Eros EDP|AM|P;Eros Flame|CI|P|2018;Eros Parfum|AM|X|2021;Dylan Blue Pour Homme|AR|T|2016;Pour Homme|AQ|T|2008;Man Eau Fraîche|CI|T|2006;The Dreamer|AR|T|1996;Dylan Turquoise|FT|T|2020;Bright Crystal|FL|T|2006|90;Crystal Noir|OR|T|2004|90
+Paco Rabanne@100>1 Million|SP|T|2008;1 Million Parfum|AM|X|2015;1 Million Elixir|AM|E|2022;1 Million Royal|AM|X|2020;Invictus|AQ|T|2013;Invictus Victory|AM|P|2021;Invictus Platinum|AR|P|2019;Phantom|AR|T|2021;Pure XS|GO|P|2017;Black XS|AR|T|2005;Fame|FT|P|2022|80;Ultraviolet Man|AQ|T|2001;Lady Million|FL|P|2010|80;Olympéa|GO|P|2015|80;Pour Homme|FO|T|1973
+Bvlgari@100>Man in Black|OR|P|2014;Aqva Pour Homme|AQ|T|2005;Aqva Amara|AQ|T|2017;Man Wood Essence|WO|P|2016;Pour Homme|AR|T|1996;Man Glacial Essence|FR|P|2018;Omnia Crystalline|FL|T|2005|65;Le Gemme Tygar|AR|P|2016|125;Le Gemme Falkar|SP|P|2016|125;Le Gemme Kobraa|AM|P|2016|125
+Montblanc@100>Explorer|WO|P|2019;Legend|FO|T|2011;Legend Spirit|CI|T|2016;Legend Night|WO|P|2017;Legend Red|AR|P|2018;Explorer Ultra Blue|AQ|P|2020;Explorer Platinum|AR|P|2022
+Hermès@100>Terre d'Hermès|WO|T|2006;Terre d'Hermès Parfum|WO|X|2009|75;Terre d'Hermès Eau Intense Vétiver|GR|P|2014;Terre d'Hermès Eau Givrée|CI|P|2010;H24|WO|T|2021;Eau d'Orange Verte|CI|C|1979;Voyage d'Hermès|WO|T|2010;Un Jardin en Méditerranée|GR|T|2003;Un Jardin sur le Nil|GR|T|2005;Bel Ami|LE|T|1986;Eau de Rhubarbe Écarlate|CI|C|2010;Hermessence Vétiver Tonka|WO|P|2004;Twilly d'Hermès|FL|P|2017|85;Équipage|SP|T|1970
+Guerlain@100>Habit Rouge|OR|T|1965;Vétiver|WO|T|1959;L'Instant Pour Homme|SP|P|2003;Shalimar|OR|P|1925|90;Mitsouko|CH|P|1919;Jicky|FO|P|1889;L'Homme Idéal|GO|T|2014;Aqua Allegoria Herba Fresca|GR|T|1999|75;Santal Royal|WO|P|2010;Cuir Béluga|LE|P|2016;Spiritueuse Double Vanille|GO|P|2013;Mon Guerlain|FL|P|2017
+Maison Crivelli@50>Oud Maracuja|OU|P;Hibiscus Mahajád|FL|P;Bois Datchaï|WO|P;Tubéreuse Astrale|FL|P;Iris Malikhân|PO|P;Santal Volcano|WO|P;Pomelo Sanguino|CI|P;Rose Saltifolia|FL|P;Oud Cardamome|OU|P
+Initio@90>Side Effect|AM|P;Oud for Greatness|OU|P;Paragon|WO|P;Atomic Rose|FL|P;Musk Therapy|MS|P;Absolute Aphrodisiac|AM|P;High Frequency|WO|P;Blessed Baraka|AM|P;Mystic Experience|AM|P;Rehab|WO|P;Narcotic Delight|AM|P;Divine Attraction|FL|P
+Xerjoff@100>Naxos|SP|P|2015;Erba Pura|FT|P|2019;Alexandria II|OU|P|2013;Torino21|FR|P|2012;Lira|GO|P;40 Knots|AQ|P;Erba Gold|FT|P;Casamorati Dolce Amalfi|CI|P;Casamorati Bouquet Ideale|FL|P;Casamorati Mefisto|AR|P;Accento|CI|P;Zefiro|CI|P;Renaissance|AM|P;Richwood|WO|P;Kemi|AM|P;Ivory Route|WO|P
+Amouage@100>Interlude Man|SP|P|2012;Reflection Man|FL|P|2007;Jubilation XXV|OR|P|2007;Epic Man|SP|P|2009;Dia Man|FL|P;Gold Man|OR|P;Honour Man|FL|P;Memoir Man|SP|P;Lyric Man|OR|P;Journey Man|WO|P;Beloved Man|AM|P;Fate Man|SP|P;Overture Man|AR|P;Ciel Man|AR|P;Sunshine Man|CI|P
+Nishane@100>Hacivat|WO|X|2017;Ani|AM|X;Fan Your Flames|GO|X;Wulong Cha|GR|X;Ege|CI|X;Nefes|AR|X;Suede et Safran|LE|X;Karagöz|FL|X;Hundred Silent Ways|MS|X;Zenne|OR|X;Afrika Olifant|WO|X;Tuberóza|FL|X
+Kilian@50>Angels' Share|AM|P|2020;Black Phantom|GO|P|2017;Good Girl Gone Bad|FL|P|2012;Love Don't Be Shy|GO|P;Straight to Heaven|AM|P;Intoxicated|GO|P;Playing With the Devil|FL|P;Sunkissed Goddess|FL|P;Roses on Ice|FL|P;Rolling in Love|FL|P;Moonlight in Heaven|FT|P;Vodka on the Rocks|GO|P;Smoking Hot|GO|P;Liaisons Dangereuses|AM|P;Back to Black|AM|P;Apple Brandy on the Rocks|FT|P
+Roja Parfums@100>Elysium Pour Homme|CI|X;Enigma Pour Homme|AM|X;Oligarch|CH|X;Danger Pour Homme|SP|X;Reckless Pour Homme|AR|X;Vetiver|WO|X;Aoud|OU|X;Amber Aoud|AM|X;Oceania|AQ|X
+Byredo@100>Gypsy Water|WO|P|2008;Bal d'Afrique|FL|P|2009;Mojave Ghost|FL|P|2014;Blanche|FL|P|2009;Bibliothèque|FL|P|2016;Black Saffron|SP|P;Accord Oud|OU|P;La Tulipe|FL|P;Rose of No Man's Land|FL|P;Sundazed|FT|P;Super Cedar|WO|P;Oud Immortel|OU|P;Vanille Antique|GO|P
+Le Labo@50>Santal 33|WO|P|2011;Another 13|MS|P|2010;Rose 31|FL|P|2006;Bergamote 22|CI|P|2006;Thé Noir 29|GR|P|2015;Fleur d'Oranger 27|FL|P;Vetiver 46|WO|P;Labdanum 18|AM|P;Gaiac 10|WO|P;Iris 39|PO|P;Lys 41|FL|P;Patchouli 24|TB|P;Tonka 25|GO|P;Aldehyde 44|FL|P;Baie 19|FL|P;Ambrette 9|MS|P;Neroli 36|FL|P;Poivre 23|SP|P;Jasmin 17|FL|P;Oud 27|OU|P;Lavande 31|AR|P;Vanille 44|GO|P
+Maison Margiela@100>Replica By the Fireplace|WO|T|2015;Replica Jazz Club|TB|T|2013;Replica Lazy Sunday Morning|MS|T|2012;Replica Sailing Day|AQ|T|2011;Replica Beach Walk|CI|T|2012;Replica Under the Lemon Trees|CI|T;Replica Whispers in the Library|WO|T;Replica Coffee Break|GO|T;Replica Bubble Bath|MS|T;Replica Autumn Vibes|WO|T;Replica Matcha Meditation|GR|T;Replica When the Rain Stops|GR|T;Replica Music Festival|FT|T
+Diptyque@100>Philosykos|GR|T|1996;Tam Dao|WO|T|2003;Do Son|FL|T|2005;Fleur de Peau|MS|P|2018|75;L'Ombre dans l'Eau|GR|P|1983;Orphéon|WO|T|2009;Eau Rose|FL|T|2011;Eau Capitale|FL|P|2013|75;Volutes|TB|P|2014|75;Oud Palao|OU|P;Vétyverio|WO|T|2005
+Serge Lutens@50>Ambre Sultan|AM|P|2000;Chergui|TB|P|2005;Fumerie Turque|TB|P|2003;Santal Majuscule|WO|P;Féminité du Bois|WO|P|1992;Muscs Koublaï Khän|MS|P;La Fille de Berlin|FL|P;Five O'Clock au Gingembre|SP|P;Datura Noir|FL|P;Borneo 1834|CH|P;Bois de Violette|WO|P
+Frédéric Malle@100>Portrait of a Lady|FL|P|2010;Musc Ravageur|MS|P|2000;Carnal Flower|FL|P|2005;Lipstick Rose|PO|P|2000;Vétiver Extraordinaire|WO|P|2002;French Lover|WO|P|2007;Géranium pour Monsieur|AR|P|2009;Bigarade Concentrée|CI|P;Cologne Indélébile|CI|P;Synthetic Jungle|GR|P;Une Rose|FL|P|2003;En Passant|FL|P|2000
+Tiziana Terenzi@100>Kirke|FT|X;Laudano Nero|AM|X;Cassiopea|AM|X;Gold Rose Oud|OU|X;Ursa|WO|X;Luna|FL|X;Andromeda|OR|X;Orion|WO|X;Delox|SP|X;Draco|AM|X
+Nasomatto@30>Black Afgano|OU|X|2009;Silver Musk|MS|X;Duro|LE|X;Baraonda|WO|X;Narcotic Venus|FL|X;Pardon|WO|X;China White|PO|X;Blamage|FL|X;Absinth|GR|X
+Orto Parisi@50>Terroni|AM|X|2013;Megamare|AQ|X|2013;Stercus|AM|X;Viride|GR|X;Bergamask|CI|X;Seminalis|MS|X;Cuoium|LE|X
+Andy Tauer@50>Lonestar Memories|LE|P|2005;L'Air du Désert Marocain|AM|P|2005;Incense Rose|FL|P;Sotto la Luna Tuberose|FL|P;Orange Star|CI|P;Une Rose Vermeille|FL|P;Cologne du Maghreb|CI|P
+Mancera@120>Cedrat Boisé|CI|P|2011;Red Tobacco|TB|P;Instant Crush|FL|P;Roses Vanille|FL|P;Aoud Vanille|OU|P;Sicily|CI|P;Soleil d'Italie|CI|P;Black Gold|OU|P;Lemon Line|CI|P;Wild Fruits|FT|P;Coco Vanille|GO|P;Amore Caramel|GO|P;Hindu Kush|AM|P;Vanille Exclusive|GO|P
+Montale@100>Arabians Tonka|GO|P;Intense Café|GO|P;Black Aoud|OU|P|2007;Aoud Ever|OU|P;Chocolate Greedy|GO|P;Dark Purple|GO|P;Wild Aoud|OU|P;Roses Musk|FL|P;Honey Aoud|OU|P;Amber & Spices|AM|P;Pure Gold|FL|P;Aoud Damascus|OU|P;Intense Tiare|FL|P;Vanille Absolu|GO|P;Fruits of the Musk|FT|P
+Armaf@100>Club de Nuit Intense Man|CI|P|2015|105;Club de Nuit Untold|AM|P|2019|105;Club de Nuit Milestone|CI|P||105;Club de Nuit Sillage|CI|P||105
+Lattafa@100>Khamrah|GO|P|2022;Khamrah Qahwa|GO|P|2023;Asad|WO|P|2021;Yara|GO|P|2019;Fakhar Black|AR|P|2022;Ana Abiyedh|MS|P;Oud Mood|OU|P;Bade'e Al Oud Honor & Glory|OU|P;Bade'e Al Oud Sublime|OU|P;Oud for Glory|OU|P;Raghba|OR|P;Eclaire|GO|P;Hayaati|WO|P
+Afnan@100>9PM|GO|P|2020;9PM Rebel|GO|P;Supremacy Silver|AR|P;Supremacy Not Only Intense|FT|P
+Al Haramain@100>Amber Oud Gold Edition|AM|P;L'Aventure|FT|P;Amber Oud Ruby|AM|P;Amber Oud Tobacco Edition|TB|P
+Rasasi@100>Hawas|AQ|P|2015;Hawas Ice|AQ|P
+Ralph Lauren@125>Polo Blue|AQ|T|2002;Polo Red|SP|T|2013;Polo Red Extreme|SP|P|2016;Polo Black|AQ|T|2005;Polo Green|GR|T|1978;Polo Ultra Blue|AQ|T|2018;Polo Sport|AQ|T|1994;Polo Deep Blue|AQ|X|2020;Romance Men|AR|T|1998;Polo Supreme Oud|OU|P|2013
+Calvin Klein@100>CK One|CI|C|1994;Eternity for Men|FO|T|1989;Obsession for Men|OR|T|1986;Escape for Men|AQ|T|1993;Euphoria Men|OR|T|2006;CK Be|CI|T|1996;Defy|AR|T|2019
+Hugo Boss@100>Boss Bottled|WO|T|1998;Bottled Night|WO|T|2010;Bottled Elixir|WO|P|2020;Bottled Infinite|WO|P|2020;The Scent|SP|T|2015;The Scent for Her|FL|P|2016;Hugo Man|GR|T|1995;Hugo Just Different|WO|T|2011
+Davidoff@125>Cool Water|AQ|T|1988;Zino Davidoff|AR|T|1986;The Game|WO|T;Horizon|AR|T
+Azzaro@100>Chrome|AQ|T|1996;Wanted|SP|T|2016;Wanted by Night|SP|P|2017;Wanted Tonic|CI|T|2017;The Most Wanted|AM|P|2021;The Most Wanted Intense|AM|P|2021;Pour Homme|FO|T|1978;Chrome Legend|AQ|T|2012;Chrome United|AQ|T|2013
+Burberry@100>Brit for Men|WO|T|2004;Hero|WO|T|2021;Hero EDP|WO|P|2022;London for Men|AR|T|2006;Touch for Men|AR|T|2000;Weekend for Men|AR|T|1997
+Carolina Herrera@100>Bad Boy|SP|T|2019;Bad Boy Cobalt|AR|P|2020;Bad Boy Extreme|SP|P|2021;212 Men|AR|T|1999;212 VIP Men|AR|T|2011;212 Heroes|AR|T|2015;CH Men|WO|T|2008;Good Girl|GO|P|2016|80;Good Girl Supreme|GO|P|2021|80;Good Girl Légère|GO|P|2018|80;Very Good Girl|FT|P|2020|80
+Prada@100>Luna Rossa|AR|T|2012;Luna Rossa Carbon|AR|T|2017;Luna Rossa Ocean|AQ|T|2021;Luna Rossa Black|AM|P|2017;L'Homme|PO|T|2016;Amber Pour Homme|AM|T|2006;Paradigme|WO|P;Infusion d'Iris|PO|P|2007;Candy|GO|P|2011|80;Paradoxe|FL|P|2022|90;Infusion de Vétiver|WO|P
+Valentino@100>Uomo Born in Roma|WO|T|2019;Born in Roma Intense|WO|P|2020;Voce Viva|FL|P|2020;Donna Born in Roma|GO|P|2019
+Givenchy@100>Gentleman|WO|P|2018;Gentleman Society|WO|P|2020;Gentleman Réserve Privée|WO|P|2020;L'Interdit|FL|P|2018|80;Pi|WO|T|1998;Irresistible|FL|P|2020|80
+Lacoste@100>Essential|AR|T|2005;L.12.12 Blanc|FR|T|2011;L.12.12 Noir|WO|T|2012
+Dolce & Gabbana@100>Light Blue|CI|T|2001;Light Blue Pour Homme|AQ|T|2007;The One for Men|OR|T|2008;K by Dolce & Gabbana|CI|P|2019;Intenso|SP|T|2014;Pour Homme|AR|T|1994;Light Blue Eau Intense|CI|P|2017;L'Impératrice|FT|T|2009
+Marc Jacobs@100>Daisy|FL|T|2007;Perfect|FL|P|2020;Decadence|FL|P|2015;Daisy Love|FL|T|2016
+Mugler@100>Angel|GO|P|1992;Alien|OR|P|2005|60;A*Men|GO|T|1996;Alien Man|WO|T|2018;A*Men Pure Havane|TB|T|2008;A*Men Pure Malt|GO|T;Aura|GO|P|2017;Angel Nova|FT|P|2020;Alien Goddess|GO|P|2020;Angel Muse|GO|P|2016
+Lancôme@100>La Vie Est Belle|GO|P|2012;Hypnôse Homme|AR|T|2016;Idôle|FL|P|2019|75;Trésor|OR|P|1990;Miracle|FL|P|2000;La Nuit Trésor|GO|P|2015|75;L'Homme|WO|T|2006
+Kenzo@100>Flower by Kenzo|PO|P|2000;L'Eau Kenzo Pour Homme|AQ|T|1998;Kenzo Homme|AQ|T|1991;Kenzo Homme Sport|AQ|T|2003
+Issey Miyake@125>L'Eau d'Issey Pour Homme|CI|T|1994;Nuit d'Issey|WO|T|2015;Fusion d'Issey|CI|T|1999;L'Eau d'Issey|FL|T|1992
+Jimmy Choo@100>Man|AR|T|2014;Man Blue|AQ|T|2015;Man Ice|CI|T|2016;Man Aqua|AQ|T|2017
+Gucci@100>Guilty Pour Homme|AR|T|2011;Guilty Absolute Pour Homme|LE|P|2017;Bloom|FL|P|2017;Flora Gorgeous Gardenia|FL|P|2021;Envy|GR|T|1997;Intense Oud|OU|P|2013
+Penhaligon's@100>Halfeti|OR|P|2015;Endymion|AR|C|2003;Blenheim Bouquet|CI|T|1902;Sartorial|AR|T|2010;The Tragedy of Lord George|WO|P|2015;The Coveted Duchess Rose|FL|P|2015;Vaara|OR|P|2016;Bluebell|FL|T|1978
+Acqua di Parma@100>Colonia|CI|C|1916;Colonia Intensa|WO|C|2004;Colonia Leather|LE|C|2017;Colonia Club|CI|C|2013;Blu Mediterraneo Mirto di Panarea|CI|T|2008;Blu Mediterraneo Bergamotto di Calabria|CI|T|2010;Iris Nobile|FL|P|2004
+Atelier Cologne@100>Orange Sanguine|CI|C|2010;Cédrat Enivrant|CI|C|2010;Oud Saphir|OU|C|2013;Santal Carmin|WO|C;Vanille Insensée|GO|C;Philtre Ceylan|AR|C;Bois Blonds|CI|C|2010;Pomelo Paradis|CI|C|2010;Gold Leather|LE|C
+Ex Nihilo@100>Fleur Narcotique|FL|P|2013;Blue Talisman|FT|P;Lust in Paradise|FL|P;Outrecuidant|AM|P;Musc Infini|MS|P;Amber Sky|AM|P;Vetiver Moloko|WO|P;Iris Porcelaine|PO|P
+Memo Paris@75>Irish Leather|LE|P|2011;African Leather|LE|P|2011;Inlé|FL|P|2011;Marfa|FL|P|2012;Kedu|FL|P|2013;Lalibela|FL|P;Tigers Nest|AM|P
+Profumum Roma@100>Acqua e Sale|AQ|P;Ambra Aurea|AM|P;Fumidus|TB|P;Dulcis in Fundo|GO|P;Arso|TB|P;Confetto|GO|P;Olibanum|AM|P
+Zoologist@60>Bat|WO|P|2015;Squid|AR|P;Hummingbird|FL|P;Macaque|FT|P;Civet|AM|P;Dragonfly|FL|P;Beaver|LE|P;Panda|GR|P;Rhinoceros|WO|P;Bee|FL|P;Chameleon|GR|P;Camel|AM|P;Butterfly|FL|P;Nightingale|FL|P
+DS & Durga@50>Burning Barbershop|AR|P|2010;Debaser|FL|P;I Don't Know What|FL|P;Coriander|SP|P;Cowboy Grass|GR|P
+Imaginary Authors@50>Cape Heartache|GR|P;Memoirs of a Trespasser|FL|P;Yesterday Haze|AM|P;Saint Julep|GR|P;A City on Fire|TB|P;The Soft Lawn|GR|P;Slow Explosions|GO|P
+Escentric Molecules@100>Molecule 01|MS|T|2006;Escentric 01|CI|T|2006;Molecule 02|MS|T|2008
+Juliette Has a Gun@100>Not a Perfume|MS|P|2010;Anyway|MS|P;Lady Vengeance|FL|P|2009;Midnight Oud|OU|P
+L'Artisan Parfumeur@100>Dzing!|LE|T|1999;Timbuktu|GR|T|2004;Mûre et Musc|FT|T|1978;Passage d'Enfer|GR|T|1999;Tea for Two|TB|T|2000;Traversée du Bosphore|FL|P;Premier Figuier|GR|T|1994;Al Oudh|OU|P;Havana Vanille|GO|T;Seville à l'Aube|FL|P
+Comme des Garçons@100>Wonderwood|WO|T|2010;Series 3 Incense Avignon|AM|T;Series 3 Incense Kyoto|WO|T;Series 3 Incense Zagorsk|WO|T;Amazingreen|GR|P|2006;Odeur 53|AQ|T|1998
+Viktor & Rolf@100>Spicebomb|SP|T|2012;Spicebomb Extreme|SP|P|2015;Spicebomb Infrared|SP|T|2017;Spicebomb Night Vision|SP|P|2018;Spicebomb Dark Leather|LE|P|2021;Flowerbomb|FL|P|2005;Bonbon|GO|P|2014;Good Fortune|FL|P|2021
+Jo Malone@100>Wood Sage & Sea Salt|AQ|C|2014;English Pear & Freesia|FT|C|2010;Peony & Blush Suede|FL|C|2013;Lime Basil & Mandarin|CI|C|1999;Blackberry & Bay|FT|C|2005;Oud & Bergamot|OU|C|2010;Velvet Rose & Oud|OU|C|2014;Myrrh & Tonka|GO|C|2016;Earl Grey & Cucumber|AR|C|2006;Nectarine Blossom & Honey|FT|C|2007;Pomegranate Noir|FT|C|2007;Mimosa & Cardamom|FL|C|2013
+Molton Brown@100>Black Peppercorn|SP|T;Re-charge Black Pepper|SP|T;Orange & Bergamot|CI|T;Russian Leather|LE|T;Fiery Pink Pepper|SP|T;Suede Orris|PO|T
+Ariana Grande@100>Cloud|GO|P|2018;Sweet Like Candy|GO|P|2019;Thank U Next|GO|P|2019;Ari|GO|P|2015
+Kayali@100>Vanilla 28|GO|P|2018;Eden Juicy Apple 01|FT|P|2019;Musk 12|MS|P;Elixir 11|FL|P;Invite Only Amber 23|AM|P;Eden Sparkling Lychee 39|FT|P
+Lalique@100>Encre Noire|WO|T|2006;Encre Noire Sport|AR|T|2011;Encre Noire A L'Extrême|WO|P|2012
+Caron@100>Pour Un Homme|AR|T|1934;Tabac Blond|LE|P|1919;Yatagan|GR|T|1976
+Annick Goutal@100>Eau d'Hadrien|CI|P|1981;Petite Chérie|FT|P|1998
+Cartier@100>Declaration|SP|T|1998;Pasha de Cartier|AR|T|1992;L'Envol|WO|P|2016;La Panthère|FL|P|2014|75;Baiser Volé|FL|P|2011;Santos de Cartier|WO|T|2005
+Van Cleef & Arpels@100>Bois d'Iris|WO|P;Oud Blanc|OU|P;Santal Blanc|WO|P;First|FL|P|1976
+Dunhill@100>Desire|CI|T|1997;Icon|WO|P|2008;London|FO|T|1996
+Narciso Rodriguez@100>For Him|MS|T|2007;For Her|MS|P|2003
+Salvatore Ferragamo@100>Uomo|AR|T|2013;Signorina|FL|P|2011;Acqua Essenziale|CI|T|2010
+Marc-Antoine Barrois@100>Ganymede|WO|P|2017;B683|AR|P
+Puredistance@100>M|SP|X;Opardu|FL|X;Antonia|FL|X;White|FL|X
+Masque Milano@100>Russian Tea|TB|P|2013;Tango|AM|P;Montecristo|WO|P;Romeo Montague|FL|P
+BDK Parfums@100>Gris Charnel|WO|P|2016;Pas Ce Soir|FL|P;Sel d'Argent|AQ|P;Rouge Smoking|AM|P;Tabac Rhum|TB|P;Crème de Cuir|LE|P;Velvet Tonka|GO|P
+Etat Libre d'Orange@100>Jasmin et Cigarette|FL|P|2006;Fat Electrician|LE|P;Like This|GO|P;Putain des Palaces|FL|P
+Vilhelm Parfumerie@100>Mango Skin|FT|P|2016;Basilico & Fellini|AR|P;Dear Polly|FT|P|2017;Moon Carnival|FL|P
+Ormonde Jayne@50>Ormonde Man|WO|P;Ta'if|FL|P;Tolu|AM|P;Woman|FL|P|2005;Orris Noir|PO|P
+Naomi Goodsir@50>Bois d'Ascèse|WO|P|2014;Cuir Velours|LE|P|2014
+`;
+/* ================= toast, modal, confirm ================= */
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
+let D=null,sheetNew=false,MODAL=null,confirmRes=null,WD=null,IMP=null;
+function openModal(html){const m=$('#modal');m.innerHTML=`<div class="panel" role="dialog" aria-modal="true">${html}</div>`;m.hidden=false;document.documentElement.classList.add('lock')}
+function closeModal(){if(MODAL==='sheet'&&sheetNew&&D){idb.del('photo:'+D.id);delete PHOTOS[D.id]}
+ const m=$('#modal');m.hidden=true;m.innerHTML='';MODAL=null;D=null;document.documentElement.classList.remove('lock')}
+function askConfirm(title,text,ok,danger){return new Promise(res=>{confirmRes=res;const d=$('#dlg');
+ d.innerHTML=`<div class="panel" role="alertdialog" aria-modal="true"><h3>${esc(title)}</h3><p class="muted" style="margin:10px 0 22px">${esc(text)}</p><div class="foot" style="margin:0"><button class="btn ghost" data-act="dlgNo">Cancel</button><button class="btn${danger?' danger':''}" data-act="dlgOk">${esc(ok||'Confirm')}</button></div></div>`;d.hidden=false})}
+function endConfirm(v){const d=$('#dlg');d.hidden=true;d.innerHTML='';if(confirmRes){confirmRes(v);confirmRes=null}}
+function applyTheme(){const t=S.settings.theme,r=document.documentElement;if(t==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t)}
+
+/* ================= fragrance sheet ================= */
+const starsHtml=(k,v,dots)=>`<div class="stars${dots?' dots':''}">${[1,2,3,4,5].map(n=>`<button type="button" data-act="star" data-k="${k}" data-v="${n}" class="${n<=v?'on':''}" aria-label="${n}">${dots?'\u25cf':'\u2605'}</button>`).join('')}</div>`;
+function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,wish=d.shelf==='wish';
+ const shOpts=S.shelves.concat([{id:'wish',name:'Wishlist'}]).map(s=>`<option value="${s.id}"${d.shelf===s.id?' selected':''}>${esc(s.name)}</option>`).join('');
+ const concs=(!d.conc||CONCS.includes(d.conc))?CONCS:CONCS.concat([d.conc]);
+ let stats='';if(!sheetNew){const w=S.wears.filter(x=>x.pid===d.id).length,days=Math.max(1,Math.floor((Date.now()-d.created)/DAY));
+  stats=`<div class="s-stats"><span><b>${days}</b> days here</span><span><b>${d.sprays||0}</b> sprays</span><span><b>${w}</b> wears</span>${+d.price>0&&w>0?`<span><b>${cur()}${(d.price/w).toFixed(2)}</b> per wear</span>`:''}</div>`}
+ const known=sheetNew&&!!(d.name&&LIB.some(e=>e.k===norm(d.brand+' '+d.name)));
+ return `<button class="x" data-act="close" aria-label="Close">\u00d7</button>
+ <div class="s-top"><div class="s-bt" id="sbt">${bt(d,lv)}</div><div class="s-id">
+ <div class="fg" style="margin-bottom:10px"><input id="f-name" data-in="sheet" placeholder="Fragrance name" autocomplete="off" value="${esc(d.name)}" aria-label="Name"><div class="sugg" id="sugg"></div></div>
+ <div class="fg" style="margin:0"><input id="f-brand" data-in="sheet" placeholder="House" autocomplete="off" list="brand-list" value="${esc(d.brand)}" aria-label="House" style="font:500 16px var(--sans)"></div>${stats}</div></div>
+ <div class="g2"><div class="fg"><label for="f-shelf">Shelf</label><select id="f-shelf" data-in="sheet">${shOpts}</select></div>
+ <div class="fg"><label for="f-type">Bottle or decant</label><select id="f-type" data-in="sheet"><option${d.type==='Bottle'?' selected':''}>Bottle</option><option${d.type==='Decant'?' selected':''}>Decant</option></select></div>
+ <div class="fg"><label for="f-fam">Scent family</label><input id="f-fam" data-in="sheet" list="fam-list" value="${esc(d.fam)}" placeholder="e.g. Woody"></div>
+ <div class="fg"><label for="f-conc">Concentration</label><select id="f-conc" data-in="sheet">${concs.map(c=>`<option${d.conc===c?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
+ <div class="fg"><label for="f-max">Size (ml)</label><input id="f-max" type="number" min="1" step="0.5" data-in="sheet" value="${esc(d.maxMl)}"></div>
+ <div class="fg"><label for="f-ml">Remaining (ml)</label><input id="f-ml" type="number" min="0" step="0.1" data-in="sheet" value="${esc(mlf(d.ml))}"></div></div>
+ ${wish?'':`<div class="fg"><input id="f-mlr" type="range" min="0" max="${+d.maxMl||100}" step="0.5" value="${+d.ml||0}" data-in="mlr" aria-label="Remaining volume"></div>`}
+ <div class="g2"><div class="fg"><label for="f-price">Price paid (${esc(cur())})</label><input id="f-price" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.price)}"></div>
+ <div class="fg"><label for="f-year">Launch year</label><input id="f-year" type="number" min="1700" max="2100" data-in="sheet" value="${d.year?esc(d.year):''}"></div>
+ <div class="fg"><span class="lb">Your rating</span>${starsHtml('rating',d.rating||0)}</div>
+ <div class="fg"><span class="lb">Projection</span>${starsHtml('proj',d.proj||0,true)}</div>
+ <div class="fg"><label for="f-long">Longevity on skin (hours)</label><input id="f-long" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.longevity)}"></div>
+ <div class="fg"><span class="lb">Best in</span><div class="chips">${SEASONS.map(s=>`<button type="button" class="chip${(d.seasons||[]).includes(s)?' on':''}" data-act="season" data-v="${s}">${s}</button>`).join('')}</div></div></div>
+ <div class="fg"><label for="f-notes">Notes</label><textarea id="f-notes" data-in="sheet" placeholder="How it wears, when you reach for it">${esc(d.notes)}</textarea></div>
+ <div class="fg"><span class="lb">Photo</span><div class="acts"><button type="button" class="btn ghost sm" data-act="photoPick">${PHOTOS[d.id]?'Change photo':'Add photo'}</button>${PHOTOS[d.id]?'<button type="button" class="btn ghost sm" data-act="photoDel">Remove photo</button>':''}</div><input type="file" id="photoFile" accept="image/*"></div>
+ ${sheetNew&&!known?`<div class="set-row" style="border:0;padding:4px 0"><label for="f-savelib" style="margin:0">Also save to my library</label><input type="checkbox" id="f-savelib" checked style="width:20px;height:20px"></div>`:''}
+ <div class="foot">${sheetNew?'':'<button class="btn danger sp" data-act="sheetDel">Delete</button>'}${!sheetNew&&!wish?'<button class="btn ghost" data-act="sheetWear">Log a wear</button>':''}<button class="btn" data-act="sheetSave">${sheetNew?'Add to cabinet':'Save changes'}</button></div>`}
+function paintSheet(){const p=$('#modal .panel');if(p){const sc=p.scrollTop;p.innerHTML=sheetHtml();p.scrollTop=sc}}
+function openSheet(id,pre){const p=id?byId(id):null;sheetNew=!p;
+ D=p?JSON.parse(JSON.stringify(p)):Object.assign({id:uid(),name:'',brand:'',fam:'',conc:'EDP',year:'',shelf:S.shelves[0].id,type:'Bottle',maxMl:100,ml:100,price:'',rating:0,longevity:'',proj:0,seasons:[],notes:'',created:Date.now(),sprays:0},pre||{});
+ MODAL='sheet';openModal(sheetHtml())}
+function readSheet(){if(!D||MODAL!=='sheet')return;const g=id=>{const e=$('#'+id);return e?e.value:undefined};
+ const set=(k,id)=>{const v=g(id);if(v!==undefined)D[k]=v};
+ set('name','f-name');set('brand','f-brand');set('fam','f-fam');set('conc','f-conc');set('year','f-year');set('shelf','f-shelf');set('type','f-type');set('maxMl','f-max');set('ml','f-ml');set('price','f-price');set('longevity','f-long');set('notes','f-notes')}
+function refreshBt(){const mx=+D.maxMl||0,ml=clamp(+D.ml||0,0,mx||9999);const b=$('#sbt');if(b)b.innerHTML=bt(D,mx?ml/mx:0);
+ const r=$('#f-mlr');if(r){r.max=mx||100;r.value=ml}}
+function suggest(){const box=$('#sugg');if(!box)return;const q=(D.name||'').trim();if(q.length<2){box.innerHTML='';return}
+ box.innerHTML=libFind(q).slice(0,6).map(i=>{const e=LIB[i];return `<button type="button" data-act="sugg" data-i="${i}">${esc(e.n)} <small>${esc(e.b)}${e.c?' \u00b7 '+esc(e.c):''}</small></button>`}).join('')}
+function commitSheet(){readSheet();const d=D;d.name=String(d.name||'').trim();d.brand=String(d.brand||'').trim();
+ if(!d.name||!d.brand){toast('Add a name and a house first');return false}
+ d.maxMl=Math.max(1,+d.maxMl||100);d.ml=Math.round(clamp(+d.ml||0,0,d.maxMl)*10)/10;d.price=d.price===''?'':Math.max(0,+d.price||0);d.year=+d.year||'';d.longevity=d.longevity===''?'':Math.max(0,+d.longevity||0);
+ if(sheetNew){S.perfumes.push(d);const sv=$('#f-savelib');
+  if(sv&&sv.checked&&!LIB.some(e=>e.k===norm(d.brand+' '+d.name))){S.mine.push({n:d.name,b:d.brand,f:d.fam,c:d.conc,y:d.year,s:d.maxMl,t:''});buildLib()}
+  sheetNew=false}
+ else{const i=S.perfumes.findIndex(p=>p.id===d.id);if(i>=0)S.perfumes[i]=d}
+ save();return true}
+
+/* ================= wear log ================= */
+function wearHtml(){const own=owned();return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Log a wear</h2>
+ <div class="fg" style="margin-top:20px"><label for="w-p">Fragrance</label><select id="w-p" data-ch="wp">${own.map(p=>`<option value="${p.id}"${p.id===WD.pid?' selected':''}>${esc(p.name)} \u00b7 ${esc(p.brand)}</option>`).join('')}</select></div>
+ <div class="fg"><label for="w-d">Date</label><input type="date" id="w-d" value="${WD.date}" max="${dkey(Date.now())}" data-ch="wd"></div>
+ <span class="lb" style="text-align:center">Sprays</span><div class="stepper"><button data-act="step" data-d="-1" aria-label="Fewer sprays">\u2212</button><b id="w-n">${WD.n}</b><button data-act="step" data-d="1" aria-label="More sprays">+</button></div>
+ <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="wearSave">Save wear</button></div>`}
+function openWear(pid){const own=owned();if(!own.length){toast('Add a fragrance first');return}
+ const sg=suggestion();WD={pid:pid&&byId(pid)?pid:(sg?sg.p.id:own[0].id),n:3,date:dkey(Date.now())};MODAL='wear';openModal(wearHtml())}
+function saveWear(){const p=byId(WD.pid);if(!p)return;const today=dkey(Date.now()),t=WD.date===today?Date.now():new Date(WD.date+'T12:00:00').getTime();
+ p.ml=Math.max(0,Math.round((p.ml-WD.n/spm())*10)/10);p.sprays=(p.sprays||0)+WD.n;S.wears.push({id:uid(),pid:p.id,t,n:WD.n});save();closeModal();render();toast(`Logged ${WD.n} ${WD.n===1?'spray':'sprays'} of ${p.name}`)}
+
+/* ================= new library entry & import ================= */
+function openEntry(){MODAL='entry';openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>New library entry</h2><p class="muted" style="margin:6px 0 18px">Saved to your own library so it shows up in search.</p>
+ <div class="g2"><div class="fg"><label for="e-n">Name</label><input id="e-n"></div><div class="fg"><label for="e-b">House</label><input id="e-b" list="brand-list"></div>
+ <div class="fg"><label for="e-f">Scent family</label><input id="e-f" list="fam-list"></div><div class="fg"><label for="e-c">Concentration</label><select id="e-c">${CONCS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+ <div class="fg"><label for="e-y">Launch year</label><input id="e-y" type="number"></div><div class="fg"><label for="e-s">Size (ml)</label><input id="e-s" type="number" value="100"></div></div>
+ <div class="fg"><label for="e-t">Notes</label><input id="e-t" placeholder="Key notes or accords"></div>
+ <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="entrySave">Save entry</button></div>`)}
+function saveEntry(){const g=id=>$('#'+id).value.trim(),n=g('e-n'),b=g('e-b');if(!n||!b){toast('Add a name and a house');return}
+ if(LIB.some(e=>e.k===norm(b+' '+n))){toast('That is already in the library');return}
+ S.mine.push({n,b,f:g('e-f'),c:g('e-c'),y:+g('e-y')||0,s:+g('e-s')||0,t:g('e-t')});save();buildLib();closeModal();render();toast('Saved to your library')}
+function parseCSV(t){const first=t.split(/\r?\n/,1)[0];const d=[',',';','\t','|'].sort((a,b)=>first.split(b).length-first.split(a).length)[0];
+ const rows=[];let r=[],f='',q=false;
+ for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c==='"')q=true;else if(c===d){r.push(f);f=''}else if(c==='\n'){r.push(f);rows.push(r);r=[];f=''}else if(c!=='\r')f+=c}
+ if(f||r.length){r.push(f);rows.push(r)}return rows.filter(r=>r.some(x=>String(x).trim()))}
+function guessMap(h){const l=h.map(norm),f=re=>l.findIndex(x=>re.test(x));
+ let name=l.findIndex(x=>x==='perfume'||x==='name'||x==='fragrance'||x==='title');if(name<0)name=f(/perfume|name|fragrance|title/);
+ const m={name,brand:f(/^(brand|house|designer|company|marka)/),fam:f(/famil|olfactive|category|group/),conc:f(/conc|strength/),year:f(/^(year|launch|release)/),size:f(/^(size|volume|ml)/),notes:-1};
+ const tmb=['top','middle','base'].every(k=>l.includes(k)),a=f(/accord/);m.notes=tmb?'combo':a>=0?a:f(/^notes?$/);return m}
+function startImport(text,fname){let rows;
+ if(/\.json$/i.test(fname)||/^\s*[\[{]/.test(text)){try{let j=JSON.parse(text);if(!Array.isArray(j))j=j.perfumes||j.data||j.items||Object.values(j)[0];
+  if(!Array.isArray(j)||!j.length)throw 0;const head=[...new Set(j.slice(0,50).flatMap(o=>Object.keys(o)))];
+  rows=[head].concat(j.map(o=>head.map(h=>o[h]==null?'':Array.isArray(o[h])?o[h].join(', '):String(o[h]))))}catch(e){toast('That JSON file could not be read');return}}
+ else rows=parseCSV(text);
+ if(rows.length<2){toast('No rows found in that file');return}
+ const head=rows[0].map(h=>String(h).trim());IMP={head,rows:rows.slice(1),map:guessMap(head)};MODAL='import';openModal(importHtml())}
+function importHtml(){const {head,rows,map}=IMP;const F=[['name','Name (required)'],['brand','House'],['fam','Scent family'],['conc','Concentration'],['year','Launch year'],['size','Size (ml)'],['notes','Notes']];
+ const tmb=['top','middle','base'].every(k=>head.map(norm).includes(k));
+ const sel=(k)=>`<select data-ch="impMap" data-f="${k}"><option value="-1">Skip</option>${k==='notes'&&tmb?`<option value="combo"${map.notes==='combo'?' selected':''}>Top, middle and base notes</option>`:''}${head.map((h,i)=>`<option value="${i}"${map[k]===i?' selected':''}>${esc(h)}</option>`).join('')}</select>`;
+ const pv=rows.slice(0,3).map(r=>`${esc(map.name>=0?r[map.name]:'?')}${map.brand>=0?' <span class="muted">\u00b7 '+esc(r[map.brand])+'</span>':''}`).join('<br>');
+ return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Import library</h2><p class="muted" style="margin:6px 0 18px">${fmt(rows.length)} rows found. Check that each field points to the right column.</p>
+ <div class="cols">${F.map(f=>`<div class="fg"><label>${f[1]}</label>${sel(f[0])}</div>`).join('')}</div>
+ <div class="fg"><span class="lb">Preview</span><div id="imp-pv">${pv}</div></div><p class="muted" style="font-size:12.5px">Duplicates are skipped. If there is no family column, it is guessed from the notes.</p>
+ <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="impGo">Import ${fmt(rows.length)} rows</button></div>`}
+async function doImport(){const m=IMP.map;if(m.name<0){toast('Choose the column with the fragrance name');return}
+ const ex=new Set(LIB.map(e=>e.k)),add=[];let skip=0;const head=IMP.head.map(norm);
+ const cell=(r,i)=>typeof i==='number'&&i>=0?String(r[i]==null?'':r[i]).trim():'';
+ IMP.rows.forEach(r=>{const n=cell(r,m.name);if(!n)return;const b=cell(r,m.brand)||'Unknown';
+  const notes=m.notes==='combo'?['top','middle','base'].map(k=>cell(r,head.indexOf(k))).filter(Boolean).join(', '):cell(r,m.notes);
+  const key=norm(b+' '+n);if(ex.has(key)){skip++;return}ex.add(key);
+  add.push([n,b,cell(r,m.fam)||inferFam(notes),cell(r,m.conc),parseInt(cell(r,m.year))||0,parseFloat(cell(r,m.size))||0,notes.slice(0,160)])});
+ IMPORTED=IMPORTED.concat(add);await idb.set('imported',IMPORTED);buildLib();closeModal();render();toast(`Imported ${fmt(add.length)}${skip?', skipped '+fmt(skip)+' duplicates':''}`)}
+
+/* ================= backup ================= */
+async function buildBackup(){const photos={};for(const p of S.perfumes){const d=PHOTOS[p.id]||await idb.get('photo:'+p.id);if(d)photos[p.id]=d}
+ return JSON.stringify({app:'lux-perfume-cabinet',v:2,exportedAt:new Date().toISOString(),state:S,photos})}
+async function backupNow(){const txt=await buildBackup(),name='lux-backup-'+dkey(Date.now())+'.json';let done=false;
+ try{const c=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(c){await c.save({filename:name,data:txt});done=true}}catch(e){if(e&&e.code==='declined')return}
+ if(!done){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();done=true}catch(e){}}
+ if(done){S.settings.lastBackup=Date.now();persist();toast('Backup saved');if(ui.tab==='set'||ui.tab==='shelf')render()}else toast('Downloads are blocked here. Use Copy as text.')}
+async function backupCopy(){const txt=await buildBackup();let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(e){}
+ if(!ok){const ta=$('#bk-text');if(ta){ta.value=txt;ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e){}}}
+ if(ok){S.settings.lastBackup=Date.now();persist();toast('Backup copied. Paste it somewhere safe.')}else toast('Select the text in the box and copy it manually')}
+async function restoreText(txt){let o;try{o=JSON.parse(txt)}catch(e){toast('That is not a valid backup');return}
+ if(!o||o.app!=='lux-perfume-cabinet'||!o.state||!Array.isArray(o.state.perfumes)){toast('That is not a Lux backup');return}
+ const ok=await askConfirm('Restore this backup?',`It holds ${o.state.perfumes.length} fragrances and ${(o.state.wears||[]).length} wears. Your current data is snapshotted first, then replaced.`,'Restore');if(!ok)return;
+ snapNow('Before restore');for(const p of S.perfumes)await idb.del('photo:'+p.id);
+ S=migrate(o.state);PHOTOS={};for(const id in (o.photos||{})){PHOTOS[id]=o.photos[id];await idb.set('photo:'+id,o.photos[id])}
+ persist();applyTheme();buildLib();render();toast('Backup restored')}
+
+/* ================= drag and drop (pointer based, works with touch) ================= */
+const dnd={id:null,el:null,sx:0,sy:0,lx:0,ly:0,on:false,timer:null,pt:'',ghost:null,tgt:null,ended:0};
+function clearMarks(){$$('.rack.over').forEach(r=>r.classList.remove('over'));$$('.it.drop-l,.it.drop-r').forEach(i=>i.classList.remove('drop-l','drop-r'))}
+function dndStart(x,y){if(!dnd.el)return;dnd.on=true;dnd.el.classList.add('dragging');const g=document.createElement('div');g.className='ghost-el';const b=$('.bt',dnd.el);g.innerHTML=b?b.outerHTML:'';document.body.appendChild(g);dnd.ghost=g;document.body.classList.add('dragging-on');
+ try{if(navigator.vibrate)navigator.vibrate(12)}catch(e){}dndMove(x,y)}
+function dndMove(x,y){dnd.ghost.style.transform=`translate(${x-45}px,${y-72}px) scale(1.06)`;clearMarks();dnd.tgt=null;
+ const el=document.elementFromPoint(x,y);
+ if(el){const it=el.closest('.it'),rk=el.closest('.rack');
+  if(it&&it.dataset.id===dnd.id){dnd.tgt=null}
+  else if(it){const r=it.getBoundingClientRect(),after=x>r.left+r.width/2;it.classList.add(after?'drop-r':'drop-l');dnd.tgt={id:it.dataset.id,after}}
+  else if(rk){rk.classList.add('over');dnd.tgt={shelf:rk.dataset.shelf}}}
+ if(y<90)scrollBy(0,-16);else if(y>innerHeight-90)scrollBy(0,16)}
+function dndEnd(commit){clearTimeout(dnd.timer);
+ if(dnd.on){const t=dnd.tgt,id=dnd.id;if(dnd.ghost)dnd.ghost.remove();if(dnd.el)dnd.el.classList.remove('dragging');clearMarks();document.body.classList.remove('dragging-on');dnd.ended=Date.now();dnd.on=false;dnd.ghost=null;if(commit&&t)movePerfume(id,t)}
+ dnd.id=null;dnd.el=null}
+function movePerfume(id,t){const i=S.perfumes.findIndex(p=>p.id===id);if(i<0)return;const [p]=S.perfumes.splice(i,1);
+ if(t.id){const j=S.perfumes.findIndex(q=>q.id===t.id);if(j<0){S.perfumes.push(p)}else{p.shelf=S.perfumes[j].shelf;S.perfumes.splice(j+(t.after?1:0),0,p)}}
+ else{p.shelf=t.shelf;S.perfumes.push(p)}
+ save();render();toast(`${p.name} is on ${shelfName(p.shelf)}`)}
+const viewEl=$('#view');
+viewEl.addEventListener('pointerdown',e=>{const it=e.target.closest('.it');if(!it||(e.pointerType==='mouse'&&e.button!==0))return;
+ dnd.id=it.dataset.id;dnd.el=it;dnd.sx=dnd.lx=e.clientX;dnd.sy=dnd.ly=e.clientY;dnd.pt=e.pointerType;dnd.on=false;clearTimeout(dnd.timer);
+ if(e.pointerType!=='mouse')dnd.timer=setTimeout(()=>{if(dnd.el&&!dnd.on)dndStart(dnd.lx,dnd.ly)},300)});
+window.addEventListener('pointermove',e=>{if(!dnd.el)return;dnd.lx=e.clientX;dnd.ly=e.clientY;
+ if(dnd.on){dndMove(e.clientX,e.clientY);return}
+ const mv=Math.hypot(e.clientX-dnd.sx,e.clientY-dnd.sy);
+ if(dnd.pt==='mouse'){if(mv>6)dndStart(e.clientX,e.clientY)}else if(mv>10){clearTimeout(dnd.timer);dnd.el=null;dnd.id=null}});
+window.addEventListener('pointerup',()=>dndEnd(true));
+window.addEventListener('pointercancel',()=>dndEnd(false));
+document.addEventListener('touchmove',e=>{if(dnd.on)e.preventDefault()},{passive:false});
+viewEl.addEventListener('contextmenu',e=>{if(e.target.closest('.it'))e.preventDefault()});
+viewEl.addEventListener('dragstart',e=>e.preventDefault());
+viewEl.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('it')){e.preventDefault();openSheet(e.target.dataset.id)}});
+
+/* ================= actions ================= */
+let libT;const debounceLib=()=>{clearTimeout(libT);libT=setTimeout(updateLib,120)};
+const ACT={
+ tab:a=>{ui.tab=a.dataset.t;render();scrollTo(0,0)},
+ add:()=>openSheet(null),open:a=>openSheet(a.dataset.id),close:()=>closeModal(),
+ dlgOk:()=>endConfirm(true),dlgNo:()=>endConfirm(false),
+ clearDemo:()=>askConfirm('Clear the sample data?','The sample fragrances and their wears are removed. Anything you added stays.','Clear',true).then(ok=>{if(!ok)return;
+  const ids=new Set(S.perfumes.filter(p=>p.demo).map(p=>p.id));S.perfumes=S.perfumes.filter(p=>!ids.has(p.id));S.wears=S.wears.filter(w=>!ids.has(w.pid));S.demo=false;save();render()}),
+ snooze:()=>{S.settings.snooze=Date.now()+7*DAY;save();render()},
+ star:a=>{readSheet();const k=a.dataset.k,v=+a.dataset.v;D[k]=D[k]===v?0:v;paintSheet()},
+ season:a=>{readSheet();const s=a.dataset.v,l=D.seasons||[];D.seasons=l.includes(s)?l.filter(x=>x!==s):l.concat(s);paintSheet()},
+ photoPick:()=>{const f=$('#photoFile');if(f)f.click()},
+ photoDel:()=>{readSheet();delete PHOTOS[D.id];idb.del('photo:'+D.id);paintSheet()},
+ sheetSave:()=>{if(commitSheet()){closeModal();render();toast('Saved')}},
+ sheetWear:()=>{if(commitSheet()){const id=D.id;closeModal();render();openWear(id)}},
+ sheetDel:()=>askConfirm('Delete this fragrance?','Its wear history is removed too.','Delete',true).then(ok=>{if(!ok)return;const id=D.id;
+  S.perfumes=S.perfumes.filter(p=>p.id!==id);S.wears=S.wears.filter(w=>w.pid!==id);idb.del('photo:'+id);delete PHOTOS[id];save();sheetNew=false;closeModal();render();toast('Deleted')}),
+ sugg:a=>{readSheet();const e=LIB[+a.dataset.i];if(!e)return;D.name=e.n;D.brand=e.b;D.fam=e.f||D.fam;D.conc=e.c||D.conc;D.year=e.y||'';D.maxMl=e.s||100;D.ml=D.maxMl;paintSheet()},
+ wearOpen:a=>openWear(a.dataset.id),
+ step:a=>{WD.n=clamp(WD.n+(+a.dataset.d),1,20);$('#w-n').textContent=WD.n},
+ wearSave:()=>saveWear(),
+ wdel:a=>{const i=S.wears.findIndex(w=>w.id===a.dataset.id);if(i<0)return;const w=S.wears[i],p=byId(w.pid);
+  if(p){p.ml=Math.min(p.maxMl,Math.round((p.ml+w.n/spm())*10)/10);p.sprays=Math.max(0,(p.sprays||0)-w.n)}S.wears.splice(i,1);save();render();toast('Entry removed')},
+ another:()=>{ui.pick++;render()},jprev:()=>{ui.jm--;render()},jnext:()=>{ui.jm++;render()},jmore:()=>{ui.jlim+=40;render()},
+ insP:a=>{S.settings.ins.p=a.dataset.v;save();updateIns()},
+ lmore:()=>{ui.llim+=60;updateLib()},lnew:()=>openEntry(),entrySave:()=>saveEntry(),
+ lwish:a=>{const e=LIB[+a.dataset.i];if(!e)return;const i=S.perfumes.findIndex(p=>p.shelf==='wish'&&norm(p.brand+' '+p.name)===e.k);
+  if(i>=0){S.perfumes.splice(i,1);toast('Removed from wishlist')}
+  else{S.perfumes.push({id:uid(),name:e.n,brand:e.b,fam:e.f,conc:e.c||'EDP',year:e.y||'',shelf:'wish',type:'Bottle',maxMl:e.s||100,ml:e.s||100,price:'',rating:0,longevity:'',proj:0,seasons:[],notes:'',created:Date.now(),sprays:0});toast('Added to wishlist')}
+  save();updateLib();$('#railFoot').innerHTML=`${owned().length} in the cabinet<br>${fmt(LIB.length)} in the library`},
+ ladd:a=>{const e=LIB[+a.dataset.i];if(!e)return;openSheet(null,{name:e.n,brand:e.b,fam:e.f,conc:e.c||'EDP',year:e.y||'',maxMl:e.s||100,ml:e.s||100})},
+ impPick:()=>{const f=$('#impFile');if(f)f.click()},impGo:()=>doImport(),
+ theme:a=>{S.settings.theme=a.dataset.v;applyTheme();save();render()},
+ shAdd:()=>{S.shelves.push({id:'s'+uid(),name:'New shelf'});save();render()},
+ shUp:a=>{const i=+a.dataset.i;if(i>0){[S.shelves[i-1],S.shelves[i]]=[S.shelves[i],S.shelves[i-1]];save();render()}},
+ shDn:a=>{const i=+a.dataset.i;if(i<S.shelves.length-1){[S.shelves[i+1],S.shelves[i]]=[S.shelves[i],S.shelves[i+1]];save();render()}},
+ shDel:a=>{const i=+a.dataset.i;if(S.shelves.length<2){toast('Keep at least one shelf');return}
+  askConfirm('Remove this shelf?','Its bottles move to another shelf.','Remove',true).then(ok=>{if(!ok)return;const sh=S.shelves[i],to=S.shelves.find(s=>s.id!==sh.id).id;
+   S.perfumes.forEach(p=>{if(p.shelf===sh.id)p.shelf=to});S.shelves.splice(i,1);save();render()})},
+ bkNow:()=>backupNow(),bkCopy:()=>backupCopy(),bkFile:()=>{const f=$('#bkFile');if(f)f.click()},
+ bkText:()=>{const t=$('#bk-text').value.trim();if(!t){toast('Paste a backup first');return}restoreText(t)},
+ remind:()=>{S.settings.remind=!S.settings.remind;save();render()},
+ snapRestore:a=>{let arr=[];try{arr=JSON.parse(localStorage.getItem('lux.snaps')||'[]')}catch(e){}const x=arr[+a.dataset.i];if(!x)return;
+  askConfirm('Restore this snapshot?','Your current data is snapshotted first.','Restore').then(async ok=>{if(!ok)return;snapNow('Before restore');S=migrate(JSON.parse(x.data));persist();applyTheme();await loadPhotos();buildLib();render();toast('Snapshot restored')})},
+ clrImp:()=>askConfirm('Clear the imported library?','Built-in and your own entries stay.','Clear',true).then(async ok=>{if(!ok)return;IMPORTED=[];await idb.set('imported',[]);buildLib();render();toast('Imported entries cleared')}),
+ reset:()=>askConfirm('Erase everything?','The collection, journal, photos and your own entries are removed. A snapshot is kept in Settings.','Erase all',true).then(async ok=>{if(!ok)return;
+  snapNow('Before erase');for(const p of S.perfumes)await idb.del('photo:'+p.id);PHOTOS={};S=defaults();persist();buildLib();render();toast('Everything erased')})
+};
+document.addEventListener('click',e=>{
+ if(Date.now()-dnd.ended<350){e.preventDefault();e.stopPropagation();return}
+ if(e.target===$('#modal')){closeModal();return}
+ if(e.target===$('#dlg')){endConfirm(false);return}
+ const a=e.target.closest('[data-act]');
+ if(a&&ACT[a.dataset.act]){ACT[a.dataset.act](a,e);return}
+ const it=e.target.closest('.it');if(it&&$('#modal').hidden)openSheet(it.dataset.id)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dlg').hidden)endConfirm(false);else if(!$('#modal').hidden)closeModal()}});
+const IN={
+ lq:e=>{ui.lq=e.value;ui.llim=60;debounceLib()},lb:e=>{ui.lb=e.value;ui.llim=60;debounceLib()},
+ sheet:e=>{readSheet();if(e.id==='f-name'&&sheetNew)suggest();refreshBt()},
+ mlr:e=>{const f=$('#f-ml');f.value=e.value;readSheet();refreshBt()}};
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.in;if(k&&IN[k])IN[k](e.target,e)});
+const CH={
+ insM:e=>{S.settings.ins.m=e.value;save();updateIns()},insG:e=>{S.settings.ins.g=e.value;save();updateIns()},
+ rank:e=>{ui.rank=e.value;const d=insCompute();$('#rankBox').innerHTML=rankHtml(d)},
+ lf:e=>{ui.lf=e.value;ui.llim=60;updateLib()},lc:e=>{ui.lc=e.value;ui.llim=60;updateLib()},
+ spm:e=>{S.settings.spm=clamp(+e.value||11,1,30);save();toast('Saved')},cur:e=>{S.settings.cur=e.value.trim();save();toast('Saved')},
+ shName:e=>{const s=S.shelves.find(x=>x.id===e.dataset.id);if(s){s.name=e.value.trim()||s.name;save();toast('Shelf renamed')}},
+ wp:e=>{WD.pid=e.value},wd:e=>{WD.date=e.value||dkey(Date.now())},
+ impMap:e=>{const f=e.dataset.f;IMP.map[f]=e.value==='combo'?'combo':parseInt(e.value,10);
+  const {rows,map}=IMP;$('#imp-pv').innerHTML=rows.slice(0,3).map(r=>`${esc(map.name>=0?r[map.name]:'?')}${map.brand>=0?' <span class="muted">\u00b7 '+esc(r[map.brand])+'</span>':''}`).join('<br>')}};
+document.addEventListener('change',async e=>{const t=e.target,k=t.dataset&&t.dataset.ch;
+ if(k&&CH[k]){CH[k](t,e);return}
+ if(t.id==='photoFile'&&t.files[0]&&D){try{readSheet();const url=await compressImage(t.files[0]);PHOTOS[D.id]=url;await idb.set('photo:'+D.id,url);paintSheet()}catch(err){toast('That image could not be read')}}
+ else if(t.id==='impFile'&&t.files[0]){const f=t.files[0];const txt=await f.text();t.value='';startImport(txt,f.name)}
+ else if(t.id==='bkFile'&&t.files[0]){const f=t.files[0];const txt=await f.text();t.value='';restoreText(txt)}});
+
+/* ================= init ================= */
+(async function init(){
+ parseRaw();
+ await idb.open();
+ if(!S){S=seed();persist()}
+ await loadPhotos();await loadImported();buildLib();applyTheme();
+ $('#fam-list').innerHTML=FAMLIST.map(f=>`<option value="${f}">`).join('');
+ render();
+ window.addEventListener('beforeunload',()=>{try{persist()}catch(e){}});
+})();
+/* ================= chart hover and tap ================= */
+document.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('.seg,.lg-row');if(t&&$('#dn'))hl(+t.dataset.i)});
+document.addEventListener('mouseout',e=>{const t=e.target.closest&&e.target.closest('.seg,.lg-row');if(t&&$('#dn'))hl(null)});
+document.addEventListener('click',e=>{if(!$('#dn'))return;const t=e.target.closest('.seg,.lg-row');if(t)hl(+t.dataset.i);else if(!e.target.closest('.donut-wrap'))hl(null)});
+</script>
+</body>
+</html>
