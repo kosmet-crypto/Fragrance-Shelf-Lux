@@ -907,5 +907,6 @@ document.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.clo
 document.addEventListener('mouseout',e=>{const t=e.target.closest&&e.target.closest('.seg,.lg-row');if(t&&$('#dn'))hl(null)});
 document.addEventListener('click',e=>{if(!$('#dn'))return;const t=e.target.closest('.seg,.lg-row');if(t)hl(+t.dataset.i);else if(!e.target.closest('.donut-wrap'))hl(null)});
 </script>
+<script src="lux-test.js"></script>
 </body>
 </html>
