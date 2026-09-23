@@ -550,6 +550,7 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  <div class="set-row" style="margin-top:16px"><div>Remind me to back up<small>A gentle note on the Collection page every two weeks</small></div><button class="chip${s.remind?' on':''}" data-act="remind">${s.remind?'On':'Off'}</button></div>
  <h3 style="margin:22px 0 4px">Automatic snapshots</h3><p class="muted" style="margin-bottom:8px;font-size:13.5px">Saved in this browser about once a day, and before every restore.</p>
  ${snaps.length?snaps.map((x,i)=>`<div class="set-row"><div>${new Date(x.t).toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}<small>${esc(x.why)} \u00b7 ${x.n} fragrances</small></div><button class="btn ghost sm" data-act="snapRestore" data-i="${i}">Restore</button></div>`).join(''):'<p class="muted">None yet.</p>'}</div>
+ <div class="card"><h3>Updates</h3><div class="set-row"><div>${window.LuxAndroid&&LuxAndroid.getVersion?'Lux '+esc(LuxAndroid.getVersion())+' for Android':'Lux web app'}<small>Updates keep your collection and settings</small></div><button class="btn ghost sm" data-act="checkUpdate">Check for updates</button></div></div>
  <div class="card"><h3>Library and data</h3>
  <div class="set-row"><div>Imported library<small>${fmt(IMPORTED.length)} entries. Your own entries are kept.</small></div><button class="btn ghost sm" data-act="clrImp">Clear imported</button></div>
  <div class="set-row"><div>Erase everything<small>Removes the collection, journal, photos and own entries</small></div><button class="btn danger sm" data-act="reset">Erase all</button></div></div>`}
@@ -864,7 +865,7 @@ const ACT={
  shDel:a=>{const i=+a.dataset.i;if(S.shelves.length<2){toast('Keep at least one shelf');return}
   askConfirm('Remove this shelf?','Its bottles move to another shelf.','Remove',true).then(ok=>{if(!ok)return;const sh=S.shelves[i],to=S.shelves.find(s=>s.id!==sh.id).id;
    S.perfumes.forEach(p=>{if(p.shelf===sh.id)p.shelf=to});S.shelves.splice(i,1);save();render()})},
- bkNow:()=>backupNow(),bkCopy:()=>backupCopy(),bkFile:()=>{const f=$('#bkFile');if(f)f.click()},
+ checkUpdate:()=>checkForUpdate(),bkNow:()=>backupNow(),bkCopy:()=>backupCopy(),bkFile:()=>{const f=$('#bkFile');if(f)f.click()},
  bkText:()=>{const t=$('#bk-text').value.trim();if(!t){toast('Paste a backup first');return}restoreText(t)},
  remind:()=>{S.settings.remind=!S.settings.remind;save();render()},
  snapRestore:a=>{let arr=[];try{arr=JSON.parse(localStorage.getItem('lux.snaps')||'[]')}catch(e){}const x=arr[+a.dataset.i];if(!x)return;
@@ -918,6 +919,22 @@ document.addEventListener('click',e=>{if(!$('#dn'))return;const t=e.target.close
 </script>
 <script src="lux-test.js"></script>
 <script>
+/* Manual update check. Android app: the native side asks GitHub Releases and shows the result itself.
+   Web/PWA: compare the files the service worker cached with the ones on the server. */
+async function checkForUpdate(){
+ if(window.LuxAndroid&&LuxAndroid.checkForUpdate){LuxAndroid.checkForUpdate();return}
+ toast('Checking for updates\u2026');
+ try{let changed=false;
+  for(const f of ['index.html','lux-test.js']){
+   // Unique URL + no-store so neither the service worker nor the HTTP cache answers.
+   const res=await fetch(f+'?check='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error(res.status);
+   const copy=res.clone(),fresh=await res.text(),cached=window.caches?await caches.match('./'+f):null;
+   if(cached&&(await cached.text())!==fresh){changed=true;
+    // lux-test.js is served cache-first, so store the new copy before reloading.
+    for(const k of await caches.keys())await (await caches.open(k)).put('./'+f,copy.clone())}}
+  const reg=navigator.serviceWorker?await navigator.serviceWorker.getRegistration():null;if(reg)reg.update().catch(()=>{});
+  if(changed){toast('New version found. Updating\u2026');setTimeout(()=>location.reload(),900)}else toast('You have the latest version')
+ }catch(e){toast('Could not check. Are you online?')}}
 /* Offline support when installed from the web; the Android app bundles its files instead. */
 if('serviceWorker' in navigator&&location.protocol!=='file:'&&!window.LuxAndroid){
  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
