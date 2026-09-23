@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Single-colour version for Android 13+ themed icons (the system tints it). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- cap -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M44,25.5l2,-2.5h16l2,2.5v13.5l-1.5,1.5h-17l-1.5,-1.5z" />
+    <!-- collar -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M48,41.5h12v3h-12z" />
+    <!-- faceted body with the label cut out -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M40,45h28l6,6v28l-6,6h-28l-6,-6v-28zM45,60v10h18v-10z" />
+</vector>
