@@ -131,7 +131,7 @@ public class MainActivity extends Activity {
         if (savedInstanceState != null) webView.restoreState(savedInstanceState);
         else webView.loadUrl(START_URL);
 
-        if (savedInstanceState == null) checkForUpdate();
+        if (savedInstanceState == null) checkForUpdate(false);
     }
 
     /* ---------- update check ---------- */
@@ -140,13 +140,15 @@ public class MainActivity extends Activity {
 
     /**
      * Looks up the latest GitHub Release (tagged v1.0.<versionCode>) and offers to download it
-     * when it is newer than this install. Silent when offline or on any error.
+     * when it is newer than this install. The automatic check on launch is throttled and silent;
+     * a manual check (the "Check for updates" button) always runs and reports the result.
      */
-    private void checkForUpdate() {
+    private void checkForUpdate(final boolean manual) {
         final SharedPreferences prefs = getSharedPreferences("update", MODE_PRIVATE);
         long now = System.currentTimeMillis();
-        if (now - prefs.getLong("lastCheck", 0) < UPDATE_CHECK_INTERVAL) return;
+        if (!manual && now - prefs.getLong("lastCheck", 0) < UPDATE_CHECK_INTERVAL) return;
         prefs.edit().putLong("lastCheck", now).apply();
+        if (manual) toast("Checking for updates…");
 
         new Thread(() -> {
             try {
@@ -155,7 +157,7 @@ public class MainActivity extends Activity {
                 c.setConnectTimeout(8000);
                 c.setReadTimeout(8000);
                 c.setRequestProperty("Accept", "application/vnd.github+json");
-                if (c.getResponseCode() != 200) return;
+                if (c.getResponseCode() != 200) throw new IllegalStateException("HTTP " + c.getResponseCode());
                 String body;
                 try (InputStream in = c.getInputStream()) {
                     ByteArrayOutputStream buf = new ByteArrayOutputStream();
@@ -164,15 +166,19 @@ public class MainActivity extends Activity {
                     body = buf.toString("UTF-8");
                 }
                 String tag = new JSONObject(body).optString("tag_name", "");
-                int dot = tag.lastIndexOf('.');
-                if (dot < 0) return;
-                final long latest = Long.parseLong(tag.substring(dot + 1));
+                final long latest = Long.parseLong(tag.substring(tag.lastIndexOf('.') + 1));
                 final String name = tag.startsWith("v") ? tag.substring(1) : tag;
                 if (latest > installedVersionCode()) runOnUiThread(() -> showUpdateDialog(name));
-            } catch (Exception ignored) {
-                // No network, rate limit or unexpected response: try again next time.
+                else if (manual) toast("You have the latest version");
+            } catch (Exception e) {
+                // No network, rate limit or unexpected response: the automatic check tries again later.
+                if (manual) toast("Could not check. Are you online?");
             }
         }).start();
+    }
+
+    private void toast(final String msg) {
+        runOnUiThread(() -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
     }
 
     private long installedVersionCode() throws Exception {
@@ -197,8 +203,19 @@ public class MainActivity extends Activity {
                 .show();
     }
 
-    /** Called from index.html to save a backup, since WebView cannot download blob: URLs. */
+    /** Methods index.html can call as window.LuxAndroid.*. */
     private class Bridge {
+        @JavascriptInterface
+        public String getVersion() {
+            return BuildConfig.VERSION_NAME;
+        }
+
+        @JavascriptInterface
+        public void checkForUpdate() {
+            runOnUiThread(() -> MainActivity.this.checkForUpdate(true));
+        }
+
+        /** Saves a backup; WebView cannot download blob: URLs. */
         @JavascriptInterface
         public void saveFile(final String name, final String text) {
             runOnUiThread(() -> {
