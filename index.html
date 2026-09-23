@@ -904,8 +904,8 @@ document.addEventListener('change',async e=>{const t=e.target,k=t.dataset&&t.dat
 /* ================= init ================= */
 (async function init(){
  parseRaw();
+ if(!S){S=seed();persist()} /* before the first await, so lux-test.js never sees S as null */
  await idb.open();
- if(!S){S=seed();persist()}
  await loadPhotos();await loadImported();buildLib();applyTheme();
  $('#fam-list').innerHTML=FAMLIST.map(f=>`<option value="${f}">`).join('');
  render();
