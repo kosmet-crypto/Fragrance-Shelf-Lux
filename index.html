@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lux · Perfume Cabinet</title>
+<meta name="theme-color" content="#0d0f0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lux">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -768,10 +774,13 @@ async function doImport(){const m=IMP.map;if(m.name<0){toast('Choose the column 
 /* ================= backup ================= */
 async function buildBackup(){const photos={};for(const p of S.perfumes){const d=PHOTOS[p.id]||await idb.get('photo:'+p.id);if(d)photos[p.id]=d}
  return JSON.stringify({app:'lux-perfume-cabinet',v:2,exportedAt:new Date().toISOString(),state:S,photos})}
+function backupSaved(){S.settings.lastBackup=Date.now();persist();toast('Backup saved');if(ui.tab==='set'||ui.tab==='shelf')render()}
+window.luxBackupSaved=backupSaved; /* called by the Android app once the file is written */
 async function backupNow(){const txt=await buildBackup(),name='lux-backup-'+dkey(Date.now())+'.json';let done=false;
+ if(window.LuxAndroid){LuxAndroid.saveFile(name,txt);return} /* WebView cannot download blob: URLs */
  try{const c=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(c){await c.save({filename:name,data:txt});done=true}}catch(e){if(e&&e.code==='declined')return}
  if(!done){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();done=true}catch(e){}}
- if(done){S.settings.lastBackup=Date.now();persist();toast('Backup saved');if(ui.tab==='set'||ui.tab==='shelf')render()}else toast('Downloads are blocked here. Use Copy as text.')}
+ if(done)backupSaved();else toast('Downloads are blocked here. Use Copy as text.')}
 async function backupCopy(){const txt=await buildBackup();let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(e){}
  if(!ok){const ta=$('#bk-text');if(ta){ta.value=txt;ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e){}}}
  if(ok){S.settings.lastBackup=Date.now();persist();toast('Backup copied. Paste it somewhere safe.')}else toast('Select the text in the box and copy it manually')}
@@ -908,5 +917,10 @@ document.addEventListener('mouseout',e=>{const t=e.target.closest&&e.target.clos
 document.addEventListener('click',e=>{if(!$('#dn'))return;const t=e.target.closest('.seg,.lg-row');if(t)hl(+t.dataset.i);else if(!e.target.closest('.donut-wrap'))hl(null)});
 </script>
 <script src="lux-test.js"></script>
+<script>
+/* Offline support when installed from the web; the Android app bundles its files instead. */
+if('serviceWorker' in navigator&&location.protocol!=='file:'&&!window.LuxAndroid){
+ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
 </body>
 </html>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gold perfume bottle, kept inside the 66dp safe zone. Same artwork as icons/*.png. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFE6CF98"
+        android:pathData="M47,26h14a2,2 0,0 1,2 2v8h-18v-8a2,2 0,0 1,2 -2z" />
+    <path
+        android:fillColor="#FFA5823F"
+        android:pathData="M49,36h10v5h-10z" />
+    <path android:pathData="M40,41h28a8,8 0,0 1,8 8v24a8,8 0,0 1,-8 8h-28a8,8 0,0 1,-8 -8v-24a8,8 0,0 1,8 -8z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54" android:startY="41"
+                android:endX="54" android:endY="81">
+                <item android:offset="0" android:color="#FFECD7A3" />
+                <item android:offset="0.55" android:color="#FFCAA96B" />
+                <item android:offset="1" android:color="#FFA5823F" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:strokeColor="#6119130A"
+        android:strokeWidth="1.6"
+        android:pathData="M46,56h16a2,2 0,0 1,2 2v8a2,2 0,0 1,-2 2h-16a2,2 0,0 1,-2 -2v-8a2,2 0,0 1,2 -2z" />
+    <path
+        android:strokeColor="#73FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:pathData="M37.5,50v20" />
+</vector>
