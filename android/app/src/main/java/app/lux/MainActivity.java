@@ -3,6 +3,8 @@ package app.lux;
 import android.app.Activity;
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.ClipData;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -22,11 +25,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.core.content.FileProvider;
 import androidx.webkit.WebViewAssetLoader;
 
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -45,10 +51,13 @@ public class MainActivity extends Activity {
     private static final int REQ_PICK_FILE = 1;
     private static final int REQ_SAVE_FILE = 2;
     private static final int REQ_LOCATION = 3;
+    private static final int REQ_NOTIFY = 4;
 
     private WebView webView;
     private ValueCallback<Uri[]> pendingPick;
-    private String pendingSaveText;
+    private byte[] pendingSave;
+    private boolean pendingSaveIsBackup;
+    private String pendingOpen;
     private String pendingGeoOrigin;
     private GeolocationPermissions.Callback pendingGeo;
 
@@ -78,6 +87,12 @@ public class MainActivity extends Activity {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 return loader.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (pendingOpen != null) openInPage(pendingOpen);
+                pendingOpen = null;
             }
 
             @Override
@@ -132,6 +147,27 @@ public class MainActivity extends Activity {
         else webView.loadUrl(START_URL);
 
         if (savedInstanceState == null) checkForUpdate(false);
+        pendingOpen = openTarget(getIntent());
+        ReminderReceiver.schedule(this);
+    }
+
+    /* ---------- notifications ---------- */
+
+    /** A tapped notification says which screen to show: the morning pick or the wear log. */
+    private static String openTarget(Intent intent) {
+        String from = intent == null ? null : intent.getStringExtra("from");
+        return "pm".equals(from) ? "log" : "am".equals(from) ? "pick" : null;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String target = openTarget(intent);
+        if (target != null) openInPage(target);
+    }
+
+    private void openInPage(String target) {
+        webView.evaluateJavascript("window.luxOpen&&luxOpen('" + target + "')", null);
     }
 
     /* ---------- update check ---------- */
@@ -203,8 +239,82 @@ public class MainActivity extends Activity {
                 .show();
     }
 
+    private void saveAs(String name, String mime, byte[] data, boolean backup) {
+        pendingSave = data;
+        pendingSaveIsBackup = backup;
+        Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType(mime);
+        i.putExtra(Intent.EXTRA_TITLE, name);
+        try {
+            startActivityForResult(i, REQ_SAVE_FILE);
+        } catch (ActivityNotFoundException e) {
+            pendingSave = null;
+            toast("No app available to save files");
+        }
+    }
+
     /** Methods index.html can call as window.LuxAndroid.*. */
     private class Bridge {
+        /** Reminder settings and upcoming picks as JSON; see syncReminders in index.html. */
+        @JavascriptInterface
+        public void setReminders(String json) {
+            ReminderReceiver.prefs(MainActivity.this).edit().putString("cfg", json).apply();
+            ReminderReceiver.schedule(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public boolean notificationsAllowed() {
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            return nm != null && nm.areNotificationsEnabled();
+        }
+
+        @JavascriptInterface
+        public void requestNotifications() {
+            if (Build.VERSION.SDK_INT < 33) return;
+            runOnUiThread(() -> {
+                if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFY);
+                } else if (!notificationsAllowed()) {
+                    // Allowed once and later switched off: only the system settings can turn it back on.
+                    try {
+                        startActivity(new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, getPackageName()));
+                    } catch (ActivityNotFoundException ignored) {
+                    }
+                }
+            });
+        }
+
+        /** Shares a PNG (base64) through the Android share sheet. */
+        @JavascriptInterface
+        public void shareImage(final String base64) {
+            runOnUiThread(() -> {
+                try {
+                    File dir = new File(getCacheDir(), "share");
+                    if (!dir.isDirectory() && !dir.mkdirs()) throw new IllegalStateException("no cache dir");
+                    File f = new File(dir, "lux.png");
+                    try (FileOutputStream out = new FileOutputStream(f)) {
+                        out.write(Base64.decode(base64, Base64.DEFAULT));
+                    }
+                    Uri uri = FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".files", f);
+                    Intent send = new Intent(Intent.ACTION_SEND)
+                            .setType("image/png")
+                            .putExtra(Intent.EXTRA_STREAM, uri)
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    send.setClipData(ClipData.newRawUri("", uri));
+                    startActivity(Intent.createChooser(send, "Share"));
+                } catch (Exception e) {
+                    toast("Could not share the image");
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void saveImage(final String name, final String base64) {
+            runOnUiThread(() -> saveAs(name, "image/png", Base64.decode(base64, Base64.DEFAULT), false));
+        }
+
         @JavascriptInterface
         public String getVersion() {
             return BuildConfig.VERSION_NAME;
@@ -218,19 +328,7 @@ public class MainActivity extends Activity {
         /** Saves a backup; WebView cannot download blob: URLs. */
         @JavascriptInterface
         public void saveFile(final String name, final String text) {
-            runOnUiThread(() -> {
-                pendingSaveText = text;
-                Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("application/json");
-                i.putExtra(Intent.EXTRA_TITLE, name);
-                try {
-                    startActivityForResult(i, REQ_SAVE_FILE);
-                } catch (ActivityNotFoundException e) {
-                    pendingSaveText = null;
-                    Toast.makeText(MainActivity.this, "No app available to save files", Toast.LENGTH_LONG).show();
-                }
-            });
+            runOnUiThread(() -> saveAs(name, "application/json", text.getBytes(StandardCharsets.UTF_8), true));
         }
     }
 
@@ -243,21 +341,26 @@ public class MainActivity extends Activity {
             pendingPick.onReceiveValue(uri != null ? new Uri[]{uri} : null);
             pendingPick = null;
         } else if (requestCode == REQ_SAVE_FILE) {
-            String text = pendingSaveText;
-            pendingSaveText = null;
-            if (uri == null || text == null) return;
+            byte[] bytes = pendingSave;
+            pendingSave = null;
+            if (uri == null || bytes == null) return;
             try (OutputStream out = getContentResolver().openOutputStream(uri)) {
-                out.write(text.getBytes(StandardCharsets.UTF_8));
-                // Lets the page record the backup date and show its own confirmation.
-                webView.evaluateJavascript("window.luxBackupSaved&&luxBackupSaved()", null);
+                out.write(bytes);
+                // A backup lets the page record the date and show its own confirmation.
+                if (pendingSaveIsBackup) webView.evaluateJavascript("window.luxBackupSaved&&luxBackupSaved()", null);
+                else toast("Image saved");
             } catch (Exception e) {
-                Toast.makeText(this, "Could not save backup", Toast.LENGTH_LONG).show();
+                toast(pendingSaveIsBackup ? "Could not save backup" : "Could not save the image");
             }
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        if (requestCode == REQ_NOTIFY) {
+            webView.evaluateJavascript("window.luxNotifChanged&&luxNotifChanged()", null);
+            return;
+        }
         if (requestCode != REQ_LOCATION || pendingGeo == null) return;
         boolean granted = results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED;
         pendingGeo.invoke(pendingGeoOrigin, granted, false);

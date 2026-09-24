@@ -4,6 +4,17 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
 (`lux-test.js`) for timed fragrance tests with weather. Everything is stored locally on your device
 (`localStorage` and IndexedDB for photos).
 
+## Daily pick, reminders, wishlist and sharing
+* **Today's pick** (top of Collection and Journal): suggests a bottle for the day from the season, today's weather
+  in your city, the occasion (Everyday, Work, Evening), how long it has rested and your rating, and says why.
+  Set the city in Settings → *Daily pick and reminders*. Weather comes from Open-Meteo, no account needed.
+* **Reminders** (Android app): a morning notification with today's pick and an evening reminder that only shows
+  when nothing is logged for the day. Both have their own time.
+* **Wishlist**: price seen, target price, where to buy and how much you want it. *I bought it* moves the bottle
+  to your first shelf with the price filled in.
+* **Share**: Collection → *Share* draws a picture (most worn, this month, the collection or the wishlist) to share
+  or save.
+
 ## Backup
 Settings → **Backup and restore**: download a backup file, copy it as text, or restore from a file or pasted text.
 A backup holds the collection, journal, tests, settings, photos and your own library entries.
