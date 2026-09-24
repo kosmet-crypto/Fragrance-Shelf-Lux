@@ -243,6 +243,24 @@ h1{font-size:38px}
 .lrow .ac .ic{width:36px;height:36px}
 }
 @media (min-width:700px){.modal:not(.dlg){align-items:center;padding:24px}.modal:not(.dlg) .panel{border-radius:26px}}
+/* daily pick, wishlist, share */
+.pick{margin-bottom:26px;background:radial-gradient(620px 280px at 88% -10%,var(--glow),transparent 70%),var(--surf)}
+.g3 .pick{margin-bottom:0}
+.pick-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.pick h2{font-size:32px;line-height:1.05}
+.sg.occ button{padding:5px 13px;font-size:12.5px}
+.why{list-style:none;margin:12px 0 0;display:grid;gap:5px;color:var(--tx2);font-size:14px}
+.why li:before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin:0 10px 2px 0;vertical-align:middle}
+.worn{color:var(--tx2);font-size:14px;margin:-6px 0 14px}.worn b{color:var(--tx);font-weight:600}
+.linkbtn{display:block;color:var(--tx3);font-size:12.5px;margin-top:18px;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:hover{color:var(--gold2)}
+.deal{color:var(--gold2);font-weight:600}
+.cres{display:grid;gap:6px;margin:-4px 0 8px}
+.cres button{text-align:left;padding:10px 14px;border:1px solid var(--line2);border-radius:12px}
+.cres button:hover{border-color:var(--gold)}
+.shprev{display:flex;justify-content:center;align-items:center;min-height:220px;border:1px solid var(--line);border-radius:16px;padding:10px;background:var(--bg2)}
+.shprev img{width:100%;max-width:340px;border-radius:10px;display:block}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -301,17 +319,18 @@ const FAMLIST=['Aromatic','Woody','Amber','Fresh','Citrus','Floral','Gourmand','
 const defaults=()=>({v:2,demo:false,
  shelves:[{id:'s1',name:'Daily'},{id:'s2',name:'Niche & special'},{id:'s3',name:'Summer & fresh'}],
  perfumes:[],wears:[],mine:[],
- settings:{spm:11,theme:'dark',cur:'€',remind:true,lastBackup:0,snooze:0,ins:{m:'ml',g:'perfume',p:'30'}}});
+ settings:{spm:11,theme:'dark',cur:'€',remind:true,lastBackup:0,snooze:0,ins:{m:'ml',g:'perfume',p:'30'},rem:{am:false,amT:'08:30',pm:false,pmT:'20:30'},occ:'day'}});
 function migrate(o){const d=defaults();const s=Object.assign(d,o||{});
  s.settings=Object.assign(defaults().settings,(o&&o.settings)||{});
  s.settings.ins=Object.assign(defaults().settings.ins,(o&&o.settings&&o.settings.ins)||{});
+ s.settings.rem=Object.assign(defaults().settings.rem,(o&&o.settings&&o.settings.rem)||{});
  ['shelves','perfumes','wears','mine'].forEach(k=>{if(!Array.isArray(s[k]))s[k]=d[k]});
  if(!s.shelves.length)s.shelves=defaults().shelves;return s}
 function loadState(){try{const j=localStorage.getItem('lux.v2');return j?migrate(JSON.parse(j)):null}catch(e){return null}}
 let S=loadState();
 let saveT=null;
 function save(){clearTimeout(saveT);saveT=setTimeout(persist,120)}
-function persist(){try{localStorage.setItem('lux.v2',JSON.stringify(S));autoSnap()}catch(e){console.warn('save failed',e)}}
+function persist(){try{localStorage.setItem('lux.v2',JSON.stringify(S));autoSnap()}catch(e){console.warn('save failed',e)}syncReminders()}
 function autoSnap(){try{const a=JSON.parse(localStorage.getItem('lux.snaps')||'[]');
  if(!S.perfumes.length)return;if(a.length&&Date.now()-a[0].t<20*36e5)return;
  a.unshift({t:Date.now(),why:'Automatic',n:S.perfumes.length,data:JSON.stringify(S)});
@@ -415,9 +434,9 @@ const cur=()=>S.settings.cur||'';
 
 /* ================= collection ================= */
 function item(p){const wish=p.shelf==='wish',lv=p.maxMl?p.ml/p.maxMl:0;
- return `<div class="it" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.brand+' '+p.name)}">${bt(p,wish?1:lv)}<div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="br">${esc(p.brand)}</div>${wish?'':`<div class="lv">${mlf(p.ml)} / ${mlf(p.maxMl)} ml</div>`}</div>`}
-function rack(id,name,wish){const items=S.perfumes.filter(p=>p.shelf===id),ml=items.reduce((a,p)=>a+p.ml,0);
- return `<section class="shelf${wish?' wish':''}"><div class="shelf-h"><h2>${esc(name)}</h2><span>${items.length}${wish?'':' \u00b7 '+fmt(ml)+' ml'}</span></div><div class="rack" data-shelf="${id}">${items.map(item).join('')||`<p class="empty">${wish?'Fragrances you want to try. Drag a bottle here, or tap the heart in the Library.':'Nothing on this shelf yet. Drag a bottle here or add a fragrance.'}</p>`}</div></section>`}
+ return `<div class="it" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.brand+' '+p.name)}">${bt(p,wish?1:lv)}<div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="br">${esc(p.brand)}</div>${wish?`<div class="lv">${wishLine(p)}</div>`:`<div class="lv">${mlf(p.ml)} / ${mlf(p.maxMl)} ml</div>`}</div>`}
+function rack(id,name,wish){const items=S.perfumes.filter(p=>p.shelf===id),ml=items.reduce((a,p)=>a+p.ml,0),seen=items.reduce((a,p)=>a+(+p.seen>0?+p.seen:0),0);
+ return `<section class="shelf${wish?' wish':''}"><div class="shelf-h"><h2>${esc(name)}</h2><span>${items.length}${wish?(seen?' \u00b7 about '+esc(cur())+fmt(seen):''):' \u00b7 '+fmt(ml)+' ml'}</span></div><div class="rack" data-shelf="${id}">${items.map(item).join('')||`<p class="empty">${wish?'Fragrances you want to try. Drag a bottle here, or tap the heart in the Library.':'Nothing on this shelf yet. Drag a bottle here or add a fragrance.'}</p>`}</div></section>`}
 function banners(){let h='';
  if(S.demo)h+=`<div class="note"><span>You are looking at sample data so you can see how it works.</span><button class="btn ghost sm" data-act="clearDemo">Clear sample data</button></div>`;
  else if(S.settings.remind&&S.perfumes.length&&Date.now()>(S.settings.snooze||0)&&Date.now()-(S.settings.lastBackup||0)>14*DAY){
@@ -425,18 +444,15 @@ function banners(){let h='';
   h+=`<div class="note"><span>Your last backup was ${d}. Your data lives in this browser only.</span><span class="acts"><button class="btn sm" data-act="bkNow">Back up now</button><button class="btn ghost sm" data-act="snooze">Later</button></span></div>`}
  return h}
 function vShelf(){const own=owned(),ml=own.reduce((a,p)=>a+p.ml,0);
- return `<header class="vh"><div><h1>Collection</h1><p class="sub2">${own.length} ${own.length===1?'fragrance':'fragrances'} \u00b7 ${fmt(ml)} ml \u00b7 about ${fmt(ml*spm())} sprays left</p></div><div class="acts"><button class="btn" data-act="add">Add fragrance</button></div></header>`+
- banners()+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
+ return `<header class="vh"><div><h1>Collection</h1><p class="sub2">${own.length} ${own.length===1?'fragrance':'fragrances'} \u00b7 ${fmt(ml)} ml \u00b7 about ${fmt(ml*spm())} sprays left</p></div><div class="acts"><button class="btn ghost" data-act="share">Share</button><button class="btn" data-act="add">Add fragrance</button></div></header>`+
+ banners()+todayCard()+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
 
 /* ================= journal ================= */
 function lastWorn(pid){let t=0;S.wears.forEach(w=>{if(w.pid===pid&&w.t>t)t=w.t});return t}
-function suggestion(){const ss=season(),now=Date.now();
- const L=owned().filter(p=>p.ml>0).map(p=>{const lw=lastWorn(p.id),d=lw?(now-lw)/DAY:60;
-  return {p,s:(p.seasons||[]).includes(ss)?2:0,sc:0,d}}).map(x=>{x.sc=x.s+Math.min(x.d,30)/10+(x.p.rating||0)*.3;return x}).sort((a,b)=>b.sc-a.sc);
- return L.length?L[ui.pick%L.length]:null}
+function suggestion(){return todayPick()}
 function streak(){const days=new Set(S.wears.map(w=>dkey(w.t)));let n=0,t=sod(Date.now());if(!days.has(dkey(t)))t-=DAY;while(days.has(dkey(t))){n++;t-=DAY}return n}
 function vJournal(){
- const sg=suggestion(),now=new Date(),first=new Date(now.getFullYear(),now.getMonth()+ui.jm,1),dim=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+ const now=new Date(),first=new Date(now.getFullYear(),now.getMonth()+ui.jm,1),dim=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
  const cnt={};S.wears.forEach(w=>{const k=dkey(w.t);(cnt[k]=cnt[k]||[]).push(w)});
  const pad=(first.getDay()+6)%7;let cal=['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>`<div class="dw">${d}</div>`).join('');
  for(let i=0;i<pad;i++)cal+='<div class="d e"></div>';
@@ -449,9 +465,8 @@ function vJournal(){
  shown.forEach(w=>{const p=byId(w.pid);if(!p)return;const k=dkey(w.t);if(k!==lastD){lastD=k;const d=new Date(w.t);list+=`<div class="day-h">${d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})}</div>`}
   list+=`<div class="wr"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n===1?'spray':'sprays'}</small></div><button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button></div>`});
  if(!list)list='<p class="muted" style="padding:14px 0">No wears logged yet. Log your first wear and the calendar fills in.</p>';
- const today=sg?`<div class="today"><div>${bt(sg.p,sg.p.maxMl?sg.p.ml/sg.p.maxMl:1)}</div><div style="flex:1;min-width:200px"><div class="muted" style="font-size:13px">A pick for a ${season().toLowerCase()} day</div><h2 style="margin:4px 0 2px">${esc(sg.p.name)}</h2><div class="muted">${esc(sg.p.brand)}</div><p class="sub2" style="font-size:14px">${sg.d>=60?'Not worn yet.':'Last worn '+Math.floor(sg.d)+' days ago.'}</p><div class="acts" style="margin-top:14px"><button class="btn sm" data-act="wearOpen" data-id="${sg.p.id}">Wear it today</button><button class="btn ghost sm" data-act="another">Another idea</button></div></div></div>`:`<p class="muted">Add a fragrance to get daily suggestions.</p>`;
  return `<header class="vh"><div><h1>Journal</h1><p class="sub2">${streak()} day streak \u00b7 ${S.wears.length} wears logged</p></div><div class="acts"><button class="btn" data-act="wearOpen">Log a wear</button></div></header>
- <div class="g3"><div class="card">${today}</div><div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div></div>
+ <div class="g3">${todayCard()}<div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div></div>
  <div class="card" style="margin-top:18px"><h3>History</h3>${list}${sorted.length>ui.jlim?`<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-act="jmore">Show more</button></div>`:''}</div>`}
 
 /* ================= insights ================= */
@@ -542,6 +557,7 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  <div class="card"><h3>Shelves</h3><p class="muted" style="margin:6px 0 14px">Rename, reorder or remove shelves. Removing one moves its bottles to the first shelf.</p>
  ${S.shelves.map((sh,i)=>`<div class="shrow"><input value="${esc(sh.name)}" data-ch="shName" data-id="${sh.id}" aria-label="Shelf name"><button data-act="shUp" data-i="${i}" aria-label="Move up">\u2191</button><button data-act="shDn" data-i="${i}" aria-label="Move down">\u2193</button><button data-act="shDel" data-i="${i}" aria-label="Remove shelf">\u00d7</button></div>`).join('')}
  <button class="btn ghost sm" data-act="shAdd" style="margin-top:6px">Add shelf</button></div>
+ ${remHtml()}
  <div class="card"><h3>Backup and restore</h3><p class="muted" style="margin:6px 0 16px">Last backup: ${lb}. A backup holds your collection, journal, settings, photos and own library entries.</p>
  <div class="acts"><button class="btn" data-act="bkNow">Download backup</button><button class="btn ghost" data-act="bkCopy">Copy as text</button><button class="btn ghost" data-act="bkFile">Restore from file</button></div>
  <input type="file" id="bkFile" accept=".json,application/json,text/plain">
@@ -687,23 +703,24 @@ function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,
  <div class="fg"><label for="f-max">Size (ml)</label><input id="f-max" type="number" min="1" step="0.5" data-in="sheet" value="${esc(d.maxMl)}"></div>
  <div class="fg"><label for="f-ml">Remaining (ml)</label><input id="f-ml" type="number" min="0" step="0.1" data-in="sheet" value="${esc(mlf(d.ml))}"></div></div>
  ${wish?'':`<div class="fg"><input id="f-mlr" type="range" min="0" max="${+d.maxMl||100}" step="0.5" value="${+d.ml||0}" data-in="mlr" aria-label="Remaining volume"></div>`}
- <div class="g2"><div class="fg"><label for="f-price">Price paid (${esc(cur())})</label><input id="f-price" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.price)}"></div>
+ <div class="g2">${wish?`<div class="fg"><label for="f-seen">Price seen (${esc(cur())})</label><input id="f-seen" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.seen==null?'':d.seen)}"></div><div class="fg"><label for="f-target">Target price (${esc(cur())})</label><input id="f-target" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.target==null?'':d.target)}"></div>`:`<div class="fg"><label for="f-price">Price paid (${esc(cur())})</label><input id="f-price" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.price)}"></div>`}
  <div class="fg"><label for="f-year">Launch year</label><input id="f-year" type="number" min="1700" max="2100" data-in="sheet" value="${d.year?esc(d.year):''}"></div>
  <div class="fg"><span class="lb">Your rating</span>${starsHtml('rating',d.rating||0)}</div>
  <div class="fg"><span class="lb">Projection</span>${starsHtml('proj',d.proj||0,true)}</div>
  <div class="fg"><label for="f-long">Longevity on skin (hours)</label><input id="f-long" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.longevity)}"></div>
  <div class="fg"><span class="lb">Best in</span><div class="chips">${SEASONS.map(s=>`<button type="button" class="chip${(d.seasons||[]).includes(s)?' on':''}" data-act="season" data-v="${s}">${s}</button>`).join('')}</div></div></div>
+ ${wish?`<div class="g2"><div class="fg"><label for="f-where">Where to buy</label><input id="f-where" data-in="sheet" placeholder="Shop, website or link" value="${esc(d.where||'')}"></div><div class="fg"><span class="lb">How much you want it</span>${starsHtml('prio',d.prio||0)}</div></div>`:''}
  <div class="fg"><label for="f-notes">Notes</label><textarea id="f-notes" data-in="sheet" placeholder="How it wears, when you reach for it">${esc(d.notes)}</textarea></div>
  <div class="fg"><span class="lb">Photo</span><div class="acts"><button type="button" class="btn ghost sm" data-act="photoPick">${PHOTOS[d.id]?'Change photo':'Add photo'}</button>${PHOTOS[d.id]?'<button type="button" class="btn ghost sm" data-act="photoDel">Remove photo</button>':''}</div><input type="file" id="photoFile" accept="image/*"></div>
  ${sheetNew&&!known?`<div class="set-row" style="border:0;padding:4px 0"><label for="f-savelib" style="margin:0">Also save to my library</label><input type="checkbox" id="f-savelib" checked style="width:20px;height:20px"></div>`:''}
- <div class="foot">${sheetNew?'':'<button class="btn danger sp" data-act="sheetDel">Delete</button>'}${!sheetNew&&!wish?'<button class="btn ghost" data-act="sheetWear">Log a wear</button>':''}<button class="btn" data-act="sheetSave">${sheetNew?'Add to cabinet':'Save changes'}</button></div>`}
+ <div class="foot">${sheetNew?'':'<button class="btn danger sp" data-act="sheetDel">Delete</button>'}${!sheetNew&&!wish?'<button class="btn ghost" data-act="sheetWear">Log a wear</button>':''}${!sheetNew&&wish?'<button class="btn ghost" data-act="bought">I bought it</button>':''}<button class="btn" data-act="sheetSave">${sheetNew?'Add to cabinet':'Save changes'}</button></div>`}
 function paintSheet(){const p=$('#modal .panel');if(p){const sc=p.scrollTop;p.innerHTML=sheetHtml();p.scrollTop=sc}}
 function openSheet(id,pre){const p=id?byId(id):null;sheetNew=!p;
  D=p?JSON.parse(JSON.stringify(p)):Object.assign({id:uid(),name:'',brand:'',fam:'',conc:'EDP',year:'',shelf:S.shelves[0].id,type:'Bottle',maxMl:100,ml:100,price:'',rating:0,longevity:'',proj:0,seasons:[],notes:'',created:Date.now(),sprays:0},pre||{});
  MODAL='sheet';openModal(sheetHtml())}
 function readSheet(){if(!D||MODAL!=='sheet')return;const g=id=>{const e=$('#'+id);return e?e.value:undefined};
  const set=(k,id)=>{const v=g(id);if(v!==undefined)D[k]=v};
- set('name','f-name');set('brand','f-brand');set('fam','f-fam');set('conc','f-conc');set('year','f-year');set('shelf','f-shelf');set('type','f-type');set('maxMl','f-max');set('ml','f-ml');set('price','f-price');set('longevity','f-long');set('notes','f-notes')}
+ set('name','f-name');set('brand','f-brand');set('fam','f-fam');set('conc','f-conc');set('year','f-year');set('shelf','f-shelf');set('type','f-type');set('maxMl','f-max');set('ml','f-ml');set('price','f-price');set('longevity','f-long');set('notes','f-notes');set('seen','f-seen');set('target','f-target');set('where','f-where')}
 function refreshBt(){const mx=+D.maxMl||0,ml=clamp(+D.ml||0,0,mx||9999);const b=$('#sbt');if(b)b.innerHTML=bt(D,mx?ml/mx:0);
  const r=$('#f-mlr');if(r){r.max=mx||100;r.value=ml}}
 function suggest(){const box=$('#sugg');if(!box)return;const q=(D.name||'').trim();if(q.length<2){box.innerHTML='';return}
@@ -711,6 +728,7 @@ function suggest(){const box=$('#sugg');if(!box)return;const q=(D.name||'').trim
 function commitSheet(){readSheet();const d=D;d.name=String(d.name||'').trim();d.brand=String(d.brand||'').trim();
  if(!d.name||!d.brand){toast('Add a name and a house first');return false}
  d.maxMl=Math.max(1,+d.maxMl||100);d.ml=Math.round(clamp(+d.ml||0,0,d.maxMl)*10)/10;d.price=d.price===''?'':Math.max(0,+d.price||0);d.year=+d.year||'';d.longevity=d.longevity===''?'':Math.max(0,+d.longevity||0);
+ ['seen','target'].forEach(k=>{if(d[k]!=null)d[k]=d[k]===''?'':Math.max(0,+d[k]||0)});if(d.where!=null)d.where=String(d.where).trim();
  if(sheetNew){S.perfumes.push(d);const sv=$('#f-savelib');
   if(sv&&sv.checked&&!LIB.some(e=>e.k===norm(d.brand+' '+d.name))){S.mine.push({n:d.name,b:d.brand,f:d.fam,c:d.conc,y:d.year,s:d.maxMl,t:''});buildLib()}
   sheetNew=false}
@@ -826,9 +844,173 @@ viewEl.addEventListener('contextmenu',e=>{if(e.target.closest('.it'))e.preventDe
 viewEl.addEventListener('dragstart',e=>e.preventDefault());
 viewEl.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('it')){e.preventDefault();openSheet(e.target.dataset.id)}});
 
+/* ================= daily pick: season, weather, occasion and rest ================= */
+const OCC=[['day','Everyday'],['work','Work'],['eve','Evening']];
+const famKind=f=>{const s=norm(f);if(/amber|gourmand|oud|leather|tobacco|spic|orient/.test(s))return 'warm';if(/fresh|citr|aqua|marine|green|aromat|fougere/.test(s))return 'fresh';return 'mid'};
+const cityOf=()=>S.settings.city||(S.tt&&S.tt.city)||null;
+let WXD=(()=>{try{return JSON.parse(localStorage.getItem('lux.wx')||'null')}catch(e){return null}})(),wxBusy=false,wxFail=0;
+function wxFresh(){const c=cityOf();return WXD&&c&&WXD.lat===c.lat&&WXD.lon===c.lon&&WXD.day===dkey(Date.now())&&Date.now()-WXD.at<3*36e5?WXD:null}
+async function loadWx(){const c=cityOf();if(!c||wxBusy||wxFresh()||Date.now()-wxFail<10*6e4)return;wxBusy=true;
+ try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),9000);
+  const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+c.lat+'&longitude='+c.lon+'&timezone=auto&forecast_days=1&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min',{signal:ctl.signal});clearTimeout(to);
+  if(!r.ok)throw 0;const j=await r.json();
+  WXD={lat:c.lat,lon:c.lon,city:c.name||c.label,at:Date.now(),day:dkey(Date.now()),temp:Math.round(j.current.temperature_2m),code:j.current.weather_code,max:Math.round(j.daily.temperature_2m_max[0]),min:Math.round(j.daily.temperature_2m_min[0])};
+  try{localStorage.setItem('lux.wx',JSON.stringify(WXD))}catch(e){}
+  if((ui.tab==='shelf'||ui.tab==='journal')&&$('#modal').hidden)render();syncReminders()}
+ catch(e){wxFail=Date.now()}finally{wxBusy=false}}
+const wxName=c=>c==null?'':c===0?'clear':c<=2?'partly cloudy':c===3?'overcast':c<=48?'foggy':c<=67?'rainy':c<=77?'snowy':c<=82?'showers':c<=86?'snow showers':'stormy';
+/* Scores every bottle with something left for a given day. wx is today's weather or null. */
+function rankPicks(day,wx,occ){const ss=season(day),d0=sod(day),yk=dkey(d0-DAY),dk=dkey(d0);
+ const t=wx?Math.round(wx.max!=null?(wx.max+wx.temp)/2:wx.temp):null,tb=t==null?null:t<12?'cold':t>=24?'hot':'mild';
+ return owned().filter(p=>p.ml>0).map(p=>{const R=[];let sc=0;const add=(v,why)=>{sc+=v;if(why&&v>0)R.push([v,why])};
+  const k=famKind(p.fam),se=p.seasons||[],pr=+p.proj||0;
+  if(se.includes(ss))add(2,'Made for '+ss.toLowerCase());else if(se.length)add(-1);
+  if(tb==='cold')add(k==='warm'?2:k==='fresh'?-1:.4,k==='warm'?t+'° today, a warm and dense scent fits':'');
+  else if(tb==='hot')add(k==='fresh'?2:k==='warm'?-1.5:.3,k==='fresh'?t+'° today, something fresh and light':'');
+  else if(tb==='mild')add(k==='mid'?.8:.3,k==='mid'?t+'° today, easy weather for it':'');
+  if(occ==='work')add(pr>=4?-1.5:k==='warm'?0:.8,pr&&pr<=3?'Polite enough for work':'');
+  else if(occ==='eve')add((pr>=4?1.5:0)+(k==='warm'?1:0),pr>=4||k==='warm'?'Has presence for the evening':'');
+  let lw=0;S.wears.forEach(w=>{if(w.pid===p.id&&w.t<d0&&w.t>lw)lw=w.t});
+  const d=lw?Math.round((d0-sod(lw))/DAY):null;
+  if(d==null)add(2.2,'Not worn yet');else{add(Math.min(d,30)/10,d>=7?'Not worn for '+d+' days':'');if(dkey(lw)===yk)add(-2)}
+  add((p.rating||0)*.35,p.rating>=4?'You gave it '+p.rating+' stars':'');
+  sc+=(hash(dk+p.id)%100)/250;
+  return {p,sc,d:d==null?60:d,why:R.sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1])}}).sort((a,b)=>b.sc-a.sc)}
+function todayPick(){const L=rankPicks(Date.now(),wxFresh(),S.settings.occ||'day');return L.length?L[ui.pick%L.length]:null}
+function todayCard(){const own=owned();
+ if(!own.length)return `<section class="card pick"><span class="eyebrow">Today's pick</span><p class="muted" style="margin-top:10px">Add a fragrance to get a daily suggestion.</p></section>`;
+ const c=cityOf(),wx=wxFresh();if(c&&!wx)loadWx();
+ const occ=S.settings.occ||'day',sg=todayPick(),worn=S.wears.filter(w=>dkey(w.t)===dkey(Date.now())).map(w=>byId(w.pid)).filter(Boolean);
+ const meta=[season(),wx?`${wx.temp}° ${wxName(wx.code)} in ${esc(wx.city)}`:''].filter(Boolean).join(' · ');
+ const top=`<div class="pick-top"><span class="eyebrow">Today's pick · ${meta}</span><div class="sg occ" role="group" aria-label="Occasion">${OCC.map(o=>`<button data-act="occ" data-v="${o[0]}" class="${occ===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`;
+ const wl=worn.length?`<p class="worn">Worn today: <b>${[...new Set(worn.map(p=>esc(p.name)))].join(', ')}</b></p>`:'';
+ if(!sg)return `<section class="card pick">${top}${wl}<p class="muted">Every bottle is empty. Refill one to get suggestions.</p></section>`;
+ const p=sg.p,why=sg.why.length?sg.why:['A good fit for today'];
+ return `<section class="card pick">${top}${wl}<div class="today"><div>${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div style="flex:1;min-width:200px"><h2>${esc(p.name)}</h2><div class="muted">${esc(p.brand)}${p.fam?' · '+esc(p.fam):''}</div>
+ <ul class="why">${why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>
+ <div class="acts" style="margin-top:16px"><button class="btn sm" data-act="wearOpen" data-id="${p.id}">Wear it today</button><button class="btn ghost sm" data-act="another">Another idea</button><button class="btn ghost sm" data-act="open" data-id="${p.id}">Details</button></div></div></div>
+ <button class="linkbtn" data-act="cityOpen">${c?'Weather for '+esc(c.name||c.label)+' · change':'Add your city for weather-aware picks'}</button></section>`}
+
+/* city for weather (shared with the Test lab when it has one) */
+let cityT,CITYRES=[];
+function openCity(){MODAL='city';CITYRES=[];openModal(`<button class="x" data-act="close" aria-label="Close">×</button><h2>Your city</h2>
+ <p class="muted" style="margin:6px 0 18px">Used for weather-aware picks. Weather comes from Open-Meteo; only the city's coordinates are sent.</p>
+ <div class="fg"><label for="c-q">City</label><input id="c-q" data-in="cityQ" placeholder="e.g. Belgrade" autocomplete="off"></div><div class="cres" id="c-res"></div>
+ <div class="foot"><button class="btn ghost sp" data-act="cityGeo">Use my location</button>${S.settings.city?'<button class="btn ghost" data-act="cityClear">Remove city</button>':''}<button class="btn" data-act="close">Done</button></div>`)}
+async function cityFind(q){const box=$('#c-res');if(!box)return;if(q.length<2){box.innerHTML='';return}
+ try{const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=5&language=en&format=json&name='+encodeURIComponent(q));const j=await r.json();
+  CITYRES=(j.results||[]).map(x=>({name:x.name,label:[x.name,x.admin1,x.country].filter(Boolean).join(', '),lat:x.latitude,lon:x.longitude}));
+  box.innerHTML=CITYRES.map((x,i)=>`<button type="button" data-act="cityPick" data-i="${i}">${esc(x.label)}</button>`).join('')||'<p class="muted">No city found.</p>'}
+ catch(e){box.innerHTML='<p class="muted">Could not search. Are you online?</p>'}}
+function setCity(c){S.settings.city=c;WXD=null;wxFail=0;ui.pick=0;save();closeModal();render();loadWx()}
+
+/* ================= wishlist details ================= */
+function wishLine(p){const c=cur(),s=+p.seen>0?+p.seen:0,t=+p.target>0?+p.target:0;
+ if(s&&t&&s<=t)return `<span class="deal">${esc(c)}${fmt(s)} · good price</span>`;
+ const l=[s?esc(c)+fmt(s):'',t?'target '+esc(c)+fmt(t):''].filter(Boolean).join(' · ');
+ return l||(p.prio?'<span class="deal">'+'★'.repeat(p.prio)+'</span>':'')}
+
+/* ================= daily reminders (Android app) ================= */
+let remT;
+function syncReminders(){if(!window.LuxAndroid||!LuxAndroid.setReminders)return;clearTimeout(remT);remT=setTimeout(()=>{try{
+ const r=S.settings.rem,picks={},now=Date.now();
+ for(let i=0;i<8;i++){const day=now+i*DAY,q=rankPicks(day,i===0?wxFresh():null,'day')[0];if(q)picks[dkey(day)]={t:q.p.name,b:[q.p.brand].concat(q.why).join(' · ')}}
+ const worn=[...new Set(S.wears.filter(w=>w.t>now-3*DAY).map(w=>dkey(w.t)))];
+ LuxAndroid.setReminders(JSON.stringify({am:!!r.am,amT:r.amT,pm:!!r.pm,pmT:r.pmT,picks,worn}))}catch(e){}},600)}
+function remHtml(){const r=S.settings.rem,and=!!(window.LuxAndroid&&LuxAndroid.setReminders),c=cityOf();
+ const off=and&&(r.am||r.pm)&&LuxAndroid.notificationsAllowed&&!LuxAndroid.notificationsAllowed();
+ const row=(k,tk,title,sub)=>`<div class="set-row"><div>${title}<small>${sub}</small></div><div class="acts" style="align-items:center">${and?`<input type="time" value="${esc(r[tk])}" data-ch="remT" data-k="${tk}" style="width:120px" aria-label="${title} time"${r[k]?'':' disabled'}>`:''}<button class="chip${r[k]?' on':''}" data-act="remTog" data-k="${k}"${and?'':' disabled'}>${r[k]?'On':'Off'}</button></div></div>`;
+ return `<div class="card"><h3>Daily pick and reminders</h3>
+ ${and?'':'<p class="muted" style="margin:6px 0 4px">Notifications are part of the <a href="https://github.com/kosmet-crypto/Fragrance-Shelf-Lux/releases/latest/download/lux.apk" style="color:var(--gold2)">Lux Android app</a>.</p>'}
+ ${off?'<div class="note" style="margin:12px 0 0"><span>Notifications are turned off for Lux on this phone.</span><button class="btn sm" data-act="remAllow">Allow</button></div>':''}
+ ${row('am','amT','Morning pick','A notification with today’s suggestion')}
+ ${row('pm','pmT','Evening reminder','Only when nothing is logged for the day')}
+ <div class="set-row"><div>City for weather<small>${c?esc(c.label||c.name):'Not set. Picks use the season only.'}</small></div><button class="btn ghost sm" data-act="cityOpen">${c?'Change':'Add city'}</button></div></div>`}
+window.luxNotifChanged=()=>{if(ui.tab==='set'&&$('#modal').hidden)render()};
+/* The Android app calls this when a notification is tapped. */
+window.luxOpen=k=>{if(k==='log'){if($('#modal').hidden)openWear()}else{ui.tab='shelf';if($('#modal').hidden)render();scrollTo(0,0)}};
+
+/* ================= share as image ================= */
+const SHK=[['top','Most worn'],['month','This month'],['shelf','My collection'],['wish','Wishlist']];
+let SHR={kind:'top',url:null,n:0};
+function openShare(){SHR={kind:owned().length?'top':'wish',url:null,n:0};MODAL='share';openModal(shareHtml());drawShare()}
+function shareHtml(){return `<button class="x" data-act="close" aria-label="Close">×</button><h2>Share</h2><p class="muted" style="margin:6px 0 16px">A picture of your cabinet for Instagram, WhatsApp or anywhere you like.</p>
+ <div class="chips" style="margin-bottom:16px">${SHK.map(k=>`<button type="button" class="chip${SHR.kind===k[0]?' on':''}" data-act="shKind" data-v="${k[0]}">${k[1]}</button>`).join('')}</div>
+ <div class="shprev" id="shPrev"><span class="muted">Drawing…</span></div>
+ <div class="foot"><button class="btn ghost" data-act="shSave">Save image</button><button class="btn" data-act="shGo">Share</button></div>`}
+function bottleImg(p,level){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);
+ if(PHOTOS[p.id]){im.src=PHOTOS[p.id];return}
+ const defs='<defs>'+['g-cap','g-shade'].map(id=>{const e=document.getElementById(id);return e?e.outerHTML:''}).join('')+'</defs>';
+ const s=bottle(p,level).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="200" height="320" ').replace(/(<svg[^>]*>)/,'$1'+defs)
+  .replace('class="gl"','fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.34)"').replace('class="sh"','fill="rgba(255,255,255,.16)"');
+ im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s)})}
+function ell(x,t,w){t=String(t||'');if(x.measureText(t).width<=w)return t;while(t.length>1&&x.measureText(t+'…').width>w)t=t.slice(0,-1);return t.trim()+'…'}
+function drawIn(x,im,cx,top,w,h){if(!im)return;const k=Math.min(w/im.width,h/im.height),dw=im.width*k,dh=im.height*k;x.drawImage(im,cx-dw/2,top+h-dh,dw,dh)}
+async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ const SER='"Cormorant Garamond",Georgia,serif',SAN='"Hanken Grotesk",system-ui,sans-serif',GOLD='#caa96b',TX='#ece6d6',TX2='#a8a293',TX3='#787466';
+ try{await Promise.all([document.fonts.load('500 60px "Cormorant Garamond"'),document.fonts.load('italic 500 60px "Cormorant Garamond"'),document.fonts.load('500 30px "Hanken Grotesk"')])}catch(e){}
+ x.fillStyle='#0d0f0e';x.fillRect(0,0,W,H);
+ let g=x.createRadialGradient(880,60,10,880,60,980);g.addColorStop(0,'rgba(202,169,107,.30)');g.addColorStop(1,'rgba(202,169,107,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.strokeStyle='rgba(202,169,107,.38)';x.lineWidth=2;x.strokeRect(34,34,W-68,H-68);
+ x.textBaseline='alphabetic';x.textAlign='left';x.fillStyle=GOLD;x.font=`italic 500 66px ${SER}`;x.fillText('Lux',84,140);
+ x.fillStyle=TX2;x.font=`500 21px ${SAN}`;x.fillText('P E R F U M E   C A B I N E T',86,176);
+ const own=owned(),now=Date.now(),cnt=t0=>{const m={};S.wears.forEach(w=>{if(w.t>=t0&&byId(w.pid))m[w.pid]=(m[w.pid]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([id,v])=>({p:byId(id),v}))};
+ const head=(t,s)=>{x.fillStyle=TX;x.font=`500 94px ${SER}`;x.fillText(ell(x,t,W-168),84,312);x.fillStyle=TX2;x.font=`400 30px ${SAN}`;x.fillText(ell(x,s,W-168),86,362)};
+ const empty=t=>{x.fillStyle=TX3;x.font=`italic 500 44px ${SER}`;x.textAlign='center';x.fillText(t,W/2,720);x.textAlign='left'};
+ const rows=async(list,val)=>{let y=420;for(let i=0;i<list.length;i++){const {p}=list[i];
+  x.fillStyle=GOLD;x.font=`500 58px ${SER}`;x.fillText(String(i+1),84,y+92);
+  drawIn(x,await bottleImg(p,p.shelf==='wish'?1:p.maxMl?p.ml/p.maxMl:1),200,y+4,86,138);
+  x.fillStyle=TX;x.font=`600 50px ${SER}`;x.fillText(ell(x,p.name,540),276,y+72);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(ell(x,p.brand,540),278,y+112);
+  x.textAlign='right';x.fillStyle=GOLD;x.font=`500 30px ${SAN}`;x.fillText(val(list[i]),W-84,y+86);x.textAlign='left';
+  if(i<list.length-1){x.fillStyle='rgba(232,220,190,.12)';x.fillRect(84,y+150,W-168,1.5)}y+=152}};
+ if(k==='top'){const L=cnt(now-90*DAY).slice(0,5);head('My most worn','The last 90 days · '+S.wears.filter(w=>w.t>=now-90*DAY).length+' wears');
+  if(L.length)await rows(L,r=>r.v+(r.v===1?' wear':' wears'));else empty('No wears in the last 90 days yet')}
+ else if(k==='month'){const d=new Date(),t0=new Date(d.getFullYear(),d.getMonth(),1).getTime(),L=cnt(t0),mw=S.wears.filter(w=>w.t>=t0&&byId(w.pid));
+  head(MON[d.getMonth()]+' '+d.getFullYear(),'My month in fragrance');
+  if(!mw.length)empty('Nothing logged this month yet');else{
+   const fam={};mw.forEach(w=>{const f=byId(w.pid).fam;if(f)fam[f]=(fam[f]||0)+1});const tf=Object.entries(fam).sort((a,b)=>b[1]-a[1])[0];
+   const stat=(v,l,cx)=>{const num=/^\d+$/.test(v);x.textAlign='center';x.fillStyle=GOLD;x.font=`500 ${num?128:64}px ${SER}`;x.fillText(ell(x,v,290),cx,num?540:510);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(l,cx,588);x.textAlign='left'};
+   stat(String(mw.length),mw.length===1?'wear':'wears',W/6+40);stat(String(L.length),'fragrances',W/2);stat(tf?tf[0]:'\u2014','favourite family',W*5/6-40);
+   x.fillStyle='rgba(232,220,190,.12)';x.fillRect(84,650,W-168,1.5);
+   const T=L.slice(0,3),cw=(W-168)/3;for(let i=0;i<T.length;i++){const p=T[i].p,cx=84+cw*i+cw/2;
+    drawIn(x,await bottleImg(p,p.maxMl?p.ml/p.maxMl:1),cx,700,150,240);x.fillStyle='rgba(202,169,107,.34)';x.fillRect(cx-cw/2+16,946,cw-32,2);
+    x.textAlign='center';x.fillStyle=TX;x.font=`600 38px ${SER}`;x.fillText(ell(x,p.name,cw-24),cx,1004);x.fillStyle=TX2;x.font=`400 23px ${SAN}`;x.fillText(ell(x,p.brand,cw-24),cx,1040);
+    x.fillStyle=GOLD;x.font=`500 25px ${SAN}`;x.fillText(T[i].v+(T[i].v===1?' wear':' wears'),cx,1080);x.textAlign='left'}}}
+ else if(k==='shelf'){const ml=own.reduce((a,p)=>a+p.ml,0),L=own.slice(0,12);head('My collection',own.length+(own.length===1?' fragrance':' fragrances')+' · '+fmt(ml)+' ml');
+  if(!L.length)empty('The cabinet is still empty');else{const cw=(W-168)/4;
+   for(let i=0;i<L.length;i++){const p=L[i],r=Math.floor(i/4),cx=84+cw*(i%4)+cw/2,top=400+r*262;
+    drawIn(x,await bottleImg(p,p.maxMl?p.ml/p.maxMl:1),cx,top,104,166);
+    x.textAlign='center';x.fillStyle=TX;x.font=`600 29px ${SER}`;x.fillText(ell(x,p.name,cw-18),cx,top+206);x.fillStyle=TX3;x.font=`400 19px ${SAN}`;x.fillText(ell(x,p.brand,cw-18),cx,top+234);x.textAlign='left';
+    if(i%4===0){x.fillStyle='rgba(202,169,107,.34)';x.fillRect(84,top+170,W-168,2)}}
+   if(own.length>12){x.fillStyle=TX2;x.font=`italic 500 34px ${SER}`;x.fillText('and '+(own.length-12)+' more on the shelves',84,1196)}}}
+ else{const L=S.perfumes.filter(p=>p.shelf==='wish').sort((a,b)=>(b.prio||0)-(a.prio||0)).slice(0,5);head('On my wishlist',L.length?'Fragrances I would love to own':'');
+  if(L.length)await rows(L.map(p=>({p})),r=>+r.p.seen>0?cur()+fmt(r.p.seen):r.p.prio?'★'.repeat(r.p.prio):'');else empty('The wishlist is empty')}
+ x.fillStyle='rgba(202,169,107,.38)';x.fillRect(84,1238,W-168,1.5);x.fillStyle=TX3;x.font=`400 22px ${SAN}`;x.fillText('Made with Lux',84,1278);
+ x.textAlign='right';x.fillText(new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}),W-84,1278);x.textAlign='left';
+ if(n!==SHR.n)return;SHR.url=c.toDataURL('image/png');const pv=$('#shPrev');if(pv)pv.innerHTML=`<img src="${SHR.url}" alt="Preview of the image to share">`}
+async function shareGo(saveOnly){if(!SHR.url){toast('One moment, still drawing');return}
+ const name='lux-'+SHR.kind+'-'+dkey(Date.now())+'.png',b64=SHR.url.split(',')[1];
+ if(window.LuxAndroid&&LuxAndroid.shareImage){if(saveOnly)LuxAndroid.saveImage(name,b64);else LuxAndroid.shareImage(b64);return}
+ const blob=await (await fetch(SHR.url)).blob(),file=new File([blob],name,{type:'image/png'});
+ if(!saveOnly&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'My Lux cabinet'});return}catch(e){if(e&&e.name==='AbortError')return}}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();toast(saveOnly?'Image saved':'Sharing is not available here, so the image was downloaded')}catch(e){toast('Could not save the image here')}}
+
 /* ================= actions ================= */
 let libT;const debounceLib=()=>{clearTimeout(libT);libT=setTimeout(updateLib,120)};
 const ACT={
+ occ:a=>{S.settings.occ=a.dataset.v;ui.pick=0;save();render()},
+ cityOpen:()=>openCity(),cityPick:a=>{const c=CITYRES[+a.dataset.i];if(c)setCity(c)},
+ cityGeo:()=>{if(!navigator.geolocation){toast('Location is not available here');return}
+  navigator.geolocation.getCurrentPosition(p=>setCity({name:'your area',label:'Current location',lat:+p.coords.latitude.toFixed(3),lon:+p.coords.longitude.toFixed(3)}),()=>toast('Location was blocked. Type your city instead.'),{timeout:9000})},
+ cityClear:()=>{delete S.settings.city;WXD=null;save();closeModal();render()},
+ bought:()=>{readSheet();if(+D.seen>0)D.price=+D.seen;D.created=Date.now();D.bought=Date.now();
+  /* commitSheet reads the form again, so move the bottle there: first shelf, full */
+  const sh=$('#f-shelf'),ml=$('#f-ml');if(sh)sh.value=S.shelves[0].id;if(ml)ml.value=+D.maxMl||D.ml;
+  if(commitSheet()){D=JSON.parse(JSON.stringify(D));paintSheet();render();toast('Moved to '+shelfName(D.shelf)+'. Check the price and size.')}},
+ share:()=>openShare(),shKind:a=>{SHR.kind=a.dataset.v;SHR.url=null;$$('#modal [data-act="shKind"]').forEach(b=>b.classList.toggle('on',b===a));drawShare()},
+ shGo:()=>shareGo(false),shSave:()=>shareGo(true),
+ remTog:a=>{const k=a.dataset.k,r=S.settings.rem;r[k]=!r[k];if(r[k]&&window.LuxAndroid&&LuxAndroid.requestNotifications)LuxAndroid.requestNotifications();save();render()},
+ remAllow:()=>{if(window.LuxAndroid&&LuxAndroid.requestNotifications)LuxAndroid.requestNotifications()},
  tab:a=>{ui.tab=a.dataset.t;render();scrollTo(0,0)},
  add:()=>openSheet(null),open:a=>openSheet(a.dataset.id),close:()=>closeModal(),
  dlgOk:()=>endConfirm(true),dlgNo:()=>endConfirm(false),
@@ -885,6 +1067,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dlg').hidde
 const IN={
  lq:e=>{ui.lq=e.value;ui.llim=60;debounceLib()},lb:e=>{ui.lb=e.value;ui.llim=60;debounceLib()},
  sheet:e=>{readSheet();if(e.id==='f-name'&&sheetNew)suggest();refreshBt()},
+ cityQ:e=>{clearTimeout(cityT);const q=e.value.trim();cityT=setTimeout(()=>cityFind(q),350)},
  mlr:e=>{const f=$('#f-ml');f.value=e.value;readSheet();refreshBt()}};
 document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.in;if(k&&IN[k])IN[k](e.target,e)});
 const CH={
@@ -893,6 +1076,7 @@ const CH={
  lf:e=>{ui.lf=e.value;ui.llim=60;updateLib()},lc:e=>{ui.lc=e.value;ui.llim=60;updateLib()},
  spm:e=>{S.settings.spm=clamp(+e.value||11,1,30);save();toast('Saved')},cur:e=>{S.settings.cur=e.value.trim();save();toast('Saved')},
  shName:e=>{const s=S.shelves.find(x=>x.id===e.dataset.id);if(s){s.name=e.value.trim()||s.name;save();toast('Shelf renamed')}},
+ remT:e=>{if(e.value){S.settings.rem[e.dataset.k]=e.value;save();toast('Saved')}},
  wp:e=>{WD.pid=e.value},wd:e=>{WD.date=e.value||dkey(Date.now())},
  impMap:e=>{const f=e.dataset.f;IMP.map[f]=e.value==='combo'?'combo':parseInt(e.value,10);
   const {rows,map}=IMP;$('#imp-pv').innerHTML=rows.slice(0,3).map(r=>`${esc(map.name>=0?r[map.name]:'?')}${map.brand>=0?' <span class="muted">\u00b7 '+esc(r[map.brand])+'</span>':''}`).join('<br>')}};
@@ -909,7 +1093,7 @@ document.addEventListener('change',async e=>{const t=e.target,k=t.dataset&&t.dat
  await idb.open();
  await loadPhotos();await loadImported();buildLib();applyTheme();
  $('#fam-list').innerHTML=FAMLIST.map(f=>`<option value="${f}">`).join('');
- render();
+ render();syncReminders();
  window.addEventListener('beforeunload',()=>{try{persist()}catch(e){}});
 })();
 /* ================= chart hover and tap ================= */
