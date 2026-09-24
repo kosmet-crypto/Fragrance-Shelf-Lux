@@ -30,13 +30,9 @@ import androidx.webkit.WebViewAssetLoader;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -65,9 +61,18 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        try {
+            Ota.prepare(this, installedVersionCode());
+        } catch (Exception ignored) {
+        }
+        // Downloaded web content (see Ota) wins over the copy inside the APK.
+        final WebViewAssetLoader.AssetsPathHandler bundled = new WebViewAssetLoader.AssetsPathHandler(this);
         final WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
                 .setDomain(HOST)
-                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .addPathHandler("/assets/", path -> {
+                    WebResourceResponse r = Ota.serve(this, path);
+                    return r != null ? r : bundled.handle(path);
+                })
                 .build();
 
         webView = new WebView(this);
@@ -172,12 +177,15 @@ public class MainActivity extends Activity {
 
     /* ---------- update check ---------- */
 
-    private static final long UPDATE_CHECK_INTERVAL = 12 * 60 * 60 * 1000L;
+    private static final long UPDATE_CHECK_INTERVAL = 60 * 60 * 1000L;
 
     /**
-     * Looks up the latest GitHub Release (tagged v1.0.<versionCode>) and offers to download it
-     * when it is newer than this install. The automatic check on launch is throttled and silent;
-     * a manual check (the "Check for updates" button) always runs and reports the result.
+     * Two kinds of update, checked together:
+     * a new APK (GitHub Release tagged v1.0.<versionCode>), installed by the app itself, and
+     * new web content on main, downloaded silently by Ota and used from the next launch.
+     * The automatic check (on launch and when the app comes back) is throttled and silent;
+     * a manual check (the "Check for updates" button) always runs, reports the result and
+     * switches to new web content right away.
      */
     private void checkForUpdate(final boolean manual) {
         final SharedPreferences prefs = getSharedPreferences("update", MODE_PRIVATE);
@@ -188,23 +196,22 @@ public class MainActivity extends Activity {
 
         new Thread(() -> {
             try {
-                URL api = new URL("https://api.github.com/repos/" + BuildConfig.UPDATE_REPO + "/releases/latest");
-                HttpURLConnection c = (HttpURLConnection) api.openConnection();
-                c.setConnectTimeout(8000);
-                c.setReadTimeout(8000);
-                c.setRequestProperty("Accept", "application/vnd.github+json");
-                if (c.getResponseCode() != 200) throw new IllegalStateException("HTTP " + c.getResponseCode());
-                String body;
-                try (InputStream in = c.getInputStream()) {
-                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
-                    byte[] b = new byte[8192];
-                    for (int n; (n = in.read(b)) > 0; ) buf.write(b, 0, n);
-                    body = buf.toString("UTF-8");
-                }
+                String body = new String(Ota.get("https://api.github.com/repos/" + BuildConfig.UPDATE_REPO
+                        + "/releases/latest", "application/vnd.github+json"), StandardCharsets.UTF_8);
                 String tag = new JSONObject(body).optString("tag_name", "");
                 final long latest = Long.parseLong(tag.substring(tag.lastIndexOf('.') + 1));
                 final String name = tag.startsWith("v") ? tag.substring(1) : tag;
-                if (latest > installedVersionCode()) runOnUiThread(() -> showUpdateDialog(name));
+                if (latest > installedVersionCode()) {
+                    runOnUiThread(() -> showUpdateDialog(name));
+                    return;
+                }
+                boolean staged = Ota.check(this);
+                if (staged && manual) runOnUiThread(() -> {
+                    if (Ota.apply(this)) {
+                        webView.reload();
+                        toast("Lux is up to date");
+                    }
+                });
                 else if (manual) toast("You have the latest version");
             } catch (Exception e) {
                 // No network, rate limit or unexpected response: the automatic check tries again later.
@@ -226,17 +233,62 @@ public class MainActivity extends Activity {
         if (isFinishing()) return;
         new AlertDialog.Builder(this)
                 .setTitle("Update available")
-                .setMessage("Lux " + version + " is ready. Download it and open the file to update. Your data stays in place.")
-                .setPositiveButton("Download", (d, w) -> {
-                    Uri apk = Uri.parse("https://github.com/" + BuildConfig.UPDATE_REPO
-                            + "/releases/latest/download/lux.apk");
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, apk));
-                    } catch (ActivityNotFoundException ignored) {
-                    }
-                })
+                .setMessage("Lux " + version + " is ready. The app closes for a moment while it updates. Your data stays in place.")
+                .setPositiveButton("Update", (d, w) -> startSelfUpdate())
                 .setNegativeButton("Later", null)
                 .show();
+    }
+
+    private boolean waitingForInstallPermission;
+
+    /** Android asks once whether Lux may install apps; after that updates need no more steps. */
+    private void startSelfUpdate() {
+        if (!getPackageManager().canRequestPackageInstalls()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Allow updates")
+                    .setMessage("To update itself, Lux needs permission to install apps. Turn on \"Allow from this source\" on the next screen, then come back.")
+                    .setPositiveButton("Continue", (d, w) -> {
+                        waitingForInstallPermission = true;
+                        try {
+                            startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                    Uri.parse("package:" + getPackageName())));
+                        } catch (ActivityNotFoundException e) {
+                            waitingForInstallPermission = false;
+                            downloadInBrowser();
+                        }
+                    })
+                    .setNegativeButton("Download instead", (d, w) -> downloadInBrowser())
+                    .show();
+            return;
+        }
+        toast("Downloading the update…");
+        new Thread(() -> {
+            try {
+                SelfUpdate.downloadAndInstall(this);
+            } catch (Exception e) {
+                toast("Update failed. Opening the download instead.");
+                runOnUiThread(this::downloadInBrowser);
+            }
+        }).start();
+    }
+
+    private void downloadInBrowser() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/" + BuildConfig.UPDATE_REPO
+                    + "/releases/latest/download/lux.apk")));
+        } catch (ActivityNotFoundException ignored) {
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (waitingForInstallPermission) {
+            waitingForInstallPermission = false;
+            if (getPackageManager().canRequestPackageInstalls()) startSelfUpdate();
+        } else {
+            checkForUpdate(false);
+        }
     }
 
     private void saveAs(String name, String mime, byte[] data, boolean backup) {
@@ -317,7 +369,9 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String getVersion() {
-            return BuildConfig.VERSION_NAME;
+            String sha = Ota.currentSha(MainActivity.this);
+            return BuildConfig.VERSION_NAME + (Ota.isDownloaded(MainActivity.this) && sha.length() >= 7
+                    ? " (content " + sha.substring(0, 7) + ")" : "");
         }
 
         @JavascriptInterface

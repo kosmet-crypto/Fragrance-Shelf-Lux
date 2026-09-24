@@ -35,8 +35,20 @@ Always the newest version: https://github.com/kosmet-crypto/Fragrance-Shelf-Lux/
 2. Open the file. Android will ask to allow installs from your browser or file manager; allow it once.
 3. Install. Newer APKs install over the old one and keep your data.
 
-The app checks for a newer release at most twice a day and offers to download it. Updates are not silent:
-you tap **Download**, then open the file to install.
+Updates come in two kinds, and the app checks for both on launch (at most once an hour) and with
+Settings → **Check for updates**:
+
+* **Content updates are silent.** Most changes are in `index.html` and `lux-test.js`. The app downloads them from
+  the newest commit on `main` and uses them from the next launch (a manual check switches right away).
+  No APK, no install screen, data stays in place. Content that needs a newer app than the installed one
+  (`<meta name="lux-native">` above `Ota.NATIVE_API`) waits for the APK update.
+* **App updates install from inside the app.** When a newer release exists, tap **Update**. The first time,
+  Android asks you to let Lux install apps. After that, on Android 12 and newer the update usually installs
+  without the install screen; some phones still ask to confirm. The app closes while it updates and a
+  notification offers to open the new version.
+
+When a change touches the Android side (`android/`), bump `Ota.NATIVE_API` and the `lux-native` meta tag together
+if the page starts to rely on it.
 
 The APK bundles the web app, so it works offline from the first launch. Its data is stored inside the app,
 separately from the browser version, so use **Download backup** in the browser and **Restore from file**

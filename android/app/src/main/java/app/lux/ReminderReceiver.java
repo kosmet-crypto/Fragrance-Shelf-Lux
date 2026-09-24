@@ -31,6 +31,7 @@ public class ReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context ctx, Intent intent) {
         if (ACTION.equals(intent.getAction())) show(ctx, intent.getStringExtra("kind"));
+        if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())) SelfUpdate.notifyUpdated(ctx);
         schedule(ctx);
     }
 
