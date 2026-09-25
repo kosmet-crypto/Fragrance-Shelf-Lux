@@ -25,6 +25,28 @@ import java.net.URL;
 public class SelfUpdate extends BroadcastReceiver {
 
     private static final String APK = "/releases/latest/download/lux.apk";
+    /** Tells MainActivity to retry through Android's install screen. */
+    static final String EXTRA_FALLBACK = "installFallback";
+
+    /** Downloads the latest release into the cache (shared through the FileProvider). Off the main thread. */
+    static java.io.File download(Context ctx) throws IOException {
+        java.io.File dir = new java.io.File(ctx.getCacheDir(), "share");
+        if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("no cache dir");
+        java.io.File f = new java.io.File(dir, "lux-update.apk");
+        HttpURLConnection c = (HttpURLConnection) new URL("https://github.com/" + BuildConfig.UPDATE_REPO + APK).openConnection();
+        c.setConnectTimeout(15000);
+        c.setReadTimeout(30000);
+        try {
+            if (c.getResponseCode() != 200) throw new IOException("HTTP " + c.getResponseCode());
+            try (InputStream in = c.getInputStream(); OutputStream out = new java.io.FileOutputStream(f)) {
+                byte[] b = new byte[65536];
+                for (int r; (r = in.read(b)) > 0; ) out.write(b, 0, r);
+            }
+        } finally {
+            c.disconnect();
+        }
+        return f;
+    }
 
     /** Downloads the latest release and hands it to the installer. Call off the main thread. */
     static void downloadAndInstall(Context ctx) throws IOException {
@@ -73,7 +95,11 @@ public class SelfUpdate extends BroadcastReceiver {
         } else if (status != PackageInstaller.STATUS_SUCCESS) {
             ctx.getSharedPreferences("update", Context.MODE_PRIVATE).edit().remove("selfUpdating").apply();
             if (status != PackageInstaller.STATUS_FAILURE_ABORTED) {
-                Toast.makeText(ctx, "Update failed. You can download it from GitHub instead.", Toast.LENGTH_LONG).show();
+                // The quiet install was refused (some phones do); use Android's install screen instead.
+                Toast.makeText(ctx, "Opening the installer…", Toast.LENGTH_SHORT).show();
+                ctx.startActivity(new Intent(ctx, MainActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putExtra(EXTRA_FALLBACK, true));
             }
         }
     }

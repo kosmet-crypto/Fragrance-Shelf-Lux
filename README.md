@@ -56,7 +56,8 @@ Settings → **Check for updates**:
   (`<meta name="lux-native">` above `Ota.NATIVE_API`) waits for the APK update.
 * **App updates install from inside the app.** When a newer release exists, tap **Update**. The first time,
   Android asks you to let Lux install apps. After that, on Android 12 and newer the update usually installs
-  without the install screen; some phones still ask to confirm. The app closes while it updates and a
+  without the install screen; some phones still ask to confirm. If the quiet install is refused, the app
+  downloads the APK itself and opens Android's install screen, never the browser. The app closes while it updates and a
   notification offers to open the new version.
 
 The APK update is only offered when the Android part (`android/`) changed: CI stores a fingerprint of that
