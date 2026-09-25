@@ -167,6 +167,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        if (intent.getBooleanExtra(SelfUpdate.EXTRA_FALLBACK, false)) {
+            installWithSystemScreen();
+            return;
+        }
         String target = openTarget(intent);
         if (target != null) openInPage(target);
     }
@@ -259,10 +263,10 @@ public class MainActivity extends Activity {
                                     Uri.parse("package:" + getPackageName())));
                         } catch (ActivityNotFoundException e) {
                             waitingForInstallPermission = false;
-                            downloadInBrowser();
+                            installWithSystemScreen();
                         }
                     })
-                    .setNegativeButton("Download instead", (d, w) -> downloadInBrowser())
+                    .setNegativeButton("Later", null)
                     .show();
             return;
         }
@@ -271,18 +275,35 @@ public class MainActivity extends Activity {
             try {
                 SelfUpdate.downloadAndInstall(this);
             } catch (Exception e) {
-                toast("Update failed. Opening the download instead.");
-                runOnUiThread(this::downloadInBrowser);
+                installWithSystemScreen();
             }
         }).start();
     }
 
-    private void downloadInBrowser() {
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/" + BuildConfig.UPDATE_REPO
-                    + "/releases/latest/download/lux.apk")));
-        } catch (ActivityNotFoundException ignored) {
-        }
+    /**
+     * Fallback when the quiet install is not possible: the app still downloads the APK itself and
+     * opens Android's own install screen for it. No browser, no file manager.
+     */
+    private void installWithSystemScreen() {
+        toast("Downloading the update…");
+        new Thread(() -> {
+            try {
+                File apk = SelfUpdate.download(this);
+                Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".files", apk);
+                Intent i = new Intent(Intent.ACTION_VIEW)
+                        .setDataAndType(uri, "application/vnd.android.package-archive")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                runOnUiThread(() -> {
+                    try {
+                        startActivity(i);
+                    } catch (ActivityNotFoundException e) {
+                        toast("This phone cannot install the update from here.");
+                    }
+                });
+            } catch (Exception e) {
+                toast("Could not download the update. Are you online?");
+            }
+        }).start();
     }
 
     @Override
