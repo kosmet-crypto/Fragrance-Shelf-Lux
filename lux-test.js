@@ -265,7 +265,7 @@ function startSession(){
   if (s.venue && !d.venues.includes(s.venue)) d.venues.push(s.venue);
   if (ST.city) d.city = ST.city;
   const cab = s.pid && byId(s.pid);
-  if (ST.log && cab && cab.shelf !== 'wish') { cab.ml = Math.max(0, Math.round((cab.ml - s.sprays/spm())*10)/10); cab.sprays = (cab.sprays || 0) + s.sprays; S.wears.push({ id:uid(), pid:cab.id, t:s.t0, n:s.sprays }); }
+  if (ST.log && cab && cab.shelf !== 'wish') { cab.ml = Math.max(0, Math.round((cab.ml - s.sprays/rateOf(cab))*10)/10); cab.sprays = (cab.sprays || 0) + s.sprays; S.wears.push({ id:uid(), pid:cab.id, t:s.t0, n:s.sprays }); }
   save(); closeAll(); ui.tab = 'test'; render(); toast('Test started');
   if (d.city) attachWeather(s);
 }
