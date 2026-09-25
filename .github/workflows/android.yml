@@ -24,6 +24,12 @@ jobs:
 
       # The Ubuntu runner ships the Android SDK (ANDROID_HOME); Gradle fetches any missing platform.
 
+      # Fingerprint of the Android part (the web app is not included). The app compares it with the
+      # one in the newest release and only offers an APK update when it differs; web-only changes
+      # reach installed apps as silent content updates (android/app/src/main/java/app/lux/Ota.java).
+      - name: Fingerprint the Android part
+        run: echo "NATIVE_HASH=$(git ls-files -s android | sha1sum | cut -c1-12)" >> "$GITHUB_ENV"
+
       - name: Build APK
         working-directory: android
         run: |
@@ -45,4 +51,4 @@ jobs:
         run: |
           gh release create "v1.0.${{ github.run_number }}" lux.apk \
             --title "Lux 1.0.${{ github.run_number }}" \
-            --notes "Android build of commit ${{ github.sha }}. Download lux.apk below and open it on your phone to install or update."
+            --notes "Android build of commit ${{ github.sha }}. Download lux.apk below and open it on your phone to install or update. native: ${{ env.NATIVE_HASH }}"

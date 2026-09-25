@@ -25,6 +25,8 @@ android {
         versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
         // Where the app looks for newer APKs (GitHub Releases of this repo).
         // Commit the bundled web app comes from; Ota compares it with main for silent content updates.
+        // Fingerprint of android/ from CI; a release with the same one brings nothing an OTA update doesn't.
+        buildConfigField 'String', 'NATIVE_HASH', "\"${System.getenv('NATIVE_HASH') ?: ''}\""
         buildConfigField 'String', 'WEB_SHA', "\"${System.getenv('GITHUB_SHA') ?: ''}\""
         buildConfigField 'String', 'UPDATE_REPO', "\"${System.getenv('GITHUB_REPOSITORY') ?: 'kosmet-crypto/Fragrance-Shelf-Lux'}\""
     }

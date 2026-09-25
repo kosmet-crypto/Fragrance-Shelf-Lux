@@ -201,7 +201,12 @@ public class MainActivity extends Activity {
                 String tag = new JSONObject(body).optString("tag_name", "");
                 final long latest = Long.parseLong(tag.substring(tag.lastIndexOf('.') + 1));
                 final String name = tag.startsWith("v") ? tag.substring(1) : tag;
-                if (latest > installedVersionCode()) {
+                // A newer release whose Android part is the same as ours only differs in web content,
+                // which Ota below downloads silently; no need to install an APK for that.
+                java.util.regex.Matcher native_ = java.util.regex.Pattern.compile("native: ([0-9a-f]{12})")
+                        .matcher(new JSONObject(body).optString("body", ""));
+                boolean sameNative = native_.find() && native_.group(1).equals(BuildConfig.NATIVE_HASH);
+                if (latest > installedVersionCode() && !sameNative) {
                     runOnUiThread(() -> showUpdateDialog(name));
                     return;
                 }

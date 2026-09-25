@@ -59,7 +59,8 @@ Settings → **Check for updates**:
   without the install screen; some phones still ask to confirm. The app closes while it updates and a
   notification offers to open the new version.
 
-When a change touches the Android side (`android/`), bump `Ota.NATIVE_API` and the `lux-native` meta tag together
+The APK update is only offered when the Android part (`android/`) changed: CI stores a fingerprint of that
+folder in the APK and in the release notes (`native: …`), and the app compares the two. When a change touches the Android side, bump `Ota.NATIVE_API` and the `lux-native` meta tag together
 if the page starts to rely on it.
 
 The APK bundles the web app, so it works offline from the first launch. Its data is stored inside the app,
