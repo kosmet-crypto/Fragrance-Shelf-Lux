@@ -246,6 +246,33 @@ h1{font-size:38px}
 }
 @media (min-width:700px){.modal:not(.dlg){align-items:center;padding:24px}.modal:not(.dlg) .panel{border-radius:26px}}
 /* daily pick, wishlist, share */
+.today-line{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 18px;margin-bottom:26px;border:1px solid var(--line2);border-radius:16px;background:var(--surf);color:var(--tx2);font-size:14px}
+.today-line b{color:var(--tx);font-weight:600}
+.today-line .ck{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--goldink);font-weight:700;flex:none}
+.today-line .more{margin-left:auto;color:var(--gold2);font-size:13px;flex:none}
+.lv.low{color:var(--danger);font-weight:600}
+.note .lnk{color:var(--tx);text-decoration:underline;text-underline-offset:3px;font-size:inherit}
+.sg.per{display:flex;width:max-content;max-width:100%;overflow-x:auto;margin-bottom:18px}
+.sg.per button{flex:none}
+@media (max-width:520px){.sg.per{display:grid;grid-template-columns:repeat(3,1fr);width:100%;border-radius:18px}.sg.per button{padding:8px 6px;border-radius:14px}.kpi:last-child:nth-child(odd){grid-column:1/-1;border-left:0}}
+.vbig{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:14px}
+.vbig b{font:500 42px/1 var(--serif);color:var(--gold2)}
+.vbig span{color:var(--tx2)}
+.vbar{height:8px;border-radius:99px;background:var(--line2);margin-top:16px;overflow:hidden}
+.vbar b{display:block;height:100%;background:var(--gold);border-radius:99px}
+.prow{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.prow .th .bt{width:30px;height:48px;margin:0;filter:none}
+.prow .mid{flex:1;min-width:0}
+.prow .t1{font:600 17px/1.15 var(--serif)}
+.prow .t2{font-size:12.5px;color:var(--tx3)}
+.prow input{width:120px;flex:none}
+.recap{margin-bottom:26px;background:radial-gradient(560px 260px at 8% -10%,var(--glow),transparent 70%),var(--surf)}
+.rstats{display:flex;gap:30px;flex-wrap:wrap}
+.rstats b{display:block;font:500 34px/1.05 var(--serif);color:var(--gold2)}
+.rstats span{font-size:12.5px;color:var(--tx3)}
+.hint{display:block;font-size:12px;color:var(--tx3);margin-top:6px;line-height:1.4}
+.toast.act{pointer-events:auto;display:flex;align-items:center;gap:16px}
+.toast button{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .pick{margin-bottom:26px;background:radial-gradient(620px 280px at 88% -10%,var(--glow),transparent 70%),var(--surf)}
 .g3 .pick{margin-bottom:0}
 .pick-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
@@ -284,7 +311,7 @@ h1{font-size:38px}
 <nav class="nav" id="nav">
 <button class="nb" data-act="tab" data-t="shelf"><svg><use href="#i-shelf"/></svg>Collection</button>
 <button class="nb" data-act="tab" data-t="journal"><svg><use href="#i-book"/></svg>Journal</button>
-<button class="nb" data-act="tab" data-t="ins"><svg><use href="#i-chart"/></svg>Insights</button>
+<button class="nb" data-act="tab" data-t="ins"><svg><use href="#i-chart"/></svg>Stats</button>
 <button class="nb" data-act="tab" data-t="lib"><svg><use href="#i-lib"/></svg>Library</button>
 <button class="nb" data-act="tab" data-t="set"><svg><use href="#i-set"/></svg>Settings</button>
 </nav>
@@ -321,11 +348,14 @@ const FAMLIST=['Aromatic','Woody','Amber','Fresh','Citrus','Floral','Gourmand','
 const defaults=()=>({v:2,demo:false,
  shelves:[{id:'s1',name:'Daily'},{id:'s2',name:'Niche & special'},{id:'s3',name:'Summer & fresh'}],
  perfumes:[],wears:[],mine:[],
- settings:{spm:11,theme:'dark',cur:'€',remind:true,lastBackup:0,snooze:0,ins:{m:'ml',g:'perfume',p:'30'},rem:{am:false,amT:'08:30',pm:false,pmT:'20:30'},occ:'day'}});
+ settings:{spm:0,spmV:2,theme:'dark',cur:'€',remind:true,lastBackup:0,snooze:0,ins:{m:'ml',g:'perfume',p:'30'},rem:{am:false,amT:'08:30',pm:false,pmT:'20:30'},occ:'day'}});
 function migrate(o){const d=defaults();const s=Object.assign(d,o||{});
  s.settings=Object.assign(defaults().settings,(o&&o.settings)||{});
  s.settings.ins=Object.assign(defaults().settings.ins,(o&&o.settings&&o.settings.ins)||{});
  s.settings.rem=Object.assign(defaults().settings.rem,(o&&o.settings&&o.settings.rem)||{});
+ /* v2 of sprays per ml: 0 means by bottle size; the old default of 11 becomes that */
+ if(s.settings.spmV!==2){if(+s.settings.spm===11)s.settings.spm=0;s.settings.spmV=2}
+ s.perfumes.forEach(p=>{if(!p.cal)p.cal={ml:+p.ml||0,sprays:p.sprays||0}});
  ['shelves','perfumes','wears','mine'].forEach(k=>{if(!Array.isArray(s[k]))s[k]=d[k]});
  if(!s.shelves.length)s.shelves=defaults().shelves;return s}
 function loadState(){try{const j=localStorage.getItem('lux.v2');return j?migrate(JSON.parse(j)):null}catch(e){return null}}
@@ -435,10 +465,10 @@ const spm=()=>Math.max(1,+S.settings.spm||11);
 const cur=()=>S.settings.cur||'';
 
 /* ================= collection ================= */
-function item(p){const wish=p.shelf==='wish',lv=p.maxMl?p.ml/p.maxMl:0;
- return `<div class="it" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.brand+' '+p.name)}">${bt(p,wish?1:lv)}<div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="br">${esc(p.brand)}</div>${wish?`<div class="lv">${wishLine(p)}</div>`:`<div class="lv">${mlf(p.ml)} / ${mlf(p.maxMl)} ml</div>`}</div>`}
+function item(p){const wish=p.shelf==='wish',lv=p.maxMl?p.ml/p.maxMl:0,low=lowOf(p);
+ return `<div class="it" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(p.brand+' '+p.name)}">${bt(p,wish?1:lv)}<div class="nm" title="${esc(p.name)}">${esc(p.name)}</div><div class="br">${esc(p.brand)}</div>${wish?`<div class="lv">${wishLine(p)}</div>`:`<div class="lv${low?' low':''}">${mlf(p.ml)} / ${mlf(p.maxMl)} ml</div>`}</div>`}
 function rack(id,name,wish){const items=S.perfumes.filter(p=>p.shelf===id),ml=items.reduce((a,p)=>a+p.ml,0),seen=items.reduce((a,p)=>a+(+p.seen>0?+p.seen:0),0);
- return `<section class="shelf${wish?' wish':''}"><div class="shelf-h"><h2>${esc(name)}</h2><span>${items.length}${wish?(seen?' \u00b7 about '+esc(cur())+fmt(seen):''):' \u00b7 '+fmt(ml)+' ml'}</span></div><div class="rack" data-shelf="${id}">${items.map(item).join('')||`<p class="empty">${wish?'Fragrances you want to try. Drag a bottle here, or tap the heart in the Library.':'Nothing on this shelf yet. Drag a bottle here or add a fragrance.'}</p>`}</div></section>`}
+ return `<section class="shelf${wish?' wish':''}"><div class="shelf-h"><h2>${esc(name)}</h2><span>${items.length}${wish?(seen?' \u00b7 about '+esc(money(seen)):''):' \u00b7 '+fmt(ml)+' ml'}</span></div><div class="rack" data-shelf="${id}">${items.map(item).join('')||`<p class="empty">${wish?'Fragrances you want to try. Drag a bottle here, or tap the heart in the Library.':'Nothing on this shelf yet. Drag a bottle here or add a fragrance.'}</p>`}</div></section>`}
 function banners(){let h='';
  if(S.demo)h+=`<div class="note"><span>You are looking at sample data so you can see how it works.</span><button class="btn ghost sm" data-act="clearDemo">Clear sample data</button></div>`;
  else if(S.settings.remind&&S.perfumes.length&&Date.now()>(S.settings.snooze||0)&&Date.now()-(S.settings.lastBackup||0)>14*DAY){
@@ -446,8 +476,8 @@ function banners(){let h='';
   h+=`<div class="note"><span>Your last backup was ${d}. Your data lives in this browser only.</span><span class="acts"><button class="btn sm" data-act="bkNow">Back up now</button><button class="btn ghost sm" data-act="snooze">Later</button></span></div>`}
  return h}
 function vShelf(){const own=owned(),ml=own.reduce((a,p)=>a+p.ml,0);
- return `<header class="vh"><div><h1>Collection</h1><p class="sub2">${own.length} ${own.length===1?'fragrance':'fragrances'} \u00b7 ${fmt(ml)} ml \u00b7 about ${fmt(ml*spm())} sprays left</p></div><div class="acts"><button class="btn ghost" data-act="share">Share</button><button class="btn" data-act="add">Add fragrance</button></div></header>`+
- banners()+todayCard()+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
+ return `<header class="vh"><div><h1>Collection</h1><p class="sub2">${own.length} ${own.length===1?'fragrance':'fragrances'} \u00b7 ${fmtMl(ml)} \u00b7 about ${fmt(own.reduce((a,p)=>a+p.ml*rateOf(p),0))} sprays left</p></div><div class="acts"><button class="btn ghost" data-act="share">Share</button><button class="btn" data-act="add">Add fragrance</button></div></header>`+
+ banners()+lowNote()+recapCard()+todayCard('shelf')+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
 
 /* ================= journal ================= */
 function lastWorn(pid){let t=0;S.wears.forEach(w=>{if(w.pid===pid&&w.t>t)t=w.t});return t}
@@ -468,27 +498,27 @@ function vJournal(){
   list+=`<div class="wr"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n===1?'spray':'sprays'}</small></div><button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button></div>`});
  if(!list)list='<p class="muted" style="padding:14px 0">No wears logged yet. Log your first wear and the calendar fills in.</p>';
  return `<header class="vh"><div><h1>Journal</h1><p class="sub2">${streak()} day streak \u00b7 ${S.wears.length} wears logged</p></div><div class="acts"><button class="btn" data-act="wearOpen">Log a wear</button></div></header>
- <div class="g3">${todayCard()}<div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div></div>
+ <div class="g3">${todayCard('journal')}<div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div></div>
  <div class="card" style="margin-top:18px"><h3>History</h3>${list}${sorted.length>ui.jlim?`<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-act="jmore">Show more</button></div>`:''}</div>`}
 
 /* ================= insights ================= */
-const MEAS=[['ml','Remaining volume'],['spr','Sprays left'],['used','Sprays used, all time'],['wears','Wears in period'],['pspr','Sprays in period'],['val','Price paid']];
+const MEAS=[['ml','Remaining volume'],['spr','Sprays left'],['cval','Current value'],['val','Price paid'],['wears','Wears in period'],['pspr','Sprays in period'],['pml','Amount used in period'],['pval','Value sprayed in period'],['used','Sprays used, all time']];
 const GRPS=[['perfume','Fragrance'],['brand','House'],['shelf','Shelf'],['fam','Scent family'],['type','Bottle or decant']];
-const PERS=[['7','7 days'],['30','30 days'],['90','90 days'],['365','Year'],['all','All time']];
+const PERS=[['1','Today'],['7','7 days'],['30','30 days'],['90','90 days'],['365','Year'],['all','All time']];
 const PAL=['#caa96b','#8fb08a','#b5654f','#6f8fae','#a58bb5','#d6a27a','#5f9a92'];
 const colorOf=(i,k)=>k==='Other'?'#807b6d':PAL[i%PAL.length];
-function insCompute(){const {m,g,p:per}=S.settings.ins,t0=per==='all'?0:Date.now()-(+per)*DAY,wp={};
- S.wears.forEach(w=>{if(w.t>=t0){const o=wp[w.pid]||(wp[w.pid]={c:0,n:0});o.c++;o.n+=w.n}});
+function insCompute(){const {m,g,p:per}=S.settings.ins,t0=perStart(per),wp={};
+ S.wears.forEach(w=>{const q=byId(w.pid);if(w.t>=t0&&q){const o=wp[w.pid]||(wp[w.pid]={c:0,n:0,ml:0});o.c++;o.n+=w.n;o.ml+=w.n/rateOf(q)}});
  const map=new Map();
- owned().forEach(p=>{let v=0;const o=wp[p.id]||{c:0,n:0};
-  if(m==='ml')v=p.ml;else if(m==='spr')v=p.ml*spm();else if(m==='used')v=p.sprays||0;else if(m==='wears')v=o.c;else if(m==='pspr')v=o.n;else v=+p.price||0;
+ owned().forEach(p=>{let v=0;const o=wp[p.id]||{c:0,n:0,ml:0};
+  v=m==='ml'?p.ml:m==='spr'?p.ml*rateOf(p):m==='used'?p.sprays||0:m==='wears'?o.c:m==='pspr'?o.n:m==='pml'?o.ml:m==='pval'?o.ml*perMl(p):m==='cval'?valueLeft(p):+p.price||0;
   const key=g==='perfume'?p.name:g==='brand'?p.brand:g==='shelf'?shelfName(p.shelf):g==='fam'?(p.fam||'Unclassified'):(p.type||'Bottle');
   map.set(key,(map.get(key)||0)+v)});
  let arr=[...map].map(([k,v])=>({k,v})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
  if(arr.length>7){const rest=arr.slice(7).reduce((a,x)=>a+x.v,0);arr=arr.slice(0,7);arr.push({k:'Other',v:rest})}
  return {arr,total:arr.reduce((a,x)=>a+x.v,0),wp,t0}}
-function fmtVal(v,m){return m==='val'?cur()+fmt(v):m==='ml'?fmt(v)+' ml':fmt(v)}
-const measUnit=m=>({ml:'ml left',spr:'sprays left',used:'sprays used',wears:'wears',pspr:'sprays',val:'paid'}[m]);
+function fmtVal(v,m){return m==='val'||m==='cval'||m==='pval'?money(v):m==='ml'||m==='pml'?fmtMl(v):fmt(v)}
+const measUnit=m=>({ml:'left',spr:'sprays left',used:'sprays used',wears:'wears',pspr:'sprays',pml:'used',pval:'sprayed',cval:'value left',val:'paid'}[m]);
 let DD=null;
 function donutHtml(d){const m=S.settings.ins.m;DD=d;
  if(!d.arr.length)return `<p class="muted">Nothing to chart for this combination yet.</p>`;
@@ -500,33 +530,36 @@ function animateDonut(){requestAnimationFrame(()=>requestAnimationFrame(()=>$$('
 function hl(i){const dn=$('#dn');if(!dn||!DD)return;const m=S.settings.ins.m;
  $$('#dn .seg').forEach(c=>c.classList.toggle('on',i!=null&&+c.dataset.i===i));$$('#lg .lg-row').forEach(r=>r.classList.toggle('on',i!=null&&+r.dataset.i===i));dn.classList.toggle('hl',i!=null);
  const x=i!=null?DD.arr[i]:null;$('#dcv').textContent=x?fmtVal(x.v,m):fmtVal(DD.total,m);$('#dcl').textContent=x?x.k+' \u00b7 '+Math.round(x.v/DD.total*100)+'%':measUnit(m)}
-function activityHtml(per){const now=sod(Date.now());let n,unit;if(per==='7'){n=7;unit='d'}else if(per==='30'){n=30;unit='d'}else if(per==='90'){n=13;unit='w'}else{n=12;unit='m'}
+function activityHtml(per){const now=sod(Date.now());let n,unit;if(per==='1'){n=24;unit='h'}else if(per==='7'){n=7;unit='d'}else if(per==='30'){n=30;unit='d'}else if(per==='90'){n=13;unit='w'}else{n=12;unit='m'}
  const B=[];for(let i=0;i<n;i++){let a,b,l;
-  if(unit==='d'){a=now-(n-1-i)*DAY;b=a+DAY;l=new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
+  if(unit==='h'){a=now+i*36e5;b=a+36e5;l=String(i).padStart(2,'0')+':00'}
+  else if(unit==='d'){a=now-(n-1-i)*DAY;b=a+DAY;l=new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
   else if(unit==='w'){b=now+DAY-(n-1-i)*7*DAY;a=b-7*DAY;l='Week of '+new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
   else{const d=new Date();d.setDate(1);d.setHours(0,0,0,0);d.setMonth(d.getMonth()-(n-1-i));a=d.getTime();const e=new Date(d);e.setMonth(e.getMonth()+1);b=e.getTime();l=MON[d.getMonth()]+' '+d.getFullYear()}
   B.push({a,b,l,c:S.wears.filter(w=>w.t>=a&&w.t<b).length})}
  const mx=Math.max(1,...B.map(x=>x.c));
  return `<div class="bars">${B.map((x,i)=>`<div class="bar${x.c?'':' z'}" title="${esc(x.l)}: ${x.c} ${x.c===1?'wear':'wears'}" style="height:${x.c?Math.max(6,x.c/mx*100):2}%;animation-delay:${i*14}ms"></div>`).join('')}</div><div class="axis"><span>${esc(B[0].l)}</span><span>${esc(B[B.length-1].l)}</span></div>`}
-function kpisHtml(d){const own=owned(),ml=own.reduce((a,p)=>a+p.ml,0),val=own.reduce((a,p)=>a+(+p.price||0),0),per=S.settings.ins.p;
- const wn=S.wears.filter(w=>w.t>=d.t0).length;
- const k=[[own.length,'Fragrances'],[fmt(ml)+' ml','Remaining'],[fmt(ml*spm()),'Sprays left'],[val?cur()+fmt(val):'\u2014','Collection value'],[wn,'Wears, '+(PERS.find(x=>x[0]===per)||[])[1].toLowerCase()]];
+function kpisHtml(d){const W=S.wears.filter(w=>w.t>=d.t0&&byId(w.pid));let n=0,ml=0,val=0;const ids=new Set();
+ W.forEach(w=>{const p=byId(w.pid),m=w.n/rateOf(p);n+=w.n;ml+=m;val+=m*perMl(p);ids.add(p.id)});
+ const k=[[fmt(W.length),W.length===1?'Wear':'Wears'],[fmt(n),'Sprays'],[fmtMl(ml),'Used'],[money(val),'Value sprayed'],[fmt(ids.size),'Different fragrances']];
  return k.map(x=>`<div class="kpi"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}
 function rankHtml(d){const own=owned(),now=Date.now(),mode=ui.rank;
  const rows=own.map(p=>{const lw=lastWorn(p.id),idle=lw?Math.floor((now-lw)/DAY):9999,age=Math.max(1,Math.floor((now-p.created)/DAY));
-  const v=mode==='used'?(p.sprays||0):mode==='age'?age:mode==='left'?p.ml:idle;return {p,v,idle,age}});
+  const v=mode==='used'?(p.sprays||0):mode==='age'?age:mode==='left'?p.ml:mode==='val'?valueLeft(p):idle;return {p,v,idle,age}});
  rows.sort((a,b)=>b.v-a.v);const mx=Math.max(1,...rows.filter(r=>r.v<9999).map(r=>r.v));
  if(!rows.length)return '<p class="muted" style="padding:12px 0">Add fragrances to see the breakdown.</p>';
  return rows.map(r=>{const p=r.p,pct=r.v>=9999?100:Math.round(r.v/mx*100);
-  return `<div class="row" data-act="open" data-id="${p.id}"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:0)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)}</div><div class="meter"><b style="width:${pct}%"></b></div></div><div class="rt">${p.sprays||0} sprays<br>${r.idle>=9999?'never worn':r.idle===0?'worn today':r.idle+' d ago'}</div></div>`}).join('')}
+  return `<div class="row" data-act="open" data-id="${p.id}"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:0)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)}</div><div class="meter"><b style="width:${pct}%"></b></div></div><div class="rt">${mode==='val'?(hasPrice(p)?money(valueLeft(p)):'no price')+'<br>':''}${p.sprays||0} sprays<br>${r.idle>=9999?'never worn':r.idle===0?'worn today':r.idle+' d ago'}</div></div>`}).join('')}
 function vIns(){const {m,g,p}=S.settings.ins,d=insCompute();
  const opt=(a,v)=>a.map(x=>`<option value="${x[0]}"${x[0]===v?' selected':''}>${x[1]}</option>`).join('');
- return `<header class="vh"><div><h1>Insights</h1><p class="sub2">Change the parameters and the charts follow.</p></div></header>
+ return `<header class="vh"><div><h1>Stats</h1><p class="sub2">Pick a period and the numbers and charts follow.</p></div></header>
+ <div class="sg per" id="ins-p" role="group" aria-label="Period">${PERS.map(x=>`<button data-act="insP" data-v="${x[0]}" class="${x[0]===p?'on':''}">${x[1]}</button>`).join('')}</div>
  <div class="kpis" id="kpis">${kpisHtml(d)}</div>
- <div class="card"><div class="ctl"><div class="fg"><label for="ins-m">Measure</label><select id="ins-m" data-ch="insM">${opt(MEAS,m)}</select></div><div class="fg"><label for="ins-g">Group by</label><select id="ins-g" data-ch="insG">${opt(GRPS,g)}</select></div>
- <div><span class="lb">Period</span><div class="sg" id="ins-p">${PERS.map(x=>`<button data-act="insP" data-v="${x[0]}" class="${x[0]===p?'on':''}">${x[1]}</button>`).join('')}</div></div></div><div id="donutBox">${donutHtml(d)}</div></div>
+ ${valueHtml()}
+ <div class="card"><div class="ctl"><div class="fg"><label for="ins-m">Measure</label><select id="ins-m" data-ch="insM">${opt(MEAS,m)}</select></div><div class="fg"><label for="ins-g">Group by</label><select id="ins-g" data-ch="insG">${opt(GRPS,g)}</select></div></div><div id="donutBox">${donutHtml(d)}</div></div>
  <div class="card"><h3>Wear activity</h3><div id="actBox">${activityHtml(p==='all'?'365':p)}</div></div>
- <div class="card"><div class="ch" style="margin-bottom:6px"><h3>Breakdown</h3><select data-ch="rank" style="width:auto"><option value="used"${ui.rank==='used'?' selected':''}>Most used</option><option value="idle"${ui.rank==='idle'?' selected':''}>Waiting longest</option><option value="age"${ui.rank==='age'?' selected':''}>Longest in collection</option><option value="left"${ui.rank==='left'?' selected':''}>Most remaining</option></select></div><div id="rankBox">${rankHtml(d)}</div></div>`}
+ ${forgottenHtml()}
+ <div class="card"><div class="ch" style="margin-bottom:6px"><h3>Breakdown</h3><select data-ch="rank" style="width:auto"><option value="used"${ui.rank==='used'?' selected':''}>Most used</option><option value="idle"${ui.rank==='idle'?' selected':''}>Waiting longest</option><option value="age"${ui.rank==='age'?' selected':''}>Longest in collection</option><option value="left"${ui.rank==='left'?' selected':''}>Most remaining</option><option value="val"${ui.rank==='val'?' selected':''}>Most value left</option></select></div><div id="rankBox">${rankHtml(d)}</div></div>`}
 function updateIns(){if(ui.tab!=='ins')return;const d=insCompute();$('#kpis').innerHTML=kpisHtml(d);$('#donutBox').innerHTML=donutHtml(d);animateDonut();const p=S.settings.ins.p;$('#actBox').innerHTML=activityHtml(p==='all'?'365':p);$('#rankBox').innerHTML=rankHtml(d);
  $$('#ins-p button').forEach(b=>b.classList.toggle('on',b.dataset.v===p))}
 
@@ -554,7 +587,7 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  return `<header class="vh"><div><h1>Settings</h1><p class="sub2">Everything is stored in this browser. Back up to keep it safe.</p></div></header>
  <div class="card"><h3>Appearance and units</h3>
  <div class="set-row"><div>Theme</div><div class="sg">${[['dark','Dark'],['light','Light'],['auto','Match device']].map(x=>`<button data-act="theme" data-v="${x[0]}" class="${s.theme===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></div>
- <div class="set-row"><div>Sprays per ml<small>Used to estimate sprays left</small></div><input type="number" min="1" max="30" step="0.5" value="${s.spm}" data-ch="spm" style="width:100px"></div>
+ <div class="set-row"><div>Sprays per ml<small>For bottles without their own number. Empty: by bottle size (10 for 100 ml, 12 for 50 to 75 ml, 15 for 30 ml and decants).</small></div><input type="number" min="1" max="40" step="0.5" value="${+s.spm>0?s.spm:''}" placeholder="Auto" data-ch="spm" style="width:100px"></div>
  <div class="set-row"><div>Currency symbol</div><input value="${esc(s.cur)}" maxlength="4" data-ch="cur" style="width:100px"></div></div>
  <div class="card"><h3>Shelves</h3><p class="muted" style="margin:6px 0 14px">Rename, reorder or remove shelves. Removing one moves its bottles to the first shelf.</p>
  ${S.shelves.map((sh,i)=>`<div class="shrow"><input value="${esc(sh.name)}" data-ch="shName" data-id="${sh.id}" aria-label="Shelf name"><button data-act="shUp" data-i="${i}" aria-label="Move up">\u2191</button><button data-act="shDn" data-i="${i}" aria-label="Move down">\u2193</button><button data-act="shDel" data-i="${i}" aria-label="Remove shelf">\u00d7</button></div>`).join('')}
@@ -676,7 +709,7 @@ Ormonde Jayne@50>Ormonde Man|WO|P;Ta'if|FL|P;Tolu|AM|P;Woman|FL|P|2005;Orris Noi
 Naomi Goodsir@50>Bois d'Ascèse|WO|P|2014;Cuir Velours|LE|P|2014
 `;
 /* ================= toast, modal, confirm ================= */
-let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.remove('act');t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
 let D=null,sheetNew=false,MODAL=null,confirmRes=null,WD=null,IMP=null;
 function openModal(html){const m=$('#modal');m.innerHTML=`<div class="panel" role="dialog" aria-modal="true">${html}</div>`;m.hidden=false;document.documentElement.classList.add('lock')}
 function closeModal(){if(MODAL==='sheet'&&sheetNew&&D){idb.del('photo:'+D.id);delete PHOTOS[D.id]}
@@ -692,7 +725,7 @@ function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,
  const shOpts=S.shelves.concat([{id:'wish',name:'Wishlist'}]).map(s=>`<option value="${s.id}"${d.shelf===s.id?' selected':''}>${esc(s.name)}</option>`).join('');
  const concs=(!d.conc||CONCS.includes(d.conc))?CONCS:CONCS.concat([d.conc]);
  let stats='';if(!sheetNew){const w=S.wears.filter(x=>x.pid===d.id).length,days=Math.max(1,Math.floor((Date.now()-d.created)/DAY));
-  stats=`<div class="s-stats"><span><b>${days}</b> days here</span><span><b>${d.sprays||0}</b> sprays</span><span><b>${w}</b> wears</span>${+d.price>0&&w>0?`<span><b>${cur()}${(d.price/w).toFixed(2)}</b> per wear</span>`:''}</div>`}
+  stats=`<div class="s-stats"><span><b>${days}</b> days here</span><span><b>${d.sprays||0}</b> sprays</span><span><b>${w}</b> wears</span>${+d.price>0&&w>0?`<span><b>${money(d.price/w,1)}</b> per wear</span>`:''}${!wish&&hasPrice(d)?`<span><b>${money(valueLeft(d))}</b> value left</span>`:''}${!wish&&leftText(pace(d).days)?`<span>${leftText(pace(d).days)}</span>`:''}</div>`}
  const known=sheetNew&&!!(d.name&&LIB.some(e=>e.k===norm(d.brand+' '+d.name)));
  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button>
  <div class="s-top"><div class="s-bt" id="sbt">${bt(d,lv)}</div><div class="s-id">
@@ -704,7 +737,8 @@ function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,
  <div class="fg"><label for="f-conc">Concentration</label><select id="f-conc" data-in="sheet">${concs.map(c=>`<option${d.conc===c?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
  <div class="fg"><label for="f-max">Size (ml)</label><input id="f-max" type="number" min="1" step="0.5" data-in="sheet" value="${esc(d.maxMl)}"></div>
  <div class="fg"><label for="f-ml">Remaining (ml)</label><input id="f-ml" type="number" min="0" step="0.1" data-in="sheet" value="${esc(mlf(d.ml))}"></div></div>
- ${wish?'':`<div class="fg"><input id="f-mlr" type="range" min="0" max="${+d.maxMl||100}" step="0.5" value="${+d.ml||0}" data-in="mlr" aria-label="Remaining volume"></div>`}
+ ${wish?'':`<div class="fg"><input id="f-mlr" type="range" min="0" max="${+d.maxMl||100}" step="0.5" value="${+d.ml||0}" data-in="mlr" aria-label="Remaining volume"></div>
+ <div class="fg"><label for="f-spm">Sprays per ml</label><input id="f-spm" type="number" min="3" max="40" step="0.5" data-in="sheet" value="${+d.spm>0?esc(d.spm):''}" placeholder="${rateOf(Object.assign({},d,{spm:''}))} (${rateSrc(Object.assign({},d,{spm:''}))})"><small class="hint">Leave empty and Lux estimates it. When you check the bottle, correct the remaining ml above: Lux then learns how much this atomizer really sprays.</small></div>`}
  <div class="g2">${wish?`<div class="fg"><label for="f-seen">Price seen (${esc(cur())})</label><input id="f-seen" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.seen==null?'':d.seen)}"></div><div class="fg"><label for="f-target">Target price (${esc(cur())})</label><input id="f-target" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.target==null?'':d.target)}"></div>`:`<div class="fg"><label for="f-price">Price paid (${esc(cur())})</label><input id="f-price" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.price)}"></div>`}
  <div class="fg"><label for="f-year">Launch year</label><input id="f-year" type="number" min="1700" max="2100" data-in="sheet" value="${d.year?esc(d.year):''}"></div>
  <div class="fg"><span class="lb">Your rating</span>${starsHtml('rating',d.rating||0)}</div>
@@ -722,7 +756,7 @@ function openSheet(id,pre){const p=id?byId(id):null;sheetNew=!p;
  MODAL='sheet';openModal(sheetHtml())}
 function readSheet(){if(!D||MODAL!=='sheet')return;const g=id=>{const e=$('#'+id);return e?e.value:undefined};
  const set=(k,id)=>{const v=g(id);if(v!==undefined)D[k]=v};
- set('name','f-name');set('brand','f-brand');set('fam','f-fam');set('conc','f-conc');set('year','f-year');set('shelf','f-shelf');set('type','f-type');set('maxMl','f-max');set('ml','f-ml');set('price','f-price');set('longevity','f-long');set('notes','f-notes');set('seen','f-seen');set('target','f-target');set('where','f-where')}
+ set('name','f-name');set('brand','f-brand');set('fam','f-fam');set('conc','f-conc');set('year','f-year');set('shelf','f-shelf');set('type','f-type');set('maxMl','f-max');set('ml','f-ml');set('price','f-price');set('longevity','f-long');set('notes','f-notes');set('seen','f-seen');set('target','f-target');set('where','f-where');set('spm','f-spm')}
 function refreshBt(){const mx=+D.maxMl||0,ml=clamp(+D.ml||0,0,mx||9999);const b=$('#sbt');if(b)b.innerHTML=bt(D,mx?ml/mx:0);
  const r=$('#f-mlr');if(r){r.max=mx||100;r.value=ml}}
 function suggest(){const box=$('#sugg');if(!box)return;const q=(D.name||'').trim();if(q.length<2){box.innerHTML='';return}
@@ -730,11 +764,13 @@ function suggest(){const box=$('#sugg');if(!box)return;const q=(D.name||'').trim
 function commitSheet(){readSheet();const d=D;d.name=String(d.name||'').trim();d.brand=String(d.brand||'').trim();
  if(!d.name||!d.brand){toast('Add a name and a house first');return false}
  d.maxMl=Math.max(1,+d.maxMl||100);d.ml=Math.round(clamp(+d.ml||0,0,d.maxMl)*10)/10;d.price=d.price===''?'':Math.max(0,+d.price||0);d.year=+d.year||'';d.longevity=d.longevity===''?'':Math.max(0,+d.longevity||0);
- ['seen','target'].forEach(k=>{if(d[k]!=null)d[k]=d[k]===''?'':Math.max(0,+d[k]||0)});if(d.where!=null)d.where=String(d.where).trim();
- if(sheetNew){S.perfumes.push(d);const sv=$('#f-savelib');
+ ['seen','target'].forEach(k=>{if(d[k]!=null)d[k]=d[k]===''?'':Math.max(0,+d[k]||0)});if(d.where!=null)d.where=String(d.where).trim();if(d.spm!=null)d.spm=+d.spm>0?clamp(+d.spm,3,40):'';
+ if(sheetNew){d.cal={ml:d.ml,sprays:d.sprays||0};S.perfumes.push(d);const sv=$('#f-savelib');
   if(sv&&sv.checked&&!LIB.some(e=>e.k===norm(d.brand+' '+d.name))){S.mine.push({n:d.name,b:d.brand,f:d.fam,c:d.conc,y:d.year,s:d.maxMl,t:''});buildLib()}
   sheetNew=false}
- else{const i=S.perfumes.findIndex(p=>p.id===d.id);if(i>=0)S.perfumes[i]=d}
+ else{const i=S.perfumes.findIndex(p=>p.id===d.id);if(i>=0){const old=S.perfumes[i];
+  if(old.shelf==='wish'||d.shelf==='wish'||!d.cal)d.cal={ml:d.ml,sprays:d.sprays||0};else if(Math.abs((+old.ml||0)-d.ml)>=.1)learnRate(d,old);
+  S.perfumes[i]=d}}
  save();return true}
 
 /* ================= wear log ================= */
@@ -746,7 +782,9 @@ function wearHtml(){const own=owned();return `<button class="x" data-act="close"
 function openWear(pid){const own=owned();if(!own.length){toast('Add a fragrance first');return}
  const sg=suggestion();WD={pid:pid&&byId(pid)?pid:(sg?sg.p.id:own[0].id),n:3,date:dkey(Date.now())};MODAL='wear';openModal(wearHtml())}
 function saveWear(){const p=byId(WD.pid);if(!p)return;const today=dkey(Date.now()),t=WD.date===today?Date.now():new Date(WD.date+'T12:00:00').getTime();
- p.ml=Math.max(0,Math.round((p.ml-WD.n/spm())*10)/10);p.sprays=(p.sprays||0)+WD.n;S.wears.push({id:uid(),pid:p.id,t,n:WD.n});save();closeModal();render();toast(`Logged ${WD.n} ${WD.n===1?'spray':'sprays'} of ${p.name}`)}
+ const id=uid(),ml0=p.ml;p.ml=Math.max(0,Math.round((p.ml-WD.n/rateOf(p))*10)/10);p.sprays=(p.sprays||0)+WD.n;
+ S.wears.push({id,pid:p.id,t,n:WD.n,ml:Math.round((ml0-p.ml)*10)/10}); /* ml: exactly what this wear took, so undo puts it back */save();closeModal();render();
+ toastUndo(`Logged ${WD.n} ${WD.n===1?'spray':'sprays'} of ${p.name}`,()=>{if(removeWear(id)){render();toast('Wear removed')}})}
 
 /* ================= new library entry & import ================= */
 function openEntry(){MODAL='entry';openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>New library entry</h2><p class="muted" style="margin:6px 0 18px">Saved to your own library so it shows up in search.</p>
@@ -846,6 +884,73 @@ viewEl.addEventListener('contextmenu',e=>{if(e.target.closest('.it'))e.preventDe
 viewEl.addEventListener('dragstart',e=>e.preventDefault());
 viewEl.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('it')){e.preventDefault();openSheet(e.target.dataset.id)}});
 
+/* ================= bottle maths: sprays per ml, value, pace ================= */
+/* Sprays per ml, most specific first: the number entered for this bottle, what Lux learned from
+   corrections of the remaining amount, the default from Settings, or a default by bottle size
+   (atomizers on big bottles give more per spray; see README). */
+const sizeSpm=p=>p.type==='Decant'||(+p.maxMl||100)<=30?15:(+p.maxMl||100)<=75?12:10;
+const rateOf=p=>+p.spm>0?+p.spm:+p.spmAuto>0?+p.spmAuto:+S.settings.spm>0?+S.settings.spm:sizeSpm(p);
+const rateSrc=p=>+p.spm>0?'your number':+p.spmAuto>0?'learned from your corrections':+S.settings.spm>0?'your default':'by bottle size';
+/* Correcting the remaining ml by hand tells Lux how much this atomizer really sprays. */
+function learnRate(p,old){const c=old.cal;p.cal={ml:p.ml,sprays:p.sprays||0};if(!c)return;
+ const n=(p.sprays||0)-c.sprays,used=c.ml-p.ml;if(n>=15&&used>=1)p.spmAuto=Math.round(clamp(n/used,4,30)*10)/10}
+const hasPrice=p=>+p.price>0&&+p.maxMl>0;
+const perMl=p=>hasPrice(p)?+p.price/+p.maxMl:0;
+const valueLeft=p=>hasPrice(p)?+p.price*clamp(p.ml/p.maxMl,0,1):0;
+/* Symbols such as € or $ go first, letter codes such as kr or Kč after the number. */
+function money(v,dec){const c=cur(),n=dec?(+v).toFixed(2):fmt(v);return !c?n:/^[^\sA-Za-z\u00C0-\u024F\u0400-\u04FF]{1,2}$/.test(c)?c+n:n+'\u00a0'+c}
+const fmtMl=v=>v>=1000?(v/1000).toLocaleString(undefined,{maximumFractionDigits:2})+' l':v<10?mlf(v)+' ml':fmt(v)+' ml';
+/* ml a day over the last 90 days (or since the bottle arrived), and days left at that pace. */
+function pace(p){const now=Date.now(),span=Math.max(7,Math.min(90,(now-(p.created||now))/DAY)),t0=now-span*DAY;let ml=0;
+ S.wears.forEach(w=>{if(w.pid===p.id&&w.t>=t0)ml+=w.n/rateOf(p)});const d=ml/span;return {perDay:d,days:d>0?p.ml/d:null}}
+function leftText(days){if(days==null)return '';if(days<14)return 'about '+Math.max(1,Math.round(days))+(Math.round(days)===1?' day left':' days left');
+ if(days<70)return 'about '+Math.round(days/7)+' weeks left';if(days<730)return 'about '+Math.round(days/30)+' months left';return 'years left at your pace'}
+const lowOf=p=>p.shelf!=='wish'&&+p.maxMl>0&&p.ml>0&&p.ml/p.maxMl<.1;
+const idleDays=p=>{const lw=lastWorn(p.id);return Math.floor((Date.now()-(lw||p.created||Date.now()))/DAY)};
+
+/* ================= collection notes: almost empty, monthly recap, year in review ================= */
+function lowNote(){const low=owned().filter(lowOf);
+ S.settings.lowSeen=(S.settings.lowSeen||[]).filter(id=>low.some(p=>p.id===id)); /* a refilled bottle can warn again */
+ const show=low.filter(p=>!S.settings.lowSeen.includes(p.id));if(!show.length)return '';
+ return `<div class="note low"><span>Almost empty: ${show.map(p=>{const t=leftText(pace(p).days);return `<button class="lnk" data-act="open" data-id="${p.id}">${esc(p.name)}</button> (${mlf(p.ml)} ml${t?', '+t:''})`}).join(', ')}</span><button class="btn ghost sm" data-act="lowHide">Got it</button></div>`}
+function recapCard(){const d=new Date();
+ const y=d.getMonth()===11?d.getFullYear():d.getMonth()===0&&d.getDate()<=15?d.getFullYear()-1:null;
+ if(y&&S.settings.yearSeen!==y){const a=new Date(y,0,1).getTime(),b=new Date(y+1,0,1).getTime(),W=S.wears.filter(w=>w.t>=a&&w.t<b&&byId(w.pid));
+  if(W.length>=5)return recapHtml('year',y,W,`Your ${y} in fragrance`)}
+ if(d.getDate()<=7){const a=new Date(d.getFullYear(),d.getMonth()-1,1),key=a.getFullYear()+'-'+(a.getMonth()+1),b=new Date(d.getFullYear(),d.getMonth(),1).getTime();
+  if(S.settings.recapSeen!==key){const W=S.wears.filter(w=>w.t>=a.getTime()&&w.t<b&&byId(w.pid));if(W.length)return recapHtml('month',key,W,`Your ${MON[a.getMonth()]} in fragrance`)}}
+ return ''}
+function recapHtml(kind,key,W,title){const c={};let ml=0,val=0;
+ W.forEach(w=>{const p=byId(w.pid);c[p.id]=(c[p.id]||0)+1;const m=w.n/rateOf(p);ml+=m;val+=m*perMl(p)});
+ const top=Object.entries(c).sort((x,y)=>y[1]-x[1])[0],tp=byId(top[0]);
+ return `<section class="card recap"><span class="eyebrow">${kind==='year'?'Year in review':'Monthly recap'}</span><h2 style="margin:8px 0 16px">${title}</h2>
+ <div class="rstats"><div><b>${fmt(W.length)}</b><span>wears</span></div><div><b>${fmt(Object.keys(c).length)}</b><span>fragrances</span></div><div><b>${fmtMl(ml)}</b><span>used</span></div>${val?`<div><b>${money(val)}</b><span>sprayed</span></div>`:''}</div>
+ <p class="sub2" style="font-size:14px">Most worn: <b style="color:var(--tx)">${esc(tp.name)}</b> \u00b7 ${top[1]} ${top[1]===1?'wear':'wears'}</p>
+ <div class="acts" style="margin-top:16px"><button class="btn sm" data-act="recapShare" data-k="${kind}" data-v="${key}">Share as image</button><button class="btn ghost sm" data-act="recapHide" data-k="${kind}" data-v="${key}">Done</button></div></section>`}
+
+/* ================= stats: value, prices, forgotten bottles ================= */
+const perStart=p=>p==='all'?0:p==='1'?sod(Date.now()):Date.now()-(+p)*DAY;
+function valueHtml(){const own=owned(),priced=own.filter(hasPrice),miss=own.length-priced.length;
+ const paid=priced.reduce((a,p)=>a+ +p.price,0),left=priced.reduce((a,p)=>a+valueLeft(p),0),ml=own.reduce((a,p)=>a+p.ml,0),pct=paid?Math.round(left/paid*100):0;
+ return `<div class="card"><div class="ch"><h3>Collection value</h3><span class="muted" style="font-size:13px">${fmtMl(ml)} left in ${own.length} ${own.length===1?'bottle':'bottles'}</span></div>
+ ${paid?`<div class="vbig"><b>${money(left)}</b><span>left of ${money(paid)} paid</span></div><div class="vbar" role="img" aria-label="${pct}% of the value left"><b style="width:${pct}%"></b></div>
+ <p class="muted" style="font-size:13.5px;margin-top:8px">${money(paid-left)} sprayed so far \u00b7 ${pct}% left</p>`:'<p class="muted" style="margin-top:8px">Add what you paid for your bottles to see what the collection is worth.</p>'}
+ ${miss?`<button class="linkbtn" data-act="prices">${miss} ${miss===1?'bottle has':'bottles have'} no price \u00b7 add prices</button>`:''}</div>`}
+function openPrices(){const miss=owned().filter(p=>!hasPrice(p));if(!miss.length)return;MODAL='prices';
+ openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Add prices</h2><p class="muted" style="margin:6px 0 14px">What you paid for each bottle${cur()?' ('+esc(cur())+')':''}. Leave a field empty to skip it.</p>
+ ${miss.map(p=>`<div class="prow"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)} \u00b7 ${mlf(p.maxMl)} ml</div></div><input type="number" min="0" step="0.5" inputmode="decimal" data-pid="${p.id}" aria-label="Price for ${esc(p.name)}"></div>`).join('')}
+ <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="pricesSave">Save prices</button></div>`)}
+function forgottenHtml(){const L=owned().filter(p=>p.ml>0&&idleDays(p)>=60).sort((a,b)=>idleDays(b)-idleDays(a));if(!L.length)return '';
+ return `<div class="card"><h3>Waiting on the shelf</h3><p class="muted" style="margin:6px 0 8px;font-size:13.5px">Not worn for two months or more. They get a push in Today's pick.</p>
+ ${L.slice(0,8).map(p=>`<div class="row" data-act="open" data-id="${p.id}"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:0)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)}</div></div><div class="rt">${lastWorn(p.id)?idleDays(p)+' days':'never worn'}</div></div>`).join('')}
+ ${L.length>8?`<p class="muted" style="margin-top:10px;font-size:13.5px">and ${L.length-8} more</p>`:''}</div>`}
+
+/* ================= undo for the last wear ================= */
+function removeWear(id){const i=S.wears.findIndex(w=>w.id===id);if(i<0)return false;const w=S.wears[i],p=byId(w.pid);
+ if(p){p.ml=Math.min(p.maxMl,Math.round((p.ml+(w.ml!=null?w.ml:w.n/rateOf(p)))*10)/10);p.sprays=Math.max(0,(p.sprays||0)-w.n)}S.wears.splice(i,1);save();return true}
+function toastUndo(m,fn){const t=$('#toast');t.innerHTML=`<span>${esc(m)}</span><button type="button" id="toastUndo">Undo</button>`;t.classList.add('show','act');clearTimeout(toastT);
+ $('#toastUndo').onclick=()=>{t.classList.remove('show','act');clearTimeout(toastT);fn()};toastT=setTimeout(()=>t.classList.remove('show','act'),6000)}
+
 /* ================= daily pick: season, weather, occasion and rest ================= */
 const OCC=[['day','Everyday'],['work','Work'],['eve','Evening']];
 const famKind=f=>{const s=norm(f);if(/amber|gourmand|oud|leather|tobacco|spic|orient/.test(s))return 'warm';if(/fresh|citr|aqua|marine|green|aromat|fougere/.test(s))return 'fresh';return 'mid'};
@@ -874,15 +979,19 @@ function rankPicks(day,wx,occ){const ss=season(day),d0=sod(day),yk=dkey(d0-DAY),
   else if(occ==='eve')add((pr>=4?1.5:0)+(k==='warm'?1:0),pr>=4||k==='warm'?'Has presence for the evening':'');
   let lw=0;S.wears.forEach(w=>{if(w.pid===p.id&&w.t<d0&&w.t>lw)lw=w.t});
   const d=lw?Math.round((d0-sod(lw))/DAY):null;
-  if(d==null)add(2.2,'Not worn yet');else{add(Math.min(d,30)/10,d>=7?'Not worn for '+d+' days':'');if(dkey(lw)===yk)add(-2)}
+  if(d==null)add(2.2,'Not worn yet');else{add(Math.min(d,30)/10+(d>=60?1.5:0),d>=60?'Waiting on the shelf for '+Math.round(d/30)+' months':d>=7?'Not worn for '+d+' days':'');if(dkey(lw)===yk)add(-2)}
+  if(S.wears.some(w=>w.pid===p.id&&w.t>=d0&&w.t<d0+DAY))add(-3);
   add((p.rating||0)*.35,p.rating>=4?'You gave it '+p.rating+' stars':'');
   sc+=(hash(dk+p.id)%100)/250;
   return {p,sc,d:d==null?60:d,why:R.sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1])}}).sort((a,b)=>b.sc-a.sc)}
 function todayPick(){const L=rankPicks(Date.now(),wxFresh(),S.settings.occ||'day');return L.length?L[ui.pick%L.length]:null}
-function todayCard(){const own=owned();
+function todayCard(where){const own=owned();
  if(!own.length)return `<section class="card pick"><span class="eyebrow">Today's pick</span><p class="muted" style="margin-top:10px">Add a fragrance to get a daily suggestion.</p></section>`;
  const c=cityOf(),wx=wxFresh();if(c&&!wx)loadWx();
- const occ=S.settings.occ||'day',sg=todayPick(),worn=S.wears.filter(w=>dkey(w.t)===dkey(Date.now())).map(w=>byId(w.pid)).filter(Boolean);
+ const occ=S.settings.occ||'day',tw=S.wears.filter(w=>dkey(w.t)===dkey(Date.now())&&byId(w.pid)),worn=tw.map(w=>byId(w.pid));
+ if(where==='shelf'&&tw.length&&ui.pickDay!==dkey(Date.now())){const n={};tw.forEach(w=>{n[w.pid]=(n[w.pid]||0)+w.n});
+  return `<button class="today-line" data-act="pickOpen" aria-label="Show today's pick"><span class="ck">\u2713</span><span>Today: ${Object.entries(n).map(([id,k])=>`<b>${esc(byId(id).name)}</b> \u00b7 ${k} ${k===1?'spray':'sprays'}`).join(', ')}</span><span class="more">Open</span></button>`}
+ const sg=todayPick();
  const meta=[season(),wx?`${wx.temp}° ${wxName(wx.code)} in ${esc(wx.city)}`:''].filter(Boolean).join(' · ');
  const top=`<div class="pick-top"><span class="eyebrow">Today's pick · ${meta}</span><div class="sg occ" role="group" aria-label="Occasion">${OCC.map(o=>`<button data-act="occ" data-v="${o[0]}" class="${occ===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`;
  const wl=worn.length?`<p class="worn">Worn today: <b>${[...new Set(worn.map(p=>esc(p.name)))].join(', ')}</b></p>`:'';
@@ -890,7 +999,7 @@ function todayCard(){const own=owned();
  const p=sg.p,why=sg.why.length?sg.why:['A good fit for today'];
  return `<section class="card pick">${top}${wl}<div class="today"><div>${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div style="flex:1;min-width:200px"><h2>${esc(p.name)}</h2><div class="muted">${esc(p.brand)}${p.fam?' · '+esc(p.fam):''}</div>
  <ul class="why">${why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>
- <div class="acts" style="margin-top:16px"><button class="btn sm" data-act="wearOpen" data-id="${p.id}">Wear it today</button><button class="btn ghost sm" data-act="another">Another idea</button><button class="btn ghost sm" data-act="open" data-id="${p.id}">Details</button></div></div></div>
+ <div class="acts" style="margin-top:16px"><button class="btn sm" data-act="wearOpen" data-id="${p.id}">${worn.length?'Wear this too':'Wear it today'}</button><button class="btn ghost sm" data-act="another">Another idea</button>${worn.length?'<button class="btn ghost sm" data-act="wearOpen">Add another wear</button>':`<button class="btn ghost sm" data-act="open" data-id="${p.id}">Details</button>`}${where==='shelf'&&worn.length?'<button class="btn ghost sm" data-act="pickClose">Hide</button>':''}</div></div></div>
  <button class="linkbtn" data-act="cityOpen">${c?'Weather for '+esc(c.name||c.label)+' · change':'Add your city for weather-aware picks'}</button></section>`}
 
 /* city for weather (shared with the Test lab when it has one) */
@@ -907,9 +1016,9 @@ async function cityFind(q){const box=$('#c-res');if(!box)return;if(q.length<2){b
 function setCity(c){S.settings.city=c;WXD=null;wxFail=0;ui.pick=0;save();closeModal();render();loadWx()}
 
 /* ================= wishlist details ================= */
-function wishLine(p){const c=cur(),s=+p.seen>0?+p.seen:0,t=+p.target>0?+p.target:0;
- if(s&&t&&s<=t)return `<span class="deal">${esc(c)}${fmt(s)} · good price</span>`;
- const l=[s?esc(c)+fmt(s):'',t?'target '+esc(c)+fmt(t):''].filter(Boolean).join(' · ');
+function wishLine(p){const s=+p.seen>0?+p.seen:0,t=+p.target>0?+p.target:0;
+ if(s&&t&&s<=t)return `<span class="deal">${esc(money(s))} · good price</span>`;
+ const l=[s?esc(money(s)):'',t?'target '+esc(money(t)):''].filter(Boolean).join(' · ');
  return l||(p.prio?'<span class="deal">'+'★'.repeat(p.prio)+'</span>':'')}
 
 /* ================= daily reminders (Android app) ================= */
@@ -933,11 +1042,11 @@ window.luxNotifChanged=()=>{if(ui.tab==='set'&&$('#modal').hidden)render()};
 window.luxOpen=k=>{if(k==='log'){if($('#modal').hidden)openWear()}else{ui.tab='shelf';if($('#modal').hidden)render();scrollTo(0,0)}};
 
 /* ================= share as image ================= */
-const SHK=[['top','Most worn'],['month','This month'],['shelf','My collection'],['wish','Wishlist']];
-let SHR={kind:'top',url:null,n:0};
-function openShare(){SHR={kind:owned().length?'top':'wish',url:null,n:0};MODAL='share';openModal(shareHtml());drawShare()}
+const SHK=[['top','Most worn'],['month','This month'],['year','This year'],['shelf','My collection'],['wish','Wishlist']];
+let SHR={kind:'top',url:null,n:0,mo:0,year:null};
+function openShare(kind,o){o=o||{};SHR={kind:kind||(owned().length?'top':'wish'),url:null,n:0,mo:o.mo||0,year:o.year||null};MODAL='share';openModal(shareHtml());drawShare()}
 function shareHtml(){return `<button class="x" data-act="close" aria-label="Close">×</button><h2>Share</h2><p class="muted" style="margin:6px 0 16px">A picture of your cabinet for Instagram, WhatsApp or anywhere you like.</p>
- <div class="chips" style="margin-bottom:16px">${SHK.map(k=>`<button type="button" class="chip${SHR.kind===k[0]?' on':''}" data-act="shKind" data-v="${k[0]}">${k[1]}</button>`).join('')}</div>
+ <div class="chips" style="margin-bottom:16px">${SHK.map(k=>`<button type="button" class="chip${SHR.kind===k[0]?' on':''}" data-act="shKind" data-v="${k[0]}">${k[0]==='month'&&SHR.mo?'Last month':k[0]==='year'&&SHR.year?String(SHR.year):k[1]}</button>`).join('')}</div>
  <div class="shprev" id="shPrev"><span class="muted">Drawing…</span></div>
  <div class="foot"><button class="btn ghost" data-act="shSave">Save image</button><button class="btn" data-act="shGo">Share</button></div>`}
 function bottleImg(p,level){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);
@@ -956,7 +1065,7 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
  x.strokeStyle='rgba(202,169,107,.38)';x.lineWidth=2;x.strokeRect(34,34,W-68,H-68);
  x.textBaseline='alphabetic';x.textAlign='left';x.fillStyle=GOLD;x.font=`italic 500 66px ${SER}`;x.fillText('Lux',84,140);
  x.fillStyle=TX2;x.font=`500 21px ${SAN}`;x.fillText('P E R F U M E   C A B I N E T',86,176);
- const own=owned(),now=Date.now(),cnt=t0=>{const m={};S.wears.forEach(w=>{if(w.t>=t0&&byId(w.pid))m[w.pid]=(m[w.pid]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([id,v])=>({p:byId(id),v}))};
+ const own=owned(),now=Date.now(),cnt=(t0,t1=Infinity)=>{const m={};S.wears.forEach(w=>{if(w.t>=t0&&w.t<t1&&byId(w.pid))m[w.pid]=(m[w.pid]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([id,v])=>({p:byId(id),v}))};
  const head=(t,s)=>{x.fillStyle=TX;x.font=`500 94px ${SER}`;x.fillText(ell(x,t,W-168),84,312);x.fillStyle=TX2;x.font=`400 30px ${SAN}`;x.fillText(ell(x,s,W-168),86,362)};
  const empty=t=>{x.fillStyle=TX3;x.font=`italic 500 44px ${SER}`;x.textAlign='center';x.fillText(t,W/2,720);x.textAlign='left'};
  const rows=async(list,val)=>{let y=420;for(let i=0;i<list.length;i++){const {p}=list[i];
@@ -967,9 +1076,10 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
   if(i<list.length-1){x.fillStyle='rgba(232,220,190,.12)';x.fillRect(84,y+150,W-168,1.5)}y+=152}};
  if(k==='top'){const L=cnt(now-90*DAY).slice(0,5);head('My most worn','The last 90 days · '+S.wears.filter(w=>w.t>=now-90*DAY).length+' wears');
   if(L.length)await rows(L,r=>r.v+(r.v===1?' wear':' wears'));else empty('No wears in the last 90 days yet')}
- else if(k==='month'){const d=new Date(),t0=new Date(d.getFullYear(),d.getMonth(),1).getTime(),L=cnt(t0),mw=S.wears.filter(w=>w.t>=t0&&byId(w.pid));
-  head(MON[d.getMonth()]+' '+d.getFullYear(),'My month in fragrance');
-  if(!mw.length)empty('Nothing logged this month yet');else{
+ else if(k==='month'||k==='year'){const d=new Date(),yr=k==='year',y=SHR.year||d.getFullYear(),m0=new Date(d.getFullYear(),d.getMonth()+(SHR.mo||0),1);
+  const t0=yr?new Date(y,0,1).getTime():m0.getTime(),t1=yr?new Date(y+1,0,1).getTime():new Date(m0.getFullYear(),m0.getMonth()+1,1).getTime(),L=cnt(t0,t1),mw=S.wears.filter(w=>w.t>=t0&&w.t<t1&&byId(w.pid));
+  head(yr?'My '+y+' in fragrance':MON[m0.getMonth()]+' '+m0.getFullYear(),yr?'The year in wears, bottles and scents':'My month in fragrance');
+  if(!mw.length)empty(yr?'Nothing logged this year yet':'Nothing logged this month yet');else{
    const fam={};mw.forEach(w=>{const f=byId(w.pid).fam;if(f)fam[f]=(fam[f]||0)+1});const tf=Object.entries(fam).sort((a,b)=>b[1]-a[1])[0];
    const stat=(v,l,cx)=>{const num=/^\d+$/.test(v);x.textAlign='center';x.fillStyle=GOLD;x.font=`500 ${num?128:64}px ${SER}`;x.fillText(ell(x,v,290),cx,num?540:510);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(l,cx,588);x.textAlign='left'};
    stat(String(mw.length),mw.length===1?'wear':'wears',W/6+40);stat(String(L.length),'fragrances',W/2);stat(tf?tf[0]:'\u2014','favourite family',W*5/6-40);
@@ -986,7 +1096,7 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
     if(i%4===0){x.fillStyle='rgba(202,169,107,.34)';x.fillRect(84,top+170,W-168,2)}}
    if(own.length>12){x.fillStyle=TX2;x.font=`italic 500 34px ${SER}`;x.fillText('and '+(own.length-12)+' more on the shelves',84,1196)}}}
  else{const L=S.perfumes.filter(p=>p.shelf==='wish').sort((a,b)=>(b.prio||0)-(a.prio||0)).slice(0,5);head('On my wishlist',L.length?'Fragrances I would love to own':'');
-  if(L.length)await rows(L.map(p=>({p})),r=>+r.p.seen>0?cur()+fmt(r.p.seen):r.p.prio?'★'.repeat(r.p.prio):'');else empty('The wishlist is empty')}
+  if(L.length)await rows(L.map(p=>({p})),r=>+r.p.seen>0?money(r.p.seen):r.p.prio?'★'.repeat(r.p.prio):'');else empty('The wishlist is empty')}
  x.fillStyle='rgba(202,169,107,.38)';x.fillRect(84,1238,W-168,1.5);x.fillStyle=TX3;x.font=`400 22px ${SAN}`;x.fillText('Made with Lux',84,1278);
  x.textAlign='right';x.fillText(new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}),W-84,1278);x.textAlign='left';
  if(n!==SHR.n)return;SHR.url=c.toDataURL('image/png');const pv=$('#shPrev');if(pv)pv.innerHTML=`<img src="${SHR.url}" alt="Preview of the image to share">`}
@@ -1000,6 +1110,12 @@ async function shareGo(saveOnly){if(!SHR.url){toast('One moment, still drawing')
 /* ================= actions ================= */
 let libT;const debounceLib=()=>{clearTimeout(libT);libT=setTimeout(updateLib,120)};
 const ACT={
+ pickOpen:()=>{ui.pickDay=dkey(Date.now());render()},pickClose:()=>{ui.pickDay=null;render()},
+ lowHide:()=>{S.settings.lowSeen=owned().filter(lowOf).map(p=>p.id);save();render()},
+ recapHide:a=>{if(a.dataset.k==='year')S.settings.yearSeen=+a.dataset.v;else S.settings.recapSeen=a.dataset.v;save();render()},
+ recapShare:a=>{if(a.dataset.k==='year')openShare('year',{year:+a.dataset.v});else openShare('month',{mo:-1})},
+ prices:()=>openPrices(),
+ pricesSave:()=>{let n=0;$$('#modal [data-pid]').forEach(i=>{const v=+i.value,p=byId(i.dataset.pid);if(v>0&&p){p.price=v;n++}});save();closeModal();render();toast(n?'Prices saved':'Nothing to save')},
  occ:a=>{S.settings.occ=a.dataset.v;ui.pick=0;save();render()},
  cityOpen:()=>openCity(),cityPick:a=>{const c=CITYRES[+a.dataset.i];if(c)setCity(c)},
  cityGeo:()=>{if(!navigator.geolocation){toast('Location is not available here');return}
@@ -1031,8 +1147,7 @@ const ACT={
  wearOpen:a=>openWear(a.dataset.id),
  step:a=>{WD.n=clamp(WD.n+(+a.dataset.d),1,20);$('#w-n').textContent=WD.n},
  wearSave:()=>saveWear(),
- wdel:a=>{const i=S.wears.findIndex(w=>w.id===a.dataset.id);if(i<0)return;const w=S.wears[i],p=byId(w.pid);
-  if(p){p.ml=Math.min(p.maxMl,Math.round((p.ml+w.n/spm())*10)/10);p.sprays=Math.max(0,(p.sprays||0)-w.n)}S.wears.splice(i,1);save();render();toast('Entry removed')},
+ wdel:a=>{if(removeWear(a.dataset.id)){render();toast('Entry removed')}},
  another:()=>{ui.pick++;render()},jprev:()=>{ui.jm--;render()},jnext:()=>{ui.jm++;render()},jmore:()=>{ui.jlim+=40;render()},
  insP:a=>{S.settings.ins.p=a.dataset.v;save();updateIns()},
  lmore:()=>{ui.llim+=60;updateLib()},lnew:()=>openEntry(),entrySave:()=>saveEntry(),
@@ -1076,7 +1191,7 @@ const CH={
  insM:e=>{S.settings.ins.m=e.value;save();updateIns()},insG:e=>{S.settings.ins.g=e.value;save();updateIns()},
  rank:e=>{ui.rank=e.value;const d=insCompute();$('#rankBox').innerHTML=rankHtml(d)},
  lf:e=>{ui.lf=e.value;ui.llim=60;updateLib()},lc:e=>{ui.lc=e.value;ui.llim=60;updateLib()},
- spm:e=>{S.settings.spm=clamp(+e.value||11,1,30);save();toast('Saved')},cur:e=>{S.settings.cur=e.value.trim();save();toast('Saved')},
+ spm:e=>{S.settings.spm=e.value===''?0:clamp(+e.value||0,1,40);save();toast('Saved')},cur:e=>{S.settings.cur=e.value.trim();save();toast('Saved')},
  shName:e=>{const s=S.shelves.find(x=>x.id===e.dataset.id);if(s){s.name=e.value.trim()||s.name;save();toast('Shelf renamed')}},
  remT:e=>{if(e.value){S.settings.rem[e.dataset.k]=e.value;save();toast('Saved')}},
  wp:e=>{WD.pid=e.value},wd:e=>{WD.date=e.value||dkey(Date.now())},

@@ -15,6 +15,18 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
 * **Share**: Collection → *Share* draws a picture (most worn, this month, the collection or the wishlist) to share
   or save.
 
+## Stats, value and bottles
+* **Stats** (was Insights): periods Today, 7, 30, 90 days, Year and All time; wears, sprays, amount used and value
+  sprayed for the period; the collection's current value against what you paid; measures for current value,
+  value sprayed and amount used; bottles without a price can be priced from there; bottles not worn for two
+  months are listed and get a push in Today's pick.
+* **Sprays per ml** per bottle: your own number, or what Lux learns when you correct the remaining ml by hand,
+  or the default from Settings, or by bottle size (10 for 100 ml, 12 for 50 to 75 ml, 15 for 30 ml and decants;
+  common atomizers spray about 0.06 to 0.12 ml).
+* **Almost empty** note under 10%, with the time left at your pace. **Undo** right after logging a wear.
+* **Monthly recap** in the first week of a month and **year in review** in December, both shareable as images.
+* After a wear is logged, Today's pick on Collection folds into a line; tap it to add another wear.
+
 ## Backup
 Settings → **Backup and restore**: download a backup file, copy it as text, or restore from a file or pasted text.
 A backup holds the collection, journal, tests, settings, photos and your own library entries.
