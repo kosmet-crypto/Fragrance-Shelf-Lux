@@ -450,9 +450,21 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+        // The page closes an open window or returns to Collection first (window.luxBack);
+        // only then does a second press within two seconds close the app.
+        webView.evaluateJavascript("window.luxBack?luxBack():false", handled -> {
+            if ("true".equals(handled)) return;
+            long now = System.currentTimeMillis();
+            if (now - lastBack < 2000) {
+                finish();
+            } else {
+                lastBack = now;
+                Toast.makeText(this, "Press back again to close Lux", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
+    private long lastBack;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

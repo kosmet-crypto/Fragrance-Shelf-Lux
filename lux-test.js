@@ -232,7 +232,7 @@ function newST(pre){ return Object.assign({ pid:null, name:'', brand:'', fam:'',
 function startHtml(){
   const c = ST.city, cab = ST.pid && byId(ST.pid);
   return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Start a test</h2>
-  <div class="fg" style="margin-top:16px"><label>Fragrance</label>${ST.name ? `<div class="tt-pick"><span><b>${esc(ST.name)}</b> <small>${esc(ST.brand)}${cab ? ' \u00b7 in cabinet' : ''}</small></span><button data-ta="tclear">Change</button></div>` : `<input id="ts-q" data-ti="tsq" placeholder="Search your cabinet or library" autocomplete="off" value="${esc(ST.q)}"><div class="sugg" id="ts-sugg"></div>`}</div>
+  <div class="fg" style="margin-top:16px"><label>Fragrance</label>${ST.name ? `<div class="tt-pick"><span><b>${esc(ST.name)}</b> <small>${esc(ST.brand)}${cab ? (cab.shelf === 'wish' ? ' \u00b7 on your wishlist' : ' \u00b7 in cabinet') : ''}</small></span><button data-ta="tclear">Change</button></div>` : `<input id="ts-q" data-ti="tsq" placeholder="Search your cabinet or library" autocomplete="off" value="${esc(ST.q)}"><div class="sugg" id="ts-sugg"></div>`}</div>
   <div class="fg"><span class="lb">Where on the body</span><div class="chips">${SPOTS.map(([k, l]) => `<button type="button" class="chip${ST.spots.includes(k) ? ' on' : ''}" data-ta="tspot" data-v="${k}">${l}</button>`).join('')}</div></div>
   <span class="lb" style="text-align:center">Sprays</span><div class="stepper" style="margin:8px 0 16px"><button data-ta="tstep" data-d="-1" aria-label="Fewer">\u2212</button><b id="ts-n" style="font-size:44px">${ST.n}</b><button data-ta="tstep" data-d="1" aria-label="More">+</button></div>
   <div class="g2"><div class="fg"><label for="ts-venue">Where tested</label><input id="ts-venue" list="tt-venues" placeholder="Shop or home" value="${esc(ST.venue)}" autocomplete="off"><datalist id="tt-venues">${tt().venues.map(v => `<option value="${esc(v)}">`).join('')}</datalist></div>
@@ -467,7 +467,7 @@ const TI = {
     const w = norm(q).split(' ').filter(Boolean);
     const cab = S.perfumes.filter(p => { const k = norm(p.brand+' '+p.name); return w.every(x => k.includes(x)); }).slice(0, 4);
     const lib = libFind(q).slice(0, 6);
-    box.innerHTML = cab.map(p => `<button type="button" data-ta="tpickc" data-id="${p.id}">${esc(p.name)} <small>${esc(p.brand)} \u00b7 in cabinet</small></button>`).join('') +
+    box.innerHTML = cab.map(p => `<button type="button" data-ta="tpickc" data-id="${p.id}">${esc(p.name)} <small>${esc(p.brand)} \u00b7 ${p.shelf === 'wish' ? 'on your wishlist' : 'in cabinet'}</small></button>`).join('') +
       lib.map(i => `<button type="button" data-ta="tpickl" data-i="${i}">${esc(LIB[i].n)} <small>${esc(LIB[i].b)}</small></button>`).join('') +
       `<button type="button" data-ta="tpickf">Use \u201c${esc(q)}\u201d as typed</button>`;
   },
@@ -481,6 +481,6 @@ const TC = {
 };
 document.addEventListener('change', e => { const k = e.target.dataset && e.target.dataset.tc; if (k && TC[k]) TC[k](e.target, e); });
 
-window.__luxTest = { groups, score, condStats, tagCounts, relStr, wxLine, radar, keyOf };
+window.__luxTest = { groups, score, condStats, tagCounts, relStr, wxLine, radar, keyOf, openStart };
 afterRender();
 })();
