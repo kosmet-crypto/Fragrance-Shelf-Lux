@@ -249,6 +249,7 @@ h1{font-size:38px}
 .panel{max-height:88vh;max-height:88dvh}
 .panel>.x{position:sticky;top:0;float:right;margin:-14px -10px 0 10px;z-index:5;background:var(--surf2);border:1px solid var(--line2);box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center}
 /* daily pick, wishlist, share */
+.wr .wtag{flex:none;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line2);border-radius:99px;padding:3px 9px}
 .today-line{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 18px;margin-bottom:26px;border:1px solid var(--line2);border-radius:16px;background:var(--surf);color:var(--tx2);font-size:14px}
 .today-line b{color:var(--tx);font-weight:600}
 .today-line .ck{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--goldink);font-weight:700;flex:none}
@@ -483,24 +484,24 @@ function vShelf(){const own=owned(),ml=own.reduce((a,p)=>a+p.ml,0);
  banners()+lowNote()+recapCard()+todayCard('shelf')+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
 
 /* ================= journal ================= */
-function lastWorn(pid){let t=0;S.wears.forEach(w=>{if(w.pid===pid&&w.t>t)t=w.t});return t}
+function lastWorn(pid){let t=0;allWears().forEach(w=>{if(w.pid===pid&&w.t>t)t=w.t});return t}
 function suggestion(){return todayPick()}
-function streak(){const days=new Set(S.wears.map(w=>dkey(w.t)));let n=0,t=sod(Date.now());if(!days.has(dkey(t)))t-=DAY;while(days.has(dkey(t))){n++;t-=DAY}return n}
+function streak(){const days=new Set(allWears().map(w=>dkey(w.t)));let n=0,t=sod(Date.now());if(!days.has(dkey(t)))t-=DAY;while(days.has(dkey(t))){n++;t-=DAY}return n}
 function vJournal(){
  const now=new Date(),first=new Date(now.getFullYear(),now.getMonth()+ui.jm,1),dim=new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
- const cnt={};S.wears.forEach(w=>{const k=dkey(w.t);(cnt[k]=cnt[k]||[]).push(w)});
+ const AW=allWears(),cnt={};AW.forEach(w=>{const k=dkey(w.t);(cnt[k]=cnt[k]||[]).push(w)});
  const pad=(first.getDay()+6)%7;let cal=['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>`<div class="dw">${d}</div>`).join('');
  for(let i=0;i<pad;i++)cal+='<div class="d e"></div>';
  for(let d=1;d<=dim;d++){const k=dkey(new Date(first.getFullYear(),first.getMonth(),d));const a=cnt[k]||[];const al=a.length?Math.min(.9,.22+a.length*.22):0;
-  const names=a.map(w=>(byId(w.pid)||{}).name).filter(Boolean).join(', ');
+  const names=a.map(w=>wP(w).name).filter(Boolean).join(', ');
   cal+=`<div class="d${k===dkey(Date.now())?' t':''}" title="${esc(names)}" style="${al?`background:color-mix(in srgb,var(--gold) ${Math.round(al*100)}%,transparent);color:var(--goldink);font-weight:600`:''}">${d}</div>`}
- const monthWears=S.wears.filter(w=>{const d=new Date(w.t);return d.getMonth()===first.getMonth()&&d.getFullYear()===first.getFullYear()});
- const distinct=new Set(monthWears.map(w=>w.pid)).size;
- const sorted=[...S.wears].sort((a,b)=>b.t-a.t),shown=sorted.slice(0,ui.jlim);let list='',lastD='';
- shown.forEach(w=>{const p=byId(w.pid);if(!p)return;const k=dkey(w.t);if(k!==lastD){lastD=k;const d=new Date(w.t);list+=`<div class="day-h">${d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})}</div>`}
-  list+=`<div class="wr"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n===1?'spray':'sprays'}</small></div><button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button></div>`});
+ const monthWears=AW.filter(w=>{const d=new Date(w.t);return d.getMonth()===first.getMonth()&&d.getFullYear()===first.getFullYear()});
+ const distinct=new Set(monthWears.map(wKey)).size;
+ const sorted=[...AW].sort((a,b)=>b.t-a.t),shown=sorted.slice(0,ui.jlim);let list='',lastD='';
+ shown.forEach(w=>{const p=wP(w);const k=dkey(w.t);if(k!==lastD){lastD=k;const d=new Date(w.t);list+=`<div class="day-h">${d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})}</div>`}
+  list+=`<div class="wr"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n===1?'spray':'sprays'}</small></div>${w.test?'<span class="wtag" title="From the Test lab">Test</span>':`<button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button>`}</div>`});
  if(!list)list='<p class="muted" style="padding:14px 0">No wears logged yet. Log your first wear and the calendar fills in.</p>';
- return `<header class="vh"><div><h1>Journal</h1><p class="sub2">${streak()} day streak \u00b7 ${S.wears.length} wears logged</p></div><div class="acts"><button class="btn" data-act="wearOpen">Log a wear</button></div></header>
+ return `<header class="vh"><div><h1>Journal</h1><p class="sub2">${streak()} day streak \u00b7 ${AW.length} wears logged</p></div><div class="acts"><button class="btn" data-act="wearOpen">Log a wear</button></div></header>
  <div class="g3">${todayCard('journal')}<div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div></div>
  <div class="card" style="margin-top:18px"><h3>History</h3>${list}${sorted.length>ui.jlim?`<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-act="jmore">Show more</button></div>`:''}</div>`}
 
@@ -511,7 +512,7 @@ const PERS=[['1','Today'],['7','7 days'],['30','30 days'],['90','90 days'],['365
 const PAL=['#caa96b','#8fb08a','#b5654f','#6f8fae','#a58bb5','#d6a27a','#5f9a92'];
 const colorOf=(i,k)=>k==='Other'?'#807b6d':PAL[i%PAL.length];
 function insCompute(){const {m,g,p:per}=S.settings.ins,t0=perStart(per),wp={};
- S.wears.forEach(w=>{const q=byId(w.pid);if(w.t>=t0&&q){const o=wp[w.pid]||(wp[w.pid]={c:0,n:0,ml:0});o.c++;o.n+=w.n;o.ml+=w.n/rateOf(q)}});
+ allWears().forEach(w=>{const q=byId(w.pid);if(w.t>=t0&&q){const o=wp[w.pid]||(wp[w.pid]={c:0,n:0,ml:0});o.c++;o.n+=w.n;o.ml+=w.n/rateOf(q)}});
  const map=new Map();
  owned().forEach(p=>{let v=0;const o=wp[p.id]||{c:0,n:0,ml:0};
   v=m==='ml'?p.ml:m==='spr'?p.ml*rateOf(p):m==='used'?p.sprays||0:m==='wears'?o.c:m==='pspr'?o.n:m==='pml'?o.ml:m==='pval'?o.ml*perMl(p):m==='cval'?valueLeft(p):+p.price||0;
@@ -533,17 +534,17 @@ function animateDonut(){requestAnimationFrame(()=>requestAnimationFrame(()=>$$('
 function hl(i){const dn=$('#dn');if(!dn||!DD)return;const m=S.settings.ins.m;
  $$('#dn .seg').forEach(c=>c.classList.toggle('on',i!=null&&+c.dataset.i===i));$$('#lg .lg-row').forEach(r=>r.classList.toggle('on',i!=null&&+r.dataset.i===i));dn.classList.toggle('hl',i!=null);
  const x=i!=null?DD.arr[i]:null;$('#dcv').textContent=x?fmtVal(x.v,m):fmtVal(DD.total,m);$('#dcl').textContent=x?x.k+' \u00b7 '+Math.round(x.v/DD.total*100)+'%':measUnit(m)}
-function activityHtml(per){const now=sod(Date.now());let n,unit;if(per==='1'){n=24;unit='h'}else if(per==='7'){n=7;unit='d'}else if(per==='30'){n=30;unit='d'}else if(per==='90'){n=13;unit='w'}else{n=12;unit='m'}
+function activityHtml(per){const AW=allWears(),now=sod(Date.now());let n,unit;if(per==='1'){n=24;unit='h'}else if(per==='7'){n=7;unit='d'}else if(per==='30'){n=30;unit='d'}else if(per==='90'){n=13;unit='w'}else{n=12;unit='m'}
  const B=[];for(let i=0;i<n;i++){let a,b,l;
   if(unit==='h'){a=now+i*36e5;b=a+36e5;l=String(i).padStart(2,'0')+':00'}
   else if(unit==='d'){a=now-(n-1-i)*DAY;b=a+DAY;l=new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
   else if(unit==='w'){b=now+DAY-(n-1-i)*7*DAY;a=b-7*DAY;l='Week of '+new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
   else{const d=new Date();d.setDate(1);d.setHours(0,0,0,0);d.setMonth(d.getMonth()-(n-1-i));a=d.getTime();const e=new Date(d);e.setMonth(e.getMonth()+1);b=e.getTime();l=MON[d.getMonth()]+' '+d.getFullYear()}
-  B.push({a,b,l,c:S.wears.filter(w=>w.t>=a&&w.t<b).length})}
+  B.push({a,b,l,c:AW.filter(w=>w.t>=a&&w.t<b).length})}
  const mx=Math.max(1,...B.map(x=>x.c));
  return `<div class="bars">${B.map((x,i)=>`<div class="bar${x.c?'':' z'}" title="${esc(x.l)}: ${x.c} ${x.c===1?'wear':'wears'}" style="height:${x.c?Math.max(6,x.c/mx*100):2}%;animation-delay:${i*14}ms"></div>`).join('')}</div><div class="axis"><span>${esc(B[0].l)}</span><span>${esc(B[B.length-1].l)}</span></div>`}
-function kpisHtml(d){const W=S.wears.filter(w=>w.t>=d.t0&&byId(w.pid));let n=0,ml=0,val=0;const ids=new Set();
- W.forEach(w=>{const p=byId(w.pid),m=w.n/rateOf(p);n+=w.n;ml+=m;val+=m*perMl(p);ids.add(p.id)});
+function kpisHtml(d){const W=allWears().filter(w=>w.t>=d.t0&&(w.test||byId(w.pid)));let n=0,ml=0,val=0;const ids=new Set();
+ W.forEach(w=>{const m=wearMl(w);n+=w.n;ml+=m;val+=m*wearPerMl(w);ids.add(wKey(w))});
  const k=[[fmt(W.length),W.length===1?'Wear':'Wears'],[fmt(n),'Sprays'],[fmtMl(ml),'Used'],[money(val),'Value sprayed'],[fmt(ids.size),'Different fragrances']];
  return k.map(x=>`<div class="kpi"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}
 function rankHtml(d){const own=owned(),now=Date.now(),mode=ui.rank;
@@ -727,7 +728,7 @@ const starsHtml=(k,v,dots)=>`<div class="stars${dots?' dots':''}">${[1,2,3,4,5].
 function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,wish=d.shelf==='wish';
  const shOpts=S.shelves.concat([{id:'wish',name:'Wishlist'}]).map(s=>`<option value="${s.id}"${d.shelf===s.id?' selected':''}>${esc(s.name)}</option>`).join('');
  const concs=(!d.conc||CONCS.includes(d.conc))?CONCS:CONCS.concat([d.conc]);
- let stats='';if(!sheetNew){const w=S.wears.filter(x=>x.pid===d.id).length,days=Math.max(1,Math.floor((Date.now()-d.created)/DAY));
+ let stats='';if(!sheetNew){const w=allWears().filter(x=>x.pid===d.id).length,days=Math.max(1,Math.floor((Date.now()-d.created)/DAY));
   stats=`<div class="s-stats"><span><b>${days}</b> days here</span><span><b>${d.sprays||0}</b> sprays</span><span><b>${w}</b> wears</span>${+d.price>0&&w>0?`<span><b>${money(d.price/w,1)}</b> per wear</span>`:''}${!wish&&hasPrice(d)?`<span><b>${money(valueLeft(d))}</b> value left</span>`:''}${!wish&&leftText(pace(d).days)?`<span>${leftText(pace(d).days)}</span>`:''}</div>`}
  const known=sheetNew&&!!(d.name&&LIB.some(e=>e.k===norm(d.brand+' '+d.name)));
  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button>
@@ -911,6 +912,25 @@ function leftText(days){if(days==null)return '';if(days<14)return 'about '+Math.
 const lowOf=p=>p.shelf!=='wish'&&+p.maxMl>0&&p.ml>0&&p.ml/p.maxMl<.1;
 const idleDays=p=>{const lw=lastWorn(p.id);return Math.floor((Date.now()-(lw||p.created||Date.now()))/DAY)};
 
+/* ================= tests count as wears ================= */
+/* Every Test lab test counts as a wear (Journal, calendar, streak, Stats, recaps, picks, share),
+   also tests of wishlist bottles and tests typed by hand, old ones included. A test logged from a
+   cabinet bottle already made a real wear at the same moment, so it is not counted twice.
+   Test entries are read-only here; they are edited in the Test lab. */
+function testWears(){const T=(S.tt&&S.tt.sessions)||[];if(!T.length)return [];const real=new Set(S.wears.map(w=>w.pid+'@'+w.t));
+ return T.filter(x=>!real.has(x.pid+'@'+x.t0)).map(x=>{const p=x.pid&&byId(x.pid);
+  return {id:'t'+x.id,pid:p?p.id:null,t:x.t0,n:+x.sprays||0,test:true,name:p?p.name:x.name,brand:p?p.brand:(x.brand||''),fam:p?p.fam:(x.fam||''),price:x.price}})}
+function allWears(){return S.wears.concat(testWears())}
+/* The bottle behind a wear, or a stand-in for a tested fragrance that is on no shelf. */
+function wP(w){return byId(w.pid)||{id:w.id,name:w.name||'?',brand:w.brand||'',fam:w.fam||'',maxMl:100,ml:100,shelf:'wish'}}
+function wKey(w){return w.pid||'n:'+norm((w.brand||'')+' '+w.name)}
+function wearMl(w){const p=byId(w.pid);return w.n/(p?rateOf(p):10)}
+/* Value of what was sprayed: the price paid for own bottles; for tests also the seen price of a
+   wishlist bottle or the price noted in the test (per ml of the bottle size, 100 ml if unknown).
+   None of this touches the collection value. */
+function wearPerMl(w){const p=byId(w.pid);if(p&&p.shelf!=='wish'&&hasPrice(p))return perMl(p);if(!w.test)return 0;
+ const price=+w.price>0?+w.price:p&&+p.seen>0?+p.seen:p&&hasPrice(p)?+p.price:0;return price?price/((p&&+p.maxMl)||100):0}
+
 /* ================= collection notes: almost empty, monthly recap, year in review ================= */
 function lowNote(){const low=owned().filter(lowOf);
  S.settings.lowSeen=(S.settings.lowSeen||[]).filter(id=>low.some(p=>p.id===id)); /* a refilled bottle can warn again */
@@ -918,14 +938,14 @@ function lowNote(){const low=owned().filter(lowOf);
  return `<div class="note low"><span>Almost empty: ${show.map(p=>{const t=leftText(pace(p).days);return `<button class="lnk" data-act="open" data-id="${p.id}">${esc(p.name)}</button> (${mlf(p.ml)} ml${t?', '+t:''})`}).join(', ')}</span><button class="btn ghost sm" data-act="lowHide">Got it</button></div>`}
 function recapCard(){const d=new Date();
  const y=d.getMonth()===11?d.getFullYear():d.getMonth()===0&&d.getDate()<=15?d.getFullYear()-1:null;
- if(y&&S.settings.yearSeen!==y){const a=new Date(y,0,1).getTime(),b=new Date(y+1,0,1).getTime(),W=S.wears.filter(w=>w.t>=a&&w.t<b&&byId(w.pid));
+ if(y&&S.settings.yearSeen!==y){const a=new Date(y,0,1).getTime(),b=new Date(y+1,0,1).getTime(),W=allWears().filter(w=>w.t>=a&&w.t<b&&(w.test||byId(w.pid)));
   if(W.length>=5)return recapHtml('year',y,W,`Your ${y} in fragrance`)}
  if(d.getDate()<=7){const a=new Date(d.getFullYear(),d.getMonth()-1,1),key=a.getFullYear()+'-'+(a.getMonth()+1),b=new Date(d.getFullYear(),d.getMonth(),1).getTime();
-  if(S.settings.recapSeen!==key){const W=S.wears.filter(w=>w.t>=a.getTime()&&w.t<b&&byId(w.pid));if(W.length)return recapHtml('month',key,W,`Your ${MON[a.getMonth()]} in fragrance`)}}
+  if(S.settings.recapSeen!==key){const W=allWears().filter(w=>w.t>=a.getTime()&&w.t<b&&(w.test||byId(w.pid)));if(W.length)return recapHtml('month',key,W,`Your ${MON[a.getMonth()]} in fragrance`)}}
  return ''}
-function recapHtml(kind,key,W,title){const c={};let ml=0,val=0;
- W.forEach(w=>{const p=byId(w.pid);c[p.id]=(c[p.id]||0)+1;const m=w.n/rateOf(p);ml+=m;val+=m*perMl(p)});
- const top=Object.entries(c).sort((x,y)=>y[1]-x[1])[0],tp=byId(top[0]);
+function recapHtml(kind,key,W,title){const c={},nm={};let ml=0,val=0;
+ W.forEach(w=>{const k=wKey(w);c[k]=(c[k]||0)+1;nm[k]=wP(w).name;const m=wearMl(w);ml+=m;val+=m*wearPerMl(w)});
+ const top=Object.entries(c).sort((x,y)=>y[1]-x[1])[0],tp={name:nm[top[0]]};
  return `<section class="card recap"><span class="eyebrow">${kind==='year'?'Year in review':'Monthly recap'}</span><h2 style="margin:8px 0 16px">${title}</h2>
  <div class="rstats"><div><b>${fmt(W.length)}</b><span>wears</span></div><div><b>${fmt(Object.keys(c).length)}</b><span>fragrances</span></div><div><b>${fmtMl(ml)}</b><span>used</span></div>${val?`<div><b>${money(val)}</b><span>sprayed</span></div>`:''}</div>
  <p class="sub2" style="font-size:14px">Most worn: <b style="color:var(--tx)">${esc(tp.name)}</b> \u00b7 ${top[1]} ${top[1]===1?'wear':'wears'}</p>
@@ -970,7 +990,7 @@ async function loadWx(){const c=cityOf();if(!c||wxBusy||wxFresh()||Date.now()-wx
  catch(e){wxFail=Date.now()}finally{wxBusy=false}}
 const wxName=c=>c==null?'':c===0?'clear':c<=2?'partly cloudy':c===3?'overcast':c<=48?'foggy':c<=67?'rainy':c<=77?'snowy':c<=82?'showers':c<=86?'snow showers':'stormy';
 /* Scores every bottle with something left for a given day. wx is today's weather or null. */
-function rankPicks(day,wx,occ){const ss=season(day),d0=sod(day),yk=dkey(d0-DAY),dk=dkey(d0);
+function rankPicks(day,wx,occ){const AW=allWears(),ss=season(day),d0=sod(day),yk=dkey(d0-DAY),dk=dkey(d0);
  const t=wx?Math.round(wx.max!=null?(wx.max+wx.temp)/2:wx.temp):null,tb=t==null?null:t<12?'cold':t>=24?'hot':'mild';
  return owned().filter(p=>p.ml>0).map(p=>{const R=[];let sc=0;const add=(v,why)=>{sc+=v;if(why&&v>0)R.push([v,why])};
   const k=famKind(p.fam),se=p.seasons||[],pr=+p.proj||0;
@@ -980,10 +1000,10 @@ function rankPicks(day,wx,occ){const ss=season(day),d0=sod(day),yk=dkey(d0-DAY),
   else if(tb==='mild')add(k==='mid'?.8:.3,k==='mid'?t+'° today, easy weather for it':'');
   if(occ==='work')add(pr>=4?-1.5:k==='warm'?0:.8,pr&&pr<=3?'Polite enough for work':'');
   else if(occ==='eve')add((pr>=4?1.5:0)+(k==='warm'?1:0),pr>=4||k==='warm'?'Has presence for the evening':'');
-  let lw=0;S.wears.forEach(w=>{if(w.pid===p.id&&w.t<d0&&w.t>lw)lw=w.t});
+  let lw=0;AW.forEach(w=>{if(w.pid===p.id&&w.t<d0&&w.t>lw)lw=w.t});
   const d=lw?Math.round((d0-sod(lw))/DAY):null;
   if(d==null)add(2.2,'Not worn yet');else{add(Math.min(d,30)/10+(d>=60?1.5:0),d>=60?'Waiting on the shelf for '+Math.round(d/30)+' months':d>=7?'Not worn for '+d+' days':'');if(dkey(lw)===yk)add(-2)}
-  if(S.wears.some(w=>w.pid===p.id&&w.t>=d0&&w.t<d0+DAY))add(-3);
+  if(AW.some(w=>w.pid===p.id&&w.t>=d0&&w.t<d0+DAY))add(-3);
   add((p.rating||0)*.35,p.rating>=4?'You gave it '+p.rating+' stars':'');
   sc+=(hash(dk+p.id)%100)/250;
   return {p,sc,d:d==null?60:d,why:R.sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1])}}).sort((a,b)=>b.sc-a.sc)}
@@ -991,9 +1011,9 @@ function todayPick(){const L=rankPicks(Date.now(),wxFresh(),S.settings.occ||'day
 function todayCard(where){const own=owned();
  if(!own.length)return `<section class="card pick"><span class="eyebrow">Today's pick</span><p class="muted" style="margin-top:10px">Add a fragrance to get a daily suggestion.</p></section>`;
  const c=cityOf(),wx=wxFresh();if(c&&!wx)loadWx();
- const occ=S.settings.occ||'day',tw=S.wears.filter(w=>dkey(w.t)===dkey(Date.now())&&byId(w.pid)),worn=tw.map(w=>byId(w.pid));
- if(where==='shelf'&&tw.length&&ui.pickDay!==dkey(Date.now())){const n={};tw.forEach(w=>{n[w.pid]=(n[w.pid]||0)+w.n});
-  return `<button class="today-line" data-act="pickOpen" aria-label="Show today's pick"><span class="ck">\u2713</span><span>Today: ${Object.entries(n).map(([id,k])=>`<b>${esc(byId(id).name)}</b> \u00b7 ${k} ${k===1?'spray':'sprays'}`).join(', ')}</span><span class="more">Open</span></button>`}
+ const occ=S.settings.occ||'day',tw=allWears().filter(w=>dkey(w.t)===dkey(Date.now())&&(w.test||byId(w.pid))),worn=tw.map(wP);
+ if(where==='shelf'&&tw.length&&ui.pickDay!==dkey(Date.now())){const n={},nm={};tw.forEach(w=>{const k=wKey(w);n[k]=(n[k]||0)+w.n;nm[k]=wP(w).name});
+  return `<button class="today-line" data-act="pickOpen" aria-label="Show today's pick"><span class="ck">\u2713</span><span>Today: ${Object.entries(n).map(([id,k])=>`<b>${esc(nm[id])}</b> \u00b7 ${k} ${k===1?'spray':'sprays'}`).join(', ')}</span><span class="more">Open</span></button>`}
  const sg=todayPick();
  const meta=[season(),wx?`${wx.temp}° ${wxName(wx.code)} in ${esc(wx.city)}`:''].filter(Boolean).join(' · ');
  const top=`<div class="pick-top"><span class="eyebrow">Today's pick · ${meta}</span><div class="sg occ" role="group" aria-label="Occasion">${OCC.map(o=>`<button data-act="occ" data-v="${o[0]}" class="${occ===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`;
@@ -1029,7 +1049,7 @@ let remT;
 function syncReminders(){if(!window.LuxAndroid||!LuxAndroid.setReminders)return;clearTimeout(remT);remT=setTimeout(()=>{try{
  const r=S.settings.rem,picks={},now=Date.now();
  for(let i=0;i<8;i++){const day=now+i*DAY,q=rankPicks(day,i===0?wxFresh():null,'day')[0];if(q)picks[dkey(day)]={t:q.p.name,b:[q.p.brand].concat(q.why).join(' · ')}}
- const worn=[...new Set(S.wears.filter(w=>w.t>now-3*DAY).map(w=>dkey(w.t)))];
+ const worn=[...new Set(allWears().filter(w=>w.t>now-3*DAY).map(w=>dkey(w.t)))];
  LuxAndroid.setReminders(JSON.stringify({am:!!r.am,amT:r.amT,pm:!!r.pm,pmT:r.pmT,picks,worn}))}catch(e){}},600)}
 function remHtml(){const r=S.settings.rem,and=!!(window.LuxAndroid&&LuxAndroid.setReminders),c=cityOf();
  const off=and&&(r.am||r.pm)&&LuxAndroid.notificationsAllowed&&!LuxAndroid.notificationsAllowed();
@@ -1071,7 +1091,7 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
  x.strokeStyle='rgba(202,169,107,.38)';x.lineWidth=2;x.strokeRect(34,34,W-68,H-68);
  x.textBaseline='alphabetic';x.textAlign='left';x.fillStyle=GOLD;x.font=`italic 500 66px ${SER}`;x.fillText('Lux',84,140);
  x.fillStyle=TX2;x.font=`500 21px ${SAN}`;x.fillText('P E R F U M E   C A B I N E T',86,176);
- const own=owned(),now=Date.now(),cnt=(t0,t1=Infinity)=>{const m={};S.wears.forEach(w=>{if(w.t>=t0&&w.t<t1&&byId(w.pid))m[w.pid]=(m[w.pid]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([id,v])=>({p:byId(id),v}))};
+ const own=owned(),now=Date.now(),cnt=(t0,t1=Infinity)=>{const m={},P={};allWears().forEach(w=>{if(w.t>=t0&&w.t<t1&&(w.test||byId(w.pid))){const k=wKey(w);m[k]=(m[k]||0)+1;P[k]=wP(w)}});return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({p:P[k],v}))};
  const head=(t,s)=>{x.fillStyle=TX;x.font=`500 94px ${SER}`;x.fillText(ell(x,t,W-168),84,312);x.fillStyle=TX2;x.font=`400 30px ${SAN}`;x.fillText(ell(x,s,W-168),86,362)};
  const empty=t=>{x.fillStyle=TX3;x.font=`italic 500 44px ${SER}`;x.textAlign='center';x.fillText(t,W/2,720);x.textAlign='left'};
  const rows=async(list,val)=>{let y=420;for(let i=0;i<list.length;i++){const {p}=list[i];
@@ -1080,13 +1100,13 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
   x.fillStyle=TX;x.font=`600 50px ${SER}`;x.fillText(ell(x,p.name,540),276,y+72);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(ell(x,p.brand,540),278,y+112);
   x.textAlign='right';x.fillStyle=GOLD;x.font=`500 30px ${SAN}`;x.fillText(val(list[i]),W-84,y+86);x.textAlign='left';
   if(i<list.length-1){x.fillStyle='rgba(232,220,190,.12)';x.fillRect(84,y+150,W-168,1.5)}y+=152}};
- if(k==='top'){const L=cnt(now-90*DAY).slice(0,5);head('My most worn','The last 90 days · '+S.wears.filter(w=>w.t>=now-90*DAY).length+' wears');
+ if(k==='top'){const L=cnt(now-90*DAY).slice(0,5);head('My most worn','The last 90 days · '+allWears().filter(w=>w.t>=now-90*DAY).length+' wears');
   if(L.length)await rows(L,r=>r.v+(r.v===1?' wear':' wears'));else empty('No wears in the last 90 days yet')}
  else if(k==='month'||k==='year'){const d=new Date(),yr=k==='year',y=SHR.year||d.getFullYear(),m0=new Date(d.getFullYear(),d.getMonth()+(SHR.mo||0),1);
-  const t0=yr?new Date(y,0,1).getTime():m0.getTime(),t1=yr?new Date(y+1,0,1).getTime():new Date(m0.getFullYear(),m0.getMonth()+1,1).getTime(),L=cnt(t0,t1),mw=S.wears.filter(w=>w.t>=t0&&w.t<t1&&byId(w.pid));
+  const t0=yr?new Date(y,0,1).getTime():m0.getTime(),t1=yr?new Date(y+1,0,1).getTime():new Date(m0.getFullYear(),m0.getMonth()+1,1).getTime(),L=cnt(t0,t1),mw=allWears().filter(w=>w.t>=t0&&w.t<t1&&(w.test||byId(w.pid)));
   head(yr?'My '+y+' in fragrance':MON[m0.getMonth()]+' '+m0.getFullYear(),yr?'The year in wears, bottles and scents':'My month in fragrance');
   if(!mw.length)empty(yr?'Nothing logged this year yet':'Nothing logged this month yet');else{
-   const fam={};mw.forEach(w=>{const f=byId(w.pid).fam;if(f)fam[f]=(fam[f]||0)+1});const tf=Object.entries(fam).sort((a,b)=>b[1]-a[1])[0];
+   const fam={};mw.forEach(w=>{const f=wP(w).fam;if(f)fam[f]=(fam[f]||0)+1});const tf=Object.entries(fam).sort((a,b)=>b[1]-a[1])[0];
    const stat=(v,l,cx)=>{const num=/^\d+$/.test(v);x.textAlign='center';x.fillStyle=GOLD;x.font=`500 ${num?128:64}px ${SER}`;x.fillText(ell(x,v,290),cx,num?540:510);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(l,cx,588);x.textAlign='left'};
    stat(String(mw.length),mw.length===1?'wear':'wears',W/6+40);stat(String(L.length),'fragrances',W/2);stat(tf?tf[0]:'\u2014','favourite family',W*5/6-40);
    x.fillStyle='rgba(232,220,190,.12)';x.fillRect(84,650,W-168,1.5);
