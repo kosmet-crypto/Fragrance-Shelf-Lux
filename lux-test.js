@@ -35,14 +35,16 @@ const refresh = () => { if (ui.tab === 'test') render(); };
 const closeAll = () => closeModal();
 
 /* ---------- grouping and stats ---------- */
-function keyOf(s){ return s.pid ? 'p:'+s.pid : 'n:'+norm((s.brand||'')+' '+s.name); }
+/* Tests are grouped by fragrance and house, so tests of a deleted bottle and of the same fragrance
+   added again later (a new bottle, a new id) share one entry and one average. */
+function keyOf(s){ const p = s.pid && byId(s.pid); return 'n:'+norm(((p ? p.brand : s.brand)||'')+' '+(p ? p.name : s.name)); }
 function groups(){
   const map = new Map();
   tt().sessions.forEach(s => {
     const k = keyOf(s); let g = map.get(k);
-    if (!g) { g = { key:k, pid:s.pid || null, name:s.name, brand:s.brand, fam:s.fam || '', sessions:[] }; map.set(k, g); }
+    if (!g) { g = { key:k, pid:null, name:s.name, brand:s.brand, fam:s.fam || '', sessions:[] }; map.set(k, g); }
     g.sessions.push(s);
-    if (s.pid) { const p = byId(s.pid); if (p) { g.name = p.name; g.brand = p.brand; g.fam = p.fam; } }
+    if (s.pid) { const p = byId(s.pid); if (p) { g.pid = p.id; g.name = p.name; g.brand = p.brand; g.fam = p.fam; } } /* link to a bottle that still exists */
   });
   return [...map.values()].map(g => {
     g.done = g.sessions.filter(isDone).sort((a,b) => b.t0 - a.t0);
