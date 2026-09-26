@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lux · Perfume Cabinet</title>
-<meta name="theme-color" content="#0d0f0e">
+<meta name="theme-color" content="#161a18">
 <!-- Android bridge this page needs; the app only takes silent content updates it supports (android/.../Ota.java). -->
 <meta name="lux-native" content="3">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,21 +18,21 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
---bg:#0d0f0e;--bg2:#131614;--surf:#171b19;--surf2:#1d221f;--line:rgba(232,220,190,.09);--line2:rgba(232,220,190,.18);
---tx:#ece6d6;--tx2:#a8a293;--tx3:#787466;--gold:#caa96b;--gold2:#e6cf98;--goldink:#19130a;--glow:rgba(202,169,107,.11);
+--bg:#161a18;--bg2:#1c211e;--surf:#222825;--surf2:#2a312d;--line:rgba(232,220,190,.13);--line2:rgba(232,220,190,.26);
+--tx:#f5f0e4;--tx2:#cdc7b8;--tx3:#a39d8c;--gold:#dcbd7e;--gold2:#eed9a6;--goldink:#19130a;--glow:rgba(220,189,126,.14);
 --danger:#dd7565;--ledge:rgba(202,169,107,.34);--scrim:rgba(6,7,6,.66);--glass:rgba(255,255,255,.04);
---gf:rgba(255,255,255,.05);--gs:rgba(255,255,255,.3);--shn:rgba(255,255,255,.15);
+--gf:rgba(255,255,255,.07);--gs:rgba(255,255,255,.4);--shn:rgba(255,255,255,.18);
 --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
---bg:#f4f0e7;--bg2:#ece6d9;--surf:#fbf8f1;--surf2:#f1ebdf;--line:rgba(44,36,20,.10);--line2:rgba(44,36,20,.2);
---tx:#1e1b15;--tx2:#5f5848;--tx3:#8b8471;--gold:#8f6b28;--gold2:#6e4f17;--goldink:#fff8e8;--glow:rgba(143,107,40,.10);
---danger:#b4402f;--ledge:rgba(143,107,40,.4);--scrim:rgba(30,24,12,.45);--glass:rgba(0,0,0,.03);
---gf:rgba(0,0,0,.04);--gs:rgba(40,30,10,.35);--shn:rgba(255,255,255,.55)}}
+--bg:#e6e0d3;--bg2:#ddd6c7;--surf:#ece6d9;--surf2:#e3dccd;--line:rgba(44,36,20,.14);--line2:rgba(44,36,20,.27);
+--tx:#14110c;--tx2:#3e382d;--tx3:#5f584a;--gold:#6f4f15;--gold2:#573c0c;--goldink:#fff8e8;--glow:rgba(111,79,21,.12);
+--danger:#9c3324;--ledge:rgba(143,107,40,.4);--scrim:rgba(30,24,12,.45);--glass:rgba(0,0,0,.03);
+--gf:rgba(0,0,0,.05);--gs:rgba(40,30,10,.45);--shn:rgba(255,255,255,.55)}}
 :root[data-theme="light"]{
---bg:#f4f0e7;--bg2:#ece6d9;--surf:#fbf8f1;--surf2:#f1ebdf;--line:rgba(44,36,20,.10);--line2:rgba(44,36,20,.2);
---tx:#1e1b15;--tx2:#5f5848;--tx3:#8b8471;--gold:#8f6b28;--gold2:#6e4f17;--goldink:#fff8e8;--glow:rgba(143,107,40,.10);
---danger:#b4402f;--ledge:rgba(143,107,40,.4);--scrim:rgba(30,24,12,.45);--glass:rgba(0,0,0,.03);
---gf:rgba(0,0,0,.04);--gs:rgba(40,30,10,.35);--shn:rgba(255,255,255,.55)}
+--bg:#e6e0d3;--bg2:#ddd6c7;--surf:#ece6d9;--surf2:#e3dccd;--line:rgba(44,36,20,.14);--line2:rgba(44,36,20,.27);
+--tx:#14110c;--tx2:#3e382d;--tx3:#5f584a;--gold:#6f4f15;--gold2:#573c0c;--goldink:#fff8e8;--glow:rgba(111,79,21,.12);
+--danger:#9c3324;--ledge:rgba(143,107,40,.4);--scrim:rgba(30,24,12,.45);--glass:rgba(0,0,0,.03);
+--gf:rgba(0,0,0,.05);--gs:rgba(40,30,10,.45);--shn:rgba(255,255,255,.55)}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 html.lock{overflow:hidden}
 body{font:15px/1.5 var(--sans);color:var(--tx);min-height:100%;-webkit-font-smoothing:antialiased;
@@ -245,6 +245,9 @@ h1{font-size:38px}
 .lrow .ac .ic{width:36px;height:36px}
 }
 @media (min-width:700px){.modal:not(.dlg){align-items:center;padding:24px}.modal:not(.dlg) .panel{border-radius:26px}}
+/* the close button stays in reach while a long panel scrolls; the scrim above stays tappable */
+.panel{max-height:88vh;max-height:88dvh}
+.panel>.x{position:sticky;top:0;float:right;margin:-14px -10px 0 10px;z-index:5;background:var(--surf2);border:1px solid var(--line2);box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center}
 /* daily pick, wishlist, share */
 .today-line{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 18px;margin-bottom:26px;border:1px solid var(--line2);border-radius:16px;background:var(--surf);color:var(--tx2);font-size:14px}
 .today-line b{color:var(--tx);font-weight:600}
@@ -749,7 +752,7 @@ function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,
  <div class="fg"><label for="f-notes">Notes</label><textarea id="f-notes" data-in="sheet" placeholder="How it wears, when you reach for it">${esc(d.notes)}</textarea></div>
  <div class="fg"><span class="lb">Photo</span><div class="acts"><button type="button" class="btn ghost sm" data-act="photoPick">${PHOTOS[d.id]?'Change photo':'Add photo'}</button>${PHOTOS[d.id]?'<button type="button" class="btn ghost sm" data-act="photoDel">Remove photo</button>':''}</div><input type="file" id="photoFile" accept="image/*"></div>
  ${sheetNew&&!known?`<div class="set-row" style="border:0;padding:4px 0"><label for="f-savelib" style="margin:0">Also save to my library</label><input type="checkbox" id="f-savelib" checked style="width:20px;height:20px"></div>`:''}
- <div class="foot">${sheetNew?'':'<button class="btn danger sp" data-act="sheetDel">Delete</button>'}${!sheetNew&&!wish?'<button class="btn ghost" data-act="sheetWear">Log a wear</button>':''}${!sheetNew&&wish?'<button class="btn ghost" data-act="bought">I bought it</button>':''}<button class="btn" data-act="sheetSave">${sheetNew?'Add to cabinet':'Save changes'}</button></div>`}
+ <div class="foot">${sheetNew?'':'<button class="btn danger sp" data-act="sheetDel">Delete</button>'}${!sheetNew&&!wish?'<button class="btn ghost" data-act="sheetWear">Log a wear</button>':''}${!sheetNew&&wish&&window.__luxTest?'<button class="btn ghost" data-act="wishTest">Test</button>':''}${!sheetNew&&wish?'<button class="btn ghost" data-act="bought">I bought it</button>':''}<button class="btn" data-act="sheetSave">${sheetNew?'Add to cabinet':'Save changes'}</button></div>`}
 function paintSheet(){const p=$('#modal .panel');if(p){const sc=p.scrollTop;p.innerHTML=sheetHtml();p.scrollTop=sc}}
 function openSheet(id,pre){const p=id?byId(id):null;sheetNew=!p;
  D=p?JSON.parse(JSON.stringify(p)):Object.assign({id:uid(),name:'',brand:'',fam:'',conc:'EDP',year:'',shelf:S.shelves[0].id,type:'Bottle',maxMl:100,ml:100,price:'',rating:0,longevity:'',proj:0,seasons:[],notes:'',created:Date.now(),sprays:0},pre||{});
@@ -1037,6 +1040,9 @@ function remHtml(){const r=S.settings.rem,and=!!(window.LuxAndroid&&LuxAndroid.s
  ${row('am','amT','Morning pick','A notification with today’s suggestion')}
  ${row('pm','pmT','Evening reminder','Only when nothing is logged for the day')}
  <div class="set-row"><div>City for weather<small>${c?esc(c.label||c.name):'Not set. Picks use the season only.'}</small></div><button class="btn ghost sm" data-act="cityOpen">${c?'Change':'Add city'}</button></div></div>`}
+/* Android back button: close what is open first, then go back to Collection; false lets the app ask to exit. */
+window.luxBack=()=>{if(!$('#dlg').hidden){endConfirm(false);return true}if(!$('#modal').hidden){closeModal();return true}
+ if(ui.tab!=='shelf'){ui.tab='shelf';render();scrollTo(0,0);return true}return false};
 window.luxNotifChanged=()=>{if(ui.tab==='set'&&$('#modal').hidden)render()};
 /* The Android app calls this when a notification is tapped. */
 window.luxOpen=k=>{if(k==='log'){if($('#modal').hidden)openWear()}else{ui.tab='shelf';if($('#modal').hidden)render();scrollTo(0,0)}};
@@ -1110,6 +1116,7 @@ async function shareGo(saveOnly){if(!SHR.url){toast('One moment, still drawing')
 /* ================= actions ================= */
 let libT;const debounceLib=()=>{clearTimeout(libT);libT=setTimeout(updateLib,120)};
 const ACT={
+ wishTest:()=>{if(!commitSheet())return;const p=D;closeModal();render();window.__luxTest.openStart({pid:p.id,name:p.name,brand:p.brand,fam:p.fam})},
  pickOpen:()=>{ui.pickDay=dkey(Date.now());render()},pickClose:()=>{ui.pickDay=null;render()},
  lowHide:()=>{S.settings.lowSeen=owned().filter(lowOf).map(p=>p.id);save();render()},
  recapHide:a=>{if(a.dataset.k==='year')S.settings.yearSeen=+a.dataset.v;else S.settings.recapSeen=a.dataset.v;save();render()},
