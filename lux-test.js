@@ -24,6 +24,8 @@ function toLocalInput(t){ const d = new Date(t); d.setMinutes(d.getMinutes() - d
 const fromLocalInput = s => s ? new Date(s).getTime() : Date.now();
 const isDone = s => s.status === 'done';
 const score = s => s.rating ? mean([s.rating.longevity, s.rating.sillage, s.rating.skin]) : null;
+/* Average of several ratings of one test, per criterion (value only where it was given). */
+function avgRating(list){ const o = {}; ['longevity','sillage','skin','value'].forEach(k => { const v = mean(list.map(r => +r[k] > 0 ? +r[k] : NaN)); o[k] = v == null ? 0 : r1(v); }); return o; }
 const elapsed = s => (s.fadedAt || Date.now()) - s.t0;
 const pv = s => (s.pid && byId(s.pid)) || { id:'t'+s.id, name:s.name, brand:s.brand, fam:s.fam || '' };
 function spotsLabel(s){ if (Date.now() - s.t0 > 24*H || !s.spots || !s.spots.length) return ''; return s.spots.map(c => (SPOTS.find(x=>x[0]===c)||[0,c])[1]).join(' + '); }
@@ -262,6 +264,11 @@ function startSession(){
   const typed = ($('#ts-q') || {}).value;
   if (!ST.name && typed && typed.trim()) { ST.name = typed.trim(); ST.brand = ''; }
   if (!ST.name) { toast('Pick a fragrance first'); return; }
+  /* One test per fragrance per day: starting it again the same day continues that test (same
+     spraying); more impressions and ratings go into it. "New spray" adds sprays to it. */
+  const day = dkey(ST.earlier ? ST.t : Date.now()), k = keyOf({ pid:ST.pid, name:ST.name, brand:ST.brand });
+  const today = tt().sessions.find(x => dkey(x.t0) === day && keyOf(x) === k);
+  if (today) { closeAll(); render(); toast('Continuing today\u2019s test of '+today.name); openDetail(today.id); return; }
   const s = { id:uid(), pid:ST.pid, name:ST.name, brand:ST.brand, fam:ST.fam, t0:ST.earlier ? ST.t : Date.now(), sprays:ST.n, spots:ST.spots.slice(), venue:ST.venue.trim(), price:ST.price === '' ? null : +ST.price, weather:null, notes:[], fadedAt:null, status:'active', rating:null, wouldBuy:null, comment:'', created:Date.now() };
   const d = tt(); d.sessions.push(s);
   if (s.venue && !d.venues.includes(s.venue)) d.venues.push(s.venue);
@@ -302,7 +309,8 @@ function rangeRow(k, label, v, min){
 }
 function rateHtml(){
   const s = tt().sessions.find(x => x.id === RT.sid), hrs = s.fadedAt ? (s.fadedAt - s.t0)/H : null;
-  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Rate this test</h2><p class="muted" style="margin:4px 0 16px">${esc(s.name)} \u00b7 ${esc(s.brand)}${hrs != null ? ' \u00b7 lasted '+relStr(hrs*H) : ''}</p>
+  const nr = (s.ratings || (s.rating ? [s.rating] : [])).length;
+  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Rate this test</h2><p class="muted" style="margin:4px 0 16px">${esc(s.name)} \u00b7 ${esc(s.brand)}${hrs != null ? ' \u00b7 lasted '+relStr(hrs*H) : ''}${nr ? ` \u00b7 rating ${nr + 1}; it is averaged with the ${nr === 1 ? 'earlier one' : nr+' earlier ones'} (now ${r1(score(s))})` : ''}</p>
   ${rangeRow('longevity', 'Longevity'+(hrs != null && !s.rating ? ' (suggested from the time it faded)' : ''), RT.v.longevity, 1)}${rangeRow('sillage', 'Sillage and aura', RT.v.sillage, 1)}${rangeRow('skin', 'Scent on skin', RT.v.skin, 1)}${rangeRow('value', 'Value for the price (optional, 0 to skip)', RT.v.value, 0)}
   <div class="fg"><span class="lb">Would you buy it</span><div class="chips">${[['yes','Yes'],['maybe','Maybe'],['no','No']].map(([k, l]) => `<button type="button" class="chip${RT.buy === k ? ' on' : ''}" data-ta="rbuy" data-v="${k}">${l}</button>`).join('')}</div></div>
   <div class="fg"><label for="rt-c">Short review</label><textarea id="rt-c" placeholder="Opens sharp citrus, turns into creamy vanilla musk after two hours">${esc(RT.comment)}</textarea></div>
@@ -343,12 +351,19 @@ function detailHtml(s){
   ${s.venue ? `<div class="tt-kv"><span>Where</span><span>${esc(s.venue)}</span></div>` : ''}${s.price != null ? `<div class="tt-kv"><span>Price</span><span>${esc(cur())}${fmt(s.price)}</span></div>` : ''}
   <div class="tt-kv"><span>Weather</span><span>${s.weather ? esc(wxLine(s.weather)) : 'not set'} <button data-ta="wxedit" data-id="${s.id}" style="color:var(--gold2);margin-left:6px">edit</button></span></div>
   ${s.fadedAt ? `<div class="tt-kv"><span>Faded after</span><span>${relStr(s.fadedAt - s.t0)}</span></div>` : ''}
-  ${sc != null ? `<div class="tt-kv"><span>Score</span><span><b style="color:var(--gold2);font:500 22px var(--serif)">${r1(sc)}</b> \u00b7 ${CRIT.map(([k, l]) => l+' '+s.rating[k]).join(' \u00b7 ')}${s.rating.value ? ' \u00b7 Value '+s.rating.value : ''}</span></div>` : ''}
+  ${sc != null ? `<div class="tt-kv"><span>Score</span><span><b style="color:var(--gold2);font:500 22px var(--serif)">${r1(sc)}</b> \u00b7 ${CRIT.map(([k, l]) => l+' '+s.rating[k]).join(' \u00b7 ')}${s.rating.value ? ' \u00b7 Value '+s.rating.value : ''}${(s.ratings || []).length > 1 ? ' \u00b7 average of '+s.ratings.length+' ratings' : ''}</span></div>` : ''}
   ${s.comment ? `<p class="sub2" style="font-size:14px;font-style:italic">\u201c${esc(s.comment)}\u201d</p>` : ''}
   <h3 style="margin:22px 0 4px">Timeline</h3>${timelineSvg(s)}
   ${notes.length ? `<input type="range" min="0" max="${dur}" step="60000" value="${dur}" data-ti="scrub" data-id="${s.id}" aria-label="Scrub through the test"><div class="tt-scr" id="tt-scr">${scrubText(s, dur)}</div>` : ''}
   <div style="margin-top:10px">${rows}</div>
-  <div class="foot"><button class="btn danger sp" data-ta="sdel" data-id="${s.id}">Delete</button><button class="btn ghost" data-ta="note" data-id="${s.id}">Add impression</button>${s.fadedAt ? '' : `<button class="btn ghost" data-ta="fade" data-id="${s.id}">Faded out</button>`}<button class="btn" data-ta="rate" data-id="${s.id}">${s.rating ? 'Edit rating' : 'Rate'}</button></div>`;
+  <div class="foot"><button class="btn danger sp" data-ta="sdel" data-id="${s.id}">Delete</button><button class="btn ghost" data-ta="note" data-id="${s.id}">Add impression</button><button class="btn ghost" data-ta="respray" data-id="${s.id}">New spray</button>${s.fadedAt ? '' : `<button class="btn ghost" data-ta="fade" data-id="${s.id}">Faded out</button>`}<button class="btn" data-ta="rate" data-id="${s.id}">${s.rating ? 'Edit rating' : 'Rate'}</button></div>`;
+}
+let RS = null;
+function resprayHtml(){
+  const s = tt().sessions.find(x => x.id === RS.sid);
+  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>New spray</h2><p class="muted" style="margin:4px 0 6px">${esc(s.name)} \u00b7 ${s.sprays} ${s.sprays === 1 ? 'spray' : 'sprays'} so far today</p>
+  <span class="lb" style="text-align:center">Sprays to add</span><div class="stepper"><button data-ta="rsstep" data-d="-1" aria-label="Fewer">\u2212</button><b id="rs-n">${RS.n}</b><button data-ta="rsstep" data-d="1" aria-label="More">+</button></div>
+  <div class="foot"><button class="btn ghost" data-ta="dback" data-id="${s.id}">Back</button><button class="btn" data-ta="rssave">Add sprays</button></div>`;
 }
 function openDetail(sid){ const s = tt().sessions.find(x => x.id === sid); if (!s) return; MODAL = 'tt'; openModal(detailHtml(s)); }
 
@@ -437,11 +452,26 @@ const TA = {
   fade: a => openFade(a.dataset.id),
   fsave: a => { const s = tt().sessions.find(x => x.id === a.dataset.id); if (!s) return; s.fadedAt = Math.max(s.t0, fromLocalInput($('#fd-t').value)); save(); render(); openRate(s.id); },
   rate: a => openRate(a.dataset.id),
+  /* new spray on the same test: adds sprays, marks the moment on the timeline, and uses up the
+     cabinet bottle too when the test was logged from it */
+  respray: a => { RS = { sid:a.dataset.id, n:1 }; MODAL = 'tt'; openModal(resprayHtml()); },
+  rsstep: a => { RS.n = clamp(RS.n + (+a.dataset.d), 1, 20); const b = $('#rs-n'); if (b) b.textContent = RS.n; },
+  rssave: () => {
+    const s = tt().sessions.find(x => x.id === RS.sid); if (!s) return; const n = RS.n;
+    s.sprays = (+s.sprays || 0) + n;
+    (s.notes = s.notes || []).push({ id:uid(), t:Date.now(), tags:[], strength:null, text:'Sprayed again: '+n+(n === 1 ? ' spray' : ' sprays') });
+    const w = S.wears.find(x => x.pid && x.pid === s.pid && x.t === s.t0), p = w && byId(w.pid);
+    if (p) { const ml = n / rateOf(p); p.ml = Math.max(0, Math.round((p.ml - ml)*10)/10); p.sprays = (p.sprays || 0) + n; w.n += n; if (w.ml != null) w.ml = Math.round((w.ml + ml)*10)/10; }
+    save(); render(); toast('Added '+n+(n === 1 ? ' spray' : ' sprays')+' to today\u2019s test'); openDetail(s.id);
+  },
   rbuy: a => { const c = $('#rt-c'); if (c) RT.comment = c.value; RT.buy = RT.buy === a.dataset.v ? null : a.dataset.v; const p = $('#modal .panel'); const sc = p.scrollTop; p.innerHTML = rateHtml(); p.scrollTop = sc; },
   rsave: () => {
     const s = tt().sessions.find(x => x.id === RT.sid); if (!s) return;
-    s.rating = { longevity:RT.v.longevity, sillage:RT.v.sillage, skin:RT.v.skin, value:RT.v.value }; s.wouldBuy = RT.buy; s.comment = ($('#rt-c').value || '').trim(); s.status = 'done'; s.ratedAt = Date.now();
-    save(); render(); toast('Rated '+r1(score(s))+' \u00b7 '+s.name); openDetail(s.id);
+    /* Every rating is kept; the test's rating is their average (they no longer replace each other). */
+    if (!s.ratings) s.ratings = s.rating ? [Object.assign({}, s.rating)] : [];
+    s.ratings.push({ longevity:RT.v.longevity, sillage:RT.v.sillage, skin:RT.v.skin, value:RT.v.value, t:Date.now() });
+    s.rating = avgRating(s.ratings); s.wouldBuy = RT.buy; s.comment = ($('#rt-c').value || '').trim(); s.status = 'done'; s.ratedAt = Date.now();
+    save(); render(); toast((s.ratings.length > 1 ? 'Average of '+s.ratings.length+' ratings: ' : 'Rated ')+r1(score(s))+' \u00b7 '+s.name); openDetail(s.id);
   },
   sdel: a => { const id = a.dataset.id; askConfirm('Delete this test?', 'Its impressions and rating are removed. The fragrance average updates.', 'Delete', true).then(ok => { if (!ok) return; const d = tt(); d.sessions = d.sessions.filter(x => x.id !== id); save(); closeAll(); render(); toast('Test deleted'); }); },
   /* weather edit */

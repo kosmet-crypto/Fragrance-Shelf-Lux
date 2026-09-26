@@ -1,6 +1,6 @@
 /* Lux service worker: offline support.
    Bump VERSION when shipping changes to the app shell list below. */
-const VERSION = 'lux-v9';
+const VERSION = 'lux-v10';
 const SHELL = [
   './',
   './index.html',

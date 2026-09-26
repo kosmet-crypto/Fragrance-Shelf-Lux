@@ -721,7 +721,16 @@ function closeModal(){if(MODAL==='sheet'&&sheetNew&&D){idb.del('photo:'+D.id);de
 function askConfirm(title,text,ok,danger){return new Promise(res=>{confirmRes=res;const d=$('#dlg');
  d.innerHTML=`<div class="panel" role="alertdialog" aria-modal="true"><h3>${esc(title)}</h3><p class="muted" style="margin:10px 0 22px">${esc(text)}</p><div class="foot" style="margin:0"><button class="btn ghost" data-act="dlgNo">Cancel</button><button class="btn${danger?' danger':''}" data-act="dlgOk">${esc(ok||'Confirm')}</button></div></div>`;d.hidden=false})}
 function endConfirm(v){const d=$('#dlg');d.hidden=true;d.innerHTML='';if(confirmRes){confirmRes(v);confirmRes=null}}
-function applyTheme(){const t=S.settings.theme,r=document.documentElement;if(t==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t)}
+/* "Match device": the Android app reports the phone's dark mode itself (a WebView follows the app's
+   own theme, which is always dark); browsers use prefers-color-scheme. The app's status and
+   navigation bars follow the page. */
+function applyTheme(){const t=S.settings.theme,r=document.documentElement,and=window.LuxAndroid&&LuxAndroid.isNight;
+ const eff=t!=='auto'?t:and?(LuxAndroid.isNight()?'dark':'light'):matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+ if(t==='auto'&&!and)r.removeAttribute('data-theme');else r.setAttribute('data-theme',eff);
+ const bg=getComputedStyle(r).getPropertyValue('--bg').trim(),m=document.querySelector('meta[name="theme-color"]');if(m&&bg)m.setAttribute('content',bg);
+ try{if(window.LuxAndroid&&LuxAndroid.setBars&&bg)LuxAndroid.setBars(bg,eff==='light')}catch(e){}}
+window.luxThemeChanged=()=>applyTheme();
+try{matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{if(S&&S.settings.theme==='auto')applyTheme()})}catch(e){}
 
 /* ================= fragrance sheet ================= */
 const starsHtml=(k,v,dots)=>`<div class="stars${dots?' dots':''}">${[1,2,3,4,5].map(n=>`<button type="button" data-act="star" data-k="${k}" data-v="${n}" class="${n<=v?'on':''}" aria-label="${n}">${dots?'\u25cf':'\u2605'}</button>`).join('')}</div>`;
