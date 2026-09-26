@@ -10,10 +10,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.View;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -334,6 +336,30 @@ public class MainActivity extends Activity {
 
     /** Methods index.html can call as window.LuxAndroid.*. */
     private class Bridge {
+        /** Whether the phone is in dark mode; the WebView itself only knows the app's own theme. */
+        @JavascriptInterface
+        public boolean isNight() {
+            return (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                    == Configuration.UI_MODE_NIGHT_YES;
+        }
+
+        /** Status and navigation bars in the page's background colour, with dark icons on a light page. */
+        @JavascriptInterface
+        public void setBars(final String color, final boolean light) {
+            runOnUiThread(() -> {
+                try {
+                    int c = android.graphics.Color.parseColor(color);
+                    getWindow().setStatusBarColor(c);
+                    getWindow().setNavigationBarColor(c);
+                    View d = getWindow().getDecorView();
+                    int f = d.getSystemUiVisibility() & ~(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+                    if (light) f |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    d.setSystemUiVisibility(f);
+                } catch (Exception ignored) {
+                }
+            });
+        }
+
         /** Reminder settings and upcoming picks as JSON; see syncReminders in index.html. */
         @JavascriptInterface
         public void setReminders(String json) {
@@ -465,6 +491,13 @@ public class MainActivity extends Activity {
     }
 
     private long lastBack;
+
+    /** uiMode is handled here (see configChanges), so a dark mode switch reaches the page. */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (webView != null) webView.evaluateJavascript("window.luxThemeChanged&&luxThemeChanged()", null);
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
