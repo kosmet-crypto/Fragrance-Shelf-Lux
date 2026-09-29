@@ -356,7 +356,18 @@ function detailHtml(s){
   <h3 style="margin:22px 0 4px">Timeline</h3>${timelineSvg(s)}
   ${notes.length ? `<input type="range" min="0" max="${dur}" step="60000" value="${dur}" data-ti="scrub" data-id="${s.id}" aria-label="Scrub through the test"><div class="tt-scr" id="tt-scr">${scrubText(s, dur)}</div>` : ''}
   <div style="margin-top:10px">${rows}</div>
-  <div class="foot"><button class="btn danger sp" data-ta="sdel" data-id="${s.id}">Delete</button><button class="btn ghost" data-ta="note" data-id="${s.id}">Add impression</button><button class="btn ghost" data-ta="respray" data-id="${s.id}">New spray</button>${s.fadedAt ? '' : `<button class="btn ghost" data-ta="fade" data-id="${s.id}">Faded out</button>`}<button class="btn" data-ta="rate" data-id="${s.id}">${s.rating ? 'Edit rating' : 'Rate'}</button></div>`;
+  <div class="foot"><button class="btn danger sp" data-ta="sdel" data-id="${s.id}">Delete</button><button class="btn ghost" data-ta="note" data-id="${s.id}">Add impression</button><button class="btn ghost" data-ta="respray" data-id="${s.id}">New spray</button><button class="btn ghost" data-ta="tedit" data-id="${s.id}">Edit</button>${s.fadedAt ? '' : `<button class="btn ghost" data-ta="fade" data-id="${s.id}">Faded out</button>`}<button class="btn" data-ta="rate" data-id="${s.id}">${s.rating ? 'Edit rating' : 'Rate'}</button></div>`;
+}
+/* Edit a test: fragrance, sprays, time, where on the body, where tested and price. */
+let ED = null;
+function editHtml(){
+  const s = tt().sessions.find(x => x.id === ED.sid);
+  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Edit test</h2>
+  <div class="g2" style="margin-top:14px"><div class="fg"><label for="te-n">Fragrance</label><input id="te-n" value="${esc(s.name)}"></div><div class="fg"><label for="te-b">House</label><input id="te-b" value="${esc(s.brand || '')}" list="brand-list"></div>
+  <div class="fg"><label for="te-s">Sprays</label><input id="te-s" type="number" min="1" max="40" value="${s.sprays}"></div><div class="fg"><label for="te-t">Sprayed at</label><input id="te-t" type="datetime-local" value="${toLocalInput(s.t0)}"></div></div>
+  <div class="fg"><span class="lb">Where on the body</span><div class="chips">${SPOTS.map(([k, l]) => `<button type="button" class="chip${ED.spots.includes(k) ? ' on' : ''}" data-ta="tespot" data-v="${k}">${l}</button>`).join('')}</div></div>
+  <div class="g2"><div class="fg"><label for="te-v">Where tested</label><input id="te-v" value="${esc(s.venue || '')}"></div><div class="fg"><label for="te-p">Price (${esc(cur())}, optional)</label><input id="te-p" type="number" min="0" step="0.5" value="${s.price != null ? s.price : ''}"></div></div>
+  <div class="foot"><button class="btn ghost" data-ta="dback" data-id="${s.id}">Back</button><button class="btn" data-ta="tesave">Save</button></div>`;
 }
 let RS = null;
 function resprayHtml(){
@@ -452,6 +463,27 @@ const TA = {
   fade: a => openFade(a.dataset.id),
   fsave: a => { const s = tt().sessions.find(x => x.id === a.dataset.id); if (!s) return; s.fadedAt = Math.max(s.t0, fromLocalInput($('#fd-t').value)); save(); render(); openRate(s.id); },
   rate: a => openRate(a.dataset.id),
+  tedit: a => { const s = tt().sessions.find(x => x.id === a.dataset.id); if (!s) return; ED = { sid:s.id, spots:(s.spots || []).slice() }; MODAL = 'tt'; openModal(editHtml()); },
+  tespot: a => { const k = a.dataset.v; ED.spots = ED.spots.includes(k) ? ED.spots.filter(x => x !== k) : ED.spots.concat(k); a.classList.toggle('on'); },
+  tesave: () => {
+    const s = tt().sessions.find(x => x.id === ED.sid); if (!s) return;
+    const name = $('#te-n').value.trim(), brand = $('#te-b').value.trim(), n = clamp(Math.round(+$('#te-s').value || s.sprays), 1, 40);
+    if (!name) { toast('Add the fragrance name'); return; }
+    const t0 = $('#te-t').value ? fromLocalInput($('#te-t').value) : s.t0, pr = $('#te-p').value;
+    /* a wear logged from a cabinet bottle when the test started moves along with it */
+    const w = S.wears.find(x => x.pid && x.pid === s.pid && x.t === s.t0), p = w && byId(w.pid);
+    if (name !== s.name || brand !== (s.brand || '')) {
+      const m = S.perfumes.find(q => norm(q.name) === norm(name) && norm(q.brand) === norm(brand));
+      s.pid = m ? m.id : null; s.name = name; s.brand = brand; if (m) s.fam = m.fam;
+    }
+    if (w && p && w.pid === s.pid) {
+      const d = n - s.sprays, ml = d / rateOf(p);
+      p.ml = clamp(Math.round((p.ml - ml)*10)/10, 0, p.maxMl); p.sprays = Math.max(0, (p.sprays || 0) + d); w.n = n; w.t = t0; if (w.ml != null) w.ml = Math.max(0, Math.round((w.ml + ml)*10)/10);
+    }
+    const dt = t0 - s.t0; if (dt) { (s.notes || []).forEach(x => { x.t = Math.max(t0, x.t + dt); }); if (s.fadedAt) s.fadedAt = Math.max(t0, s.fadedAt + dt); }
+    s.t0 = t0; s.sprays = n; s.spots = ED.spots.slice(); s.venue = $('#te-v').value.trim(); s.price = pr === '' ? null : Math.max(0, +pr);
+    save(); render(); toast('Test updated'); openDetail(s.id);
+  },
   /* new spray on the same test: adds sprays, marks the moment on the timeline, and uses up the
      cabinet bottle too when the test was logged from it */
   respray: a => { RS = { sid:a.dataset.id, n:1 }; MODAL = 'tt'; openModal(resprayHtml()); },
