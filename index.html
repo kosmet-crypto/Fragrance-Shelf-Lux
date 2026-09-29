@@ -609,7 +609,8 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  <div class="card"><h3>Updates</h3><div class="set-row"><div>${window.LuxAndroid&&LuxAndroid.getVersion?'Lux '+esc(LuxAndroid.getVersion())+' for Android':'Lux web app'}<small>Updates keep your collection and settings</small></div><button class="btn ghost sm" data-act="checkUpdate">Check for updates</button></div></div>
  <div class="card"><h3>Library and data</h3>
  <div class="set-row"><div>Imported library<small>${fmt(IMPORTED.length)} entries. Your own entries are kept.</small></div><button class="btn ghost sm" data-act="clrImp">Clear imported</button></div>
- <div class="set-row"><div>Erase everything<small>Removes the collection, journal, photos and own entries</small></div><button class="btn danger sm" data-act="reset">Erase all</button></div></div>`}
+ <div class="set-row"><div>Erase everything<small>Removes the collection, journal, photos and own entries</small></div><button class="btn danger sm" data-act="reset">Erase all</button></div></div>
+ <div class="card"><h3>About</h3><div class="set-row"><div>Developed by<small>Ivan S. - Epicurus001, Oslo</small></div></div></div>`}
 
 /* ================= render ================= */
 function render(){const v=$('#view');
