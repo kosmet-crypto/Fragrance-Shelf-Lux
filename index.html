@@ -249,6 +249,7 @@ h1{font-size:38px}
 .panel{max-height:88vh;max-height:88dvh}
 .panel>.x{position:sticky;top:0;float:right;margin:-14px -10px 0 10px;z-index:5;background:var(--surf2);border:1px solid var(--line2);box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center}
 /* daily pick, wishlist, share */
+.lreset{float:right;color:var(--gold2);font-size:12.5px;text-decoration:underline;text-underline-offset:3px}
 .wr .wtag{flex:none;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line2);border-radius:99px;padding:3px 9px}
 .today-line{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 18px;margin-bottom:26px;border:1px solid var(--line2);border-radius:16px;background:var(--surf);color:var(--tx2);font-size:14px}
 .today-line b{color:var(--tx);font-weight:600}
@@ -582,7 +583,7 @@ function vLib(){const nI=IMPORTED.length,nM=S.mine.length;
  <div class="fg"><label for="lb">House</label><input id="lb" data-in="lb" list="brand-list" placeholder="Any" autocomplete="off" value="${esc(ui.lb)}"></div>
  <div class="fg"><label for="lf">Family</label><select id="lf" data-ch="lf"><option value="">Any</option>${FAMLIST.map(f=>`<option${ui.lf===f?' selected':''}>${f}</option>`).join('')}</select></div>
  <div class="fg"><label for="lc">Concentration</label><select id="lc" data-ch="lc"><option value="">Any</option>${CONCS.map(f=>`<option${ui.lc===f?' selected':''}>${f}</option>`).join('')}</select></div></div>
- <p class="muted" style="font-size:12.5px;margin:6px 0 4px">${fmt(BUILTIN.length)} built in \u00b7 ${fmt(nI)} imported \u00b7 ${fmt(nM)} yours. Built-in details are written from memory, so check anything important.</p>
+ <p class="muted" style="font-size:12.5px;margin:6px 0 4px"><button class="lreset" data-act="lreset">Reset filters</button>${fmt(BUILTIN.length)} built in \u00b7 ${fmt(nI)} imported \u00b7 ${fmt(nM)} yours. Built-in details are written from memory, so check anything important.</p>
  <div id="libres">${libRows()}</div></div>`}
 
 /* ================= settings ================= */
@@ -598,7 +599,7 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  <button class="btn ghost sm" data-act="shAdd" style="margin-top:6px">Add shelf</button></div>
  ${remHtml()}
  <div class="card"><h3>Backup and restore</h3><p class="muted" style="margin:6px 0 16px">Last backup: ${lb}. A backup holds your collection, journal, settings, photos and own library entries.</p>
- <div class="acts"><button class="btn" data-act="bkNow">Download backup</button><button class="btn ghost" data-act="bkCopy">Copy as text</button><button class="btn ghost" data-act="bkFile">Restore from file</button></div>
+ <div class="acts"><button class="btn" data-act="bkNow">Download backup</button><button class="btn ghost" data-act="csvCol">Collection as CSV</button><button class="btn ghost" data-act="csvJournal">Journal as CSV</button><button class="btn ghost" data-act="bkCopy">Copy as text</button><button class="btn ghost" data-act="bkFile">Restore from file</button></div>
  <input type="file" id="bkFile" accept=".json,application/json,text/plain">
  <div class="fg" style="margin-top:18px"><label for="bk-text">Or paste a backup here</label><textarea id="bk-text" placeholder="Paste backup text"></textarea></div>
  <button class="btn ghost sm" data-act="bkText">Restore from text</button>
@@ -738,7 +739,7 @@ function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,
  const shOpts=S.shelves.concat([{id:'wish',name:'Wishlist'}]).map(s=>`<option value="${s.id}"${d.shelf===s.id?' selected':''}>${esc(s.name)}</option>`).join('');
  const concs=(!d.conc||CONCS.includes(d.conc))?CONCS:CONCS.concat([d.conc]);
  let stats='';if(!sheetNew){const w=allWears().filter(x=>x.pid===d.id).length,days=Math.max(1,Math.floor((Date.now()-d.created)/DAY));
-  stats=`<div class="s-stats"><span><b>${days}</b> days here</span><span><b>${d.sprays||0}</b> sprays</span><span><b>${w}</b> wears</span>${+d.price>0&&w>0?`<span><b>${money(d.price/w,1)}</b> per wear</span>`:''}${!wish&&hasPrice(d)?`<span><b>${money(valueLeft(d))}</b> value left</span>`:''}${!wish&&leftText(pace(d).days)?`<span>${leftText(pace(d).days)}</span>`:''}</div>`}
+  stats=`<div class="s-stats"><span><b>${days}</b> days here</span><span><b>${d.sprays||0}</b> sprays</span><span><b>${w}</b> wears</span>${+d.price>0&&w>0?`<span><b>${money(d.price/w,1)}</b> per wear</span>`:''}${!wish&&hasPrice(d)?`<span><b>${money(valueLeft(d))}</b> value left</span>`:''}${!wish&&leftText(pace(d).days)?`<span>${leftText(pace(d).days)}${pace(d).days<3650?' \u00b7 empty around <b>'+new Date(Date.now()+pace(d).days*DAY).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+'</b>':''}</span>`:''}</div>`}
  const known=sheetNew&&!!(d.name&&LIB.some(e=>e.k===norm(d.brand+' '+d.name)));
  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button>
  <div class="s-top"><div class="s-bt" id="sbt">${bt(d,lv)}</div><div class="s-id">
@@ -920,6 +921,19 @@ function leftText(days){if(days==null)return '';if(days<14)return 'about '+Math.
  if(days<70)return 'about '+Math.round(days/7)+' weeks left';if(days<730)return 'about '+Math.round(days/30)+' months left';return 'years left at your pace'}
 const lowOf=p=>p.shelf!=='wish'&&+p.maxMl>0&&p.ml>0&&p.ml/p.maxMl<.1;
 const idleDays=p=>{const lw=lastWorn(p.id);return Math.floor((Date.now()-(lw||p.created||Date.now()))/DAY)};
+
+/* ================= CSV export (opens in Excel or Google Sheets) ================= */
+function csvText(rows){return '\ufeff'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
+function exportCsv(kind){let rows,name;const d=v=>v?new Date(v).toISOString().slice(0,10):'';
+ if(kind==='col'){name='lux-collection-'+dkey(Date.now())+'.csv';
+  rows=[['Name','House','Family','Concentration','Shelf','Type','Size ml','Left ml','Price paid','Value left','Price seen','Target price','Wears','Sprays','Last worn','Rating','Added']].concat(S.perfumes.map(p=>[p.name,p.brand,p.fam,p.conc,shelfName(p.shelf),p.type,p.maxMl,p.shelf==='wish'?'':p.ml,p.price,hasPrice(p)&&p.shelf!=='wish'?Math.round(valueLeft(p)):'',p.seen,p.target,allWears().filter(w=>w.pid===p.id).length,p.sprays||0,d(lastWorn(p.id)),p.rating||'',d(p.created)]))}
+ else{name='lux-journal-'+dkey(Date.now())+'.csv';
+  rows=[['Date','Time','Fragrance','House','Sprays','ml','Value sprayed','Source']].concat(allWears().sort((a,b)=>b.t-a.t).map(w=>{const p=wP(w),m=wearMl(w),v=m*wearPerMl(w);
+   return [d(w.t),new Date(w.t).toTimeString().slice(0,5),p.name,p.brand,w.n,Math.round(m*10)/10,v?Math.round(v*100)/100:'',w.test?'Test':'Wear']}))}
+ const txt=csvText(rows);
+ if(window.LuxAndroid&&LuxAndroid.saveText){LuxAndroid.saveText(name,'text/csv',txt);return}
+ if(window.LuxAndroid){LuxAndroid.saveFile(name,txt);return}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast('CSV saved')}catch(e){toast('Downloads are blocked here')}}
 
 /* ================= tests count as wears ================= */
 /* Every Test lab test counts as a wear (Journal, calendar, streak, Stats, recaps, picks, share),
@@ -1145,6 +1159,8 @@ async function shareGo(saveOnly){if(!SHR.url){toast('One moment, still drawing')
 /* ================= actions ================= */
 let libT;const debounceLib=()=>{clearTimeout(libT);libT=setTimeout(updateLib,120)};
 const ACT={
+ lreset:()=>{ui.lq=ui.lb=ui.lf=ui.lc='';ui.llim=60;render()},
+ csvCol:()=>exportCsv('col'),csvJournal:()=>exportCsv('journal'),
  wishTest:()=>{if(!commitSheet())return;const p=D;closeModal();render();window.__luxTest.openStart({pid:p.id,name:p.name,brand:p.brand,fam:p.fam})},
  pickOpen:()=>{ui.pickDay=dkey(Date.now());render()},pickClose:()=>{ui.pickDay=null;render()},
  lowHide:()=>{S.settings.lowSeen=owned().filter(lowOf).map(p=>p.id);save();render()},

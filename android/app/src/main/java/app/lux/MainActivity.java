@@ -436,6 +436,12 @@ public class MainActivity extends Activity {
         public void saveFile(final String name, final String text) {
             runOnUiThread(() -> saveAs(name, "application/json", text.getBytes(StandardCharsets.UTF_8), true));
         }
+
+        /** Saves any text file (CSV export) with its own type, so Android keeps the .csv name. */
+        @JavascriptInterface
+        public void saveText(final String name, final String mime, final String text) {
+            runOnUiThread(() -> saveAs(name, mime, text.getBytes(StandardCharsets.UTF_8), false));
+        }
     }
 
     @Override
@@ -454,9 +460,9 @@ public class MainActivity extends Activity {
                 out.write(bytes);
                 // A backup lets the page record the date and show its own confirmation.
                 if (pendingSaveIsBackup) webView.evaluateJavascript("window.luxBackupSaved&&luxBackupSaved()", null);
-                else toast("Image saved");
+                else toast("Saved");
             } catch (Exception e) {
-                toast(pendingSaveIsBackup ? "Could not save backup" : "Could not save the image");
+                toast(pendingSaveIsBackup ? "Could not save backup" : "Could not save the file");
             }
         }
     }
