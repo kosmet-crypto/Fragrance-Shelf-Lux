@@ -160,10 +160,10 @@ public class MainActivity extends Activity {
 
     /* ---------- notifications ---------- */
 
-    /** A tapped notification says which screen to show: the morning pick or the wear log. */
+    /** A tapped notification says which screen to show: the morning pick, the wear log or the Test lab. */
     private static String openTarget(Intent intent) {
         String from = intent == null ? null : intent.getStringExtra("from");
-        return "pm".equals(from) ? "log" : "am".equals(from) ? "pick" : null;
+        return "pm".equals(from) ? "log" : "am".equals(from) ? "pick" : "test".equals(from) ? "test" : null;
     }
 
     @Override

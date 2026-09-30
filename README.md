@@ -18,11 +18,30 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
   *Copy as text* copies every rated fragrance with its scores, longevity and review, ready to paste into a chat.
   Settings → *Tests as CSV* saves the same list as a spreadsheet.
 
+## Navigation, notes, moods and more
+* **Tabs**: Collection · Journal · Test · Stats · Settings. The **Library** opens from Collection (and Settings);
+  importing a CSV or JSON library is in Settings → *Library and data*. Search suggestions still come from it everywhere.
+* **Today's pick** is a compact card on Collection only: the bottle, the name and the main reason (tap *+ more* for
+  the rest). Next to the occasion there is a **Mood**; the pick then favours what you wore before in that mood.
+* **Mood when logging a wear** (optional): Relaxed, Energetic, Cozy, Confident, Romantic, Focused.
+* **Notes pyramid**: in a bottle or a tested fragrance, *Paste notes* and paste the notes copied from Fragrantica
+  or a shop page; top, heart and base fill in and can be corrected. Notes are kept per fragrance (house + name).
+* **Seasons**: without your own *Best in*, Lux suggests seasons from the family and the notes (*use it* to keep them).
+* **Decant or bottle?** (wishlist bottles, decants and tested fragrances): price per ml of each and how long each
+  lasts at your pace.
+* **Test lab**: *Compare* two tested fragrances side by side; a test you would buy offers *Add to wishlist* with the
+  price noted in the test; *Best tested* image and text show the season.
+* **Test check-ins** (Android): a notification two and six hours after you spray a test. Settings → *Daily pick and reminders*.
+* **Photos**: Settings → *Add photos* picks several at once; photos named after a bottle are matched by themselves.
+* **Accent colour**: Settings → gold, rose gold or silver, in both themes.
+
 ## Stats, value and bottles
 * **Stats** (was Insights): periods Today, 7, 30, 90 days, Year and All time; wears, sprays, amount used and value
   sprayed for the period; the collection's current value against what you paid; measures for current value,
   value sprayed and amount used; bottles without a price can be priced from there; bottles not worn for two
   months are listed and get a push in Today's pick.
+* **Notes you rate highest**, **Cost per wear**, **Temperature and what you wear** (new wears keep the day's
+  temperature when a city is set; the last three months can be filled in) and **When bottles run out**.
 * **Sprays per ml** per bottle: your own number, or what Lux learns when you correct the remaining ml by hand,
   or the default from Settings, or by bottle size (10 for 100 ml, 12 for 50 to 75 ml, 15 for 30 ml and decants;
   common atomizers spray about 0.06 to 0.12 ml).

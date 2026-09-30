@@ -60,7 +60,13 @@ function groups(){
   });
 }
 /* Rated fragrances, best first; Share (image, text) and the tests CSV in index.html use it. */
-window.LuxTT = { ranked: () => groups().filter(g => g.done.length).sort((a,b) => b.avg - a.avg) };
+/* Season from your own tests: the temperature band where the fragrance scored best (null without weather). */
+function tempSeason(g){
+  const b = {}; g.done.forEach(s => { const k = bucket(s.weather && s.weather.temp); if (k) (b[k] = b[k] || []).push(score(s)); });
+  const best = Object.keys(b).sort((x, y) => mean(b[y]) - mean(b[x]))[0];
+  return best ? { Cold:'Autumn & winter', Mild:'Spring & autumn', Warm:'Summer' }[best] : null;
+}
+window.LuxTT = { ranked: () => groups().filter(g => g.done.length).sort((a,b) => b.avg - a.avg), season: tempSeason };
 function condStats(g){
   const out = {};
   g.done.forEach(s => { const b = bucket(s.weather && s.weather.temp); if (b) (out[b] = out[b] || []).push(score(s)); });
@@ -120,7 +126,7 @@ function radar(axes){
     g += '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="var(--gold)"/>';
     g += '<text x="'+q[0].toFixed(1)+'" y="'+(q[1]+3).toFixed(1)+'" text-anchor="'+(c > .3 ? 'start' : c < -.3 ? 'end' : 'middle')+'" font-size="10" fill="var(--tx2)" font-family="var(--sans)">'+esc(a.l)+' '+r1(a.v)+'</text>';
   });
-  return '<svg viewBox="0 0 200 178" class="tt-radar" role="img" aria-label="Performance radar">'+g+'</svg>';
+  return '<svg viewBox="-34 0 268 178" class="tt-radar" role="img" aria-label="Performance radar">'+g+'</svg>';
 }
 
 /* ---------- styles ---------- */
@@ -207,7 +213,7 @@ function testHtml(){
   return `<header class="vh"><div><h1>Test lab</h1><p class="sub2">${act.length ? act.length+' running now' : 'Timed tests, impressions and a lasting average per fragrance'}</p></div><div class="acts">${gs.length ? '<button class="btn ghost" data-ta="tshare">Share results</button>' : ''}<button class="btn" data-ta="start">Start test</button></div></header>
   ${act.length ? act.map(activeCard).join('<div style="height:14px"></div>') : `<div class="card"><p class="muted">No test running. Tap Start test the moment you spray. The clock starts then, and every impression is stamped with the time since.</p></div>`}
   <div class="kpis" style="margin-top:22px">${kp.map(x => `<div class="kpi"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div>
-  <div class="card"><div class="ch" style="margin-bottom:10px"><h3>Tested fragrances</h3><select data-tc="tsort" style="width:auto"><option value="best"${TSORT==='best'?' selected':''}>Best rated</option><option value="recent"${TSORT==='recent'?' selected':''}>Most recent</option><option value="name"${TSORT==='name'?' selected':''}>Name</option></select></div>
+  <div class="card"><div class="ch" style="margin-bottom:10px"><h3>Tested fragrances</h3><div class="acts" style="align-items:center">${gs.length > 1 ? '<button class="btn ghost sm" data-ta="cmp">Compare</button>' : ''}<select data-tc="tsort" style="width:auto"><option value="best"${TSORT==='best'?' selected':''}>Best rated</option><option value="recent"${TSORT==='recent'?' selected':''}>Most recent</option><option value="name"${TSORT==='name'?' selected':''}>Name</option></select></div></div>
   <div class="fg"><input data-ti="tq" placeholder="Search tested fragrances" autocomplete="off" value="${esc(TQ)}"></div><div id="ttList">${listHtml()}</div></div>`;
 }
 
@@ -215,7 +221,6 @@ function testHtml(){
 const _render = window.render;
 function afterRender(){
   const b = $('#nav .nb[data-t="test"]'); if (b) b.classList.toggle('has-live', activeList().length > 0);
-  if (ui.tab === 'shelf') { const acts = $('#view .vh .acts'); if (acts && !acts.querySelector('[data-t="test"]')) acts.insertAdjacentHTML('afterbegin', '<button class="btn ghost" data-act="tab" data-t="test">Test lab</button>'); }
 }
 window.render = function(){
   if (ui.tab === 'test') {
@@ -227,7 +232,8 @@ window.render = function(){
 };
 (function addNav(){
   const nav = $('#nav'); if (!nav || nav.querySelector('[data-t="test"]')) return;
-  nav.insertAdjacentHTML('beforeend', '<button class="nb" data-act="tab" data-t="test"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/></svg>Test</button>');
+  const j = nav.querySelector('[data-t="journal"]');
+  (j || nav).insertAdjacentHTML(j ? 'afterend' : 'beforeend', '<button class="nb" data-act="tab" data-t="test"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/></svg>Test</button>');
 })();
 setInterval(() => { if (ui.tab === 'test') $$('.tt-el').forEach(el => { const f = +el.dataset.f; el.textContent = '+'+relStr((f || Date.now()) - (+el.dataset.t0)); }); }, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && ui.tab === 'test' && $('#modal').hidden) render(); });
@@ -355,6 +361,7 @@ function detailHtml(s){
   ${s.fadedAt ? `<div class="tt-kv"><span>Faded after</span><span>${relStr(s.fadedAt - s.t0)}</span></div>` : ''}
   ${sc != null ? `<div class="tt-kv"><span>Score</span><span><b style="color:var(--gold2);font:500 22px var(--serif)">${r1(sc)}</b> \u00b7 ${CRIT.map(([k, l]) => l+' '+s.rating[k]).join(' \u00b7 ')}${s.rating.value ? ' \u00b7 Value '+s.rating.value : ''}${(s.ratings || []).length > 1 ? ' \u00b7 average of '+s.ratings.length+' ratings' : ''}</span></div>` : ''}
   ${s.comment ? `<p class="sub2" style="font-size:14px;font-style:italic">\u201c${esc(s.comment)}\u201d</p>` : ''}
+  ${s.wouldBuy === 'yes' && !S.perfumes.some(p => norm(p.brand+' '+p.name) === norm((s.brand || '')+' '+s.name)) ? `<div class="note" style="margin:14px 0 0"><span>You would buy it.${s.price != null ? ' Price noted: '+esc(money(s.price))+'.' : ''}</span><button class="btn sm" data-ta="dwish" data-id="${s.id}">Add to wishlist</button></div>` : ''}
   <h3 style="margin:22px 0 4px">Timeline</h3>${timelineSvg(s)}
   ${notes.length ? `<input type="range" min="0" max="${dur}" step="60000" value="${dur}" data-ti="scrub" data-id="${s.id}" aria-label="Scrub through the test"><div class="tt-scr" id="tt-scr">${scrubText(s, dur)}</div>` : ''}
   <div style="margin-top:10px">${rows}</div>
@@ -400,10 +407,50 @@ function groupHtml(g){
   ${g.hours != null ? `<div class="tt-kv"><span>Average longevity</span><span>${r1(g.hours)} h</span></div>` : ''}${g.price != null ? `<div class="tt-kv"><span>Last price</span><span>${esc(cur())}${fmt(g.price)}</span></div>` : ''}
   ${cond.length ? `<div class="tt-kv"><span>By temperature</span><span>${esc(cond.join(' \u00b7 '))}</span></div>` : ''}
   ${tags.length ? `<div style="margin:16px 0 4px"><span class="lb">What you smelled most</span><div class="chips">${tags.map(([t, c]) => `<span class="chip">${esc(t)} \u00b7 ${c}</span>`).join('')}</div></div>` : ''}
+  <div style="margin:16px 0 4px"><span class="lb">Notes pyramid</span>${pyrHtml(pyrOf(g.brand, g.name)) || '<p class="muted" style="font-size:13.5px">No notes yet.</p>'}<button class="btn ghost sm" data-ta="gnotes" data-k="${esc(g.key)}" style="margin-top:8px">${pyrOf(g.brand, g.name) ? 'Edit notes' : 'Paste notes'}</button></div>
   <h3 style="margin:22px 0 2px">Tests</h3>${rows}
-  <div class="foot">${inCab ? '<button class="btn ghost" data-ta="gsync" data-k="'+esc(g.key)+'">Update cabinet ratings</button>' : (onWish ? '' : '<button class="btn ghost" data-ta="gwish" data-k="'+esc(g.key)+'">Add to wishlist</button>')}<button class="btn" data-ta="again" data-k="${esc(g.key)}">Test again</button></div>`;
+  <div class="foot">${inCab ? '<button class="btn ghost" data-ta="gsync" data-k="'+esc(g.key)+'">Update cabinet ratings</button>' : (onWish ? '' : '<button class="btn ghost" data-ta="gwish" data-k="'+esc(g.key)+'">Add to wishlist</button>')}<button class="btn ghost" data-ta="gcalc" data-k="${esc(g.key)}">Decant or bottle?</button>${g.done.length && groups().filter(x => x.done.length).length > 1 ? `<button class="btn ghost" data-ta="cmp" data-k="${esc(g.key)}">Compare</button>` : ''}<button class="btn" data-ta="again" data-k="${esc(g.key)}">Test again</button></div>`;
 }
 const findGroup = k => groups().find(g => g.key === k);
+const reopenGroup = k => () => { const g = findGroup(k); if (g) { MODAL = 'tt'; openModal(groupHtml(g)); } };
+
+/* ---------- compare two tested fragrances ---------- */
+const CMPB = '#8fb08a';
+function radar2(A, B){
+  const n = A.length, R = 62, cx = 100, cy = 88;
+  const pt = (i, r) => { const a = -Math.PI/2 + i*2*Math.PI/n; return [cx + Math.cos(a)*r, cy + Math.sin(a)*r]; };
+  const poly = (ax, f) => ax.map((a, i) => pt(i, R*(f != null ? f : clamp((a.v || 0)/10, 0, 1))).map(x => x.toFixed(1)).join(',')).join(' ');
+  let g = [1/3, 2/3, 1].map(f => '<polygon points="'+poly(A, f)+'" fill="none" stroke="var(--line2)" stroke-width="1"/>').join('');
+  [[A, 'var(--gold)'], [B, CMPB]].forEach(([ax, c]) => { g += '<polygon points="'+poly(ax)+'" fill="'+c+'" fill-opacity=".22" stroke="'+c+'" stroke-width="2" stroke-linejoin="round"/>'; });
+  A.forEach((a, i) => { const q = pt(i, R+15), c = Math.cos(-Math.PI/2 + i*2*Math.PI/n); g += '<text x="'+q[0].toFixed(1)+'" y="'+(q[1]+3).toFixed(1)+'" text-anchor="'+(c > .3 ? 'start' : c < -.3 ? 'end' : 'middle')+'" font-size="10" fill="var(--tx2)" font-family="var(--sans)">'+esc(a.l)+'</text>'; });
+  return '<svg viewBox="-34 0 268 178" class="tt-radar" role="img" aria-label="Both fragrances on one radar">'+g+'</svg>';
+}
+let CMP = { a:'', b:'' };
+function cmpHtml(){
+  const gs = groups().filter(g => g.done.length).sort((x, y) => y.avg - x.avg);
+  const A = gs.find(g => g.key === CMP.a) || gs[0], B = gs.find(g => g.key === CMP.b && g !== A) || gs.find(g => g !== A);
+  CMP.a = A.key; CMP.b = B.key;
+  const sel = k => `<select data-tc="cmp" data-k="${k}" aria-label="${k === 'a' ? 'First' : 'Second'} fragrance">${gs.map(g => `<option value="${esc(g.key)}"${g.key === CMP[k] ? ' selected' : ''}>${esc(g.name)} \u00b7 ${esc(g.brand)}</option>`).join('')}</select>`;
+  const ax = g => CRIT.map(([k, l]) => ({ l, v:g.crit[k] })).concat([{ l:'Value', v:g.crit.value }]);
+  const num = [['Score', g => g.avg, ''], ['Longevity', g => g.crit.longevity, ''], ['Sillage', g => g.crit.sillage, ''], ['Skin scent', g => g.crit.skin, ''], ['Value', g => g.crit.value, ''], ['Lasted', g => g.hours, ' h']];
+  const txt = [['Tests', g => String(g.done.length)], ['Would buy', g => g.buy || '\u2014'], ['Price', g => g.price != null ? money(g.price) : '\u2014'], ['Season', g => testSeason(g) || '\u2014'],
+    ['Notes', g => pyrAll(pyrOf(g.brand, g.name)).slice(0, 6).join(', ') || '\u2014'], ['Smelled most', g => tagCounts(g).slice(0, 3).map(x => x[0]).join(', ') || '\u2014'], ['Review', g => { const r = g.done.find(s => s.comment); return r ? '\u201c'+r.comment+'\u201d' : '\u2014'; }]];
+  const rows = num.map(([l, f, u]) => { const a = f(A), b = f(B); return `<tr><th>${l}</th><td class="${a != null && (b == null || a > b) ? 'win' : ''}">${a != null ? r1(a)+u : '\u2014'}</td><td class="${b != null && (a == null || b > a) ? 'win' : ''}">${b != null ? r1(b)+u : '\u2014'}</td></tr>`; }).join('')
+    + txt.map(([l, f]) => `<tr><th>${l}</th><td>${esc(f(A))}</td><td>${esc(f(B))}</td></tr>`).join('');
+  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Compare</h2>
+  <div class="g2" style="margin-top:14px"><div class="fg">${sel('a')}</div><div class="fg">${sel('b')}</div></div>
+  ${radar2(ax(A), ax(B))}<div class="cmp-key"><span><i style="background:var(--gold)"></i>${esc(A.name)}</span><span><i style="background:${CMPB}"></i>${esc(B.name)}</span></div>
+  <table class="cmp"><tr><th></th><td style="color:var(--gold2);font-weight:600">${esc(A.name)}</td><td style="color:${CMPB};font-weight:600">${esc(B.name)}</td></tr>${rows}</table>
+  <div class="foot"><button class="btn" data-act="close">Done</button></div>`;
+}
+function openCmp(k){ const gs = groups().filter(g => g.done.length); if (gs.length < 2) { toast('Rate at least two fragrances to compare'); return; } CMP = { a:k || '', b:'' }; MODAL = 'tt'; openModal(cmpHtml()); }
+/* Wishlist entry from a test, with the price noted in the test as the price seen. */
+function addWish(g){
+  const e = LIB.find(x => x.k === norm(g.brand+' '+g.name));
+  const w = { id:uid(), name:g.name, brand:g.brand, fam:g.fam || (e && e.f) || '', conc:(e && e.c) || 'EDP', year:(e && e.y) || '', shelf:'wish', type:'Bottle', maxMl:(e && e.s) || 100, ml:(e && e.s) || 100, price:'', rating:0, longevity:'', proj:0, seasons:[], notes:'', created:Date.now(), sprays:0 };
+  if (+g.price > 0) w.seen = +g.price;
+  S.perfumes.push(w); save(); toast('Added to your wishlist');
+}
 
 /* ---------- actions ---------- */
 const TA = {
@@ -413,12 +460,11 @@ const TA = {
   dback: a => openDetail(a.dataset.id),
   group: a => { const g = findGroup(a.dataset.k); if (g) { MODAL = 'tt'; openModal(groupHtml(g)); } },
   again: a => { const g = findGroup(a.dataset.k); if (!g) return; closeAll(); openStart({ pid:g.pid, name:g.name, brand:g.brand, fam:g.fam }); },
-  gwish: a => {
-    const g = findGroup(a.dataset.k); if (!g) return;
-    const e = LIB.find(x => x.k === norm(g.brand+' '+g.name));
-    S.perfumes.push({ id:uid(), name:g.name, brand:g.brand, fam:g.fam || (e && e.f) || '', conc:(e && e.c) || 'EDP', year:(e && e.y) || '', shelf:'wish', type:'Bottle', maxMl:(e && e.s) || 100, ml:(e && e.s) || 100, price:'', rating:0, longevity:'', proj:0, seasons:[], notes:'', created:Date.now(), sprays:0 });
-    save(); toast('Added to your wishlist'); const g2 = findGroup(g.key); if (g2) $('#modal .panel').innerHTML = groupHtml(g2);
-  },
+  gwish: a => { const g = findGroup(a.dataset.k); if (!g) return; addWish(g); const g2 = findGroup(g.key); if (g2) $('#modal .panel').innerHTML = groupHtml(g2); },
+  dwish: a => { const s = tt().sessions.find(x => x.id === a.dataset.id); if (!s) return; const g = findGroup(keyOf(s)); addWish(Object.assign({}, g || s, { price:s.price != null ? s.price : g && g.price })); render(); openDetail(s.id); },
+  gnotes: a => { const g = findGroup(a.dataset.k); if (g) openPyr(g.brand, g.name, reopenGroup(g.key)); },
+  gcalc: a => { const g = findGroup(a.dataset.k); if (g) openCalc(calcFor({ pid:g.pid, name:g.name, brand:g.brand, price:g.price }, reopenGroup(g.key))); },
+  cmp: a => openCmp(a.dataset.k),
   gsync: a => {
     const g = findGroup(a.dataset.k), p = g && g.pid && byId(g.pid); if (!p) return;
     p.rating = clamp(Math.round(g.avg/2), 1, 5); if (g.crit.sillage) p.proj = clamp(Math.round(g.crit.sillage/2), 1, 5); if (g.hours != null) p.longevity = r1(g.hours);
@@ -544,6 +590,7 @@ const TI = {
 document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.ti; if (k && TI[k]) TI[k](e.target, e); });
 const TC = {
   tsort: el => { TSORT = el.value; const box = $('#ttList'); if (box) box.innerHTML = listHtml(); },
+  cmp: el => { CMP[el.dataset.k] = el.value; if (CMP.a === CMP.b) CMP[el.dataset.k === 'a' ? 'b' : 'a'] = ''; const p = $('#modal .panel'); if (p) { const sc = p.scrollTop; p.innerHTML = cmpHtml(); p.scrollTop = sc; } },
   tearly: el => { readST(); ST.earlier = el.checked; if (el.checked) ST.t = Date.now() - H; paintST(); }
 };
 document.addEventListener('change', e => { const k = e.target.dataset && e.target.dataset.tc; if (k && TC[k]) TC[k](e.target, e); });

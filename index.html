@@ -23,6 +23,9 @@
 --danger:#dd7565;--ledge:rgba(202,169,107,.34);--scrim:rgba(6,7,6,.66);--glass:rgba(255,255,255,.04);
 --gf:rgba(255,255,255,.07);--gs:rgba(255,255,255,.4);--shn:rgba(255,255,255,.18);
 --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;--sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
+/* accent colour (Settings): gold is the default; rose gold and silver swap the accent tokens in both themes */
+:root[data-accent="rose"]{--gold:#e2a894;--gold2:#f2c9ba;--glow:rgba(226,168,148,.14);--ledge:rgba(214,150,130,.34)}
+:root[data-accent="silver"]{--gold:#c4c9cf;--gold2:#e6e9ec;--glow:rgba(196,201,207,.12);--ledge:rgba(190,195,200,.3)}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
 --bg:#e6e0d3;--bg2:#ddd6c7;--surf:#ece6d9;--surf2:#e3dccd;--line:rgba(44,36,20,.14);--line2:rgba(44,36,20,.27);
 --tx:#14110c;--tx2:#3e382d;--tx3:#5f584a;--gold:#6f4f15;--gold2:#573c0c;--goldink:#fff8e8;--glow:rgba(111,79,21,.12);
@@ -33,6 +36,10 @@
 --tx:#14110c;--tx2:#3e382d;--tx3:#5f584a;--gold:#6f4f15;--gold2:#573c0c;--goldink:#fff8e8;--glow:rgba(111,79,21,.12);
 --danger:#9c3324;--ledge:rgba(143,107,40,.4);--scrim:rgba(30,24,12,.45);--glass:rgba(0,0,0,.03);
 --gf:rgba(0,0,0,.05);--gs:rgba(40,30,10,.45);--shn:rgba(255,255,255,.55)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"])[data-accent="rose"]{--gold:#8e4a3a;--gold2:#733526;--glow:rgba(142,74,58,.12);--ledge:rgba(142,74,58,.35)}
+:root:not([data-theme="dark"])[data-accent="silver"]{--gold:#4f5660;--gold2:#3a4048;--glow:rgba(79,86,96,.12);--ledge:rgba(79,86,96,.35)}}
+:root[data-theme="light"][data-accent="rose"]{--gold:#8e4a3a;--gold2:#733526;--glow:rgba(142,74,58,.12);--ledge:rgba(142,74,58,.35)}
+:root[data-theme="light"][data-accent="silver"]{--gold:#4f5660;--gold2:#3a4048;--glow:rgba(79,86,96,.12);--ledge:rgba(79,86,96,.35)}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 html.lock{overflow:hidden}
 body{font:15px/1.5 var(--sans);color:var(--tx);min-height:100%;-webkit-font-smoothing:antialiased;
@@ -283,7 +290,7 @@ h1{font-size:38px}
 .pick-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
 .eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
 .pick h2{font-size:32px;line-height:1.05}
-.sg.occ button{padding:5px 13px;font-size:12.5px}
+.sg.occ button{padding:5px 10px;font-size:12.5px}
 .why{list-style:none;margin:12px 0 0;display:grid;gap:5px;color:var(--tx2);font-size:14px}
 .why li:before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin:0 10px 2px 0;vertical-align:middle}
 .worn{color:var(--tx2);font-size:14px;margin:-6px 0 14px}.worn b{color:var(--tx);font-weight:600}
@@ -295,6 +302,46 @@ h1{font-size:38px}
 .cres button:hover{border-color:var(--gold)}
 .shprev{display:flex;justify-content:center;align-items:center;min-height:220px;border:1px solid var(--line);border-radius:16px;padding:10px;background:var(--bg2)}
 .shprev img{width:100%;max-width:340px;border-radius:10px;display:block}
+/* compact daily pick: the bottle on the left, name and the main reason beside it */
+.pick{padding:18px 20px}
+.pick-top{margin-bottom:12px}
+.pick-ctl{display:flex;gap:6px;align-items:center;max-width:100%}
+.pick-ctl .sg{flex:none}.pick-ctl select.mini{flex:0 1 auto;min-width:0}
+.pick-top .eyebrow button{color:inherit;letter-spacing:inherit;text-transform:inherit;font-size:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.pk{display:flex;gap:16px;align-items:center}
+.pk-bt{flex:none}.pk-bt .bt{width:58px;height:93px;margin:0}
+.pk-mid{flex:1;min-width:0}
+.pick h2{font-size:26px;line-height:1.08}
+.pk-why{color:var(--tx2);font-size:13.5px;margin-top:6px;line-height:1.4}
+.pk-more{color:var(--tx3);font-size:12.5px;text-decoration:underline;text-underline-offset:3px;margin-left:4px}
+.pick .acts{margin-top:14px}
+select.mini{width:auto;padding:5px 8px;border-radius:999px;font-size:12.5px;background:var(--bg2)}
+/* stats: strips, bars and note scores */
+.hrow{display:grid;grid-template-columns:minmax(0,34%) 1fr auto;gap:12px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.hrow .nmx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrow .nmx small{display:block;color:var(--tx3);font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.hrow .v{color:var(--tx2);font-size:13px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.htrack{position:relative;height:10px;border-radius:99px;background:var(--line)}
+.htrack b{position:absolute;top:0;bottom:0;left:0;border-radius:99px;background:var(--gold)}
+.htrack i{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--gold);border:1.5px solid var(--surf)}
+.htrack em{position:absolute;top:2px;bottom:2px;border-radius:99px;background:var(--gold);opacity:.35}
+.hax{display:grid;grid-template-columns:minmax(0,34%) 1fr auto;gap:12px;color:var(--tx3);font-size:11.5px;margin-top:6px}
+.hax div{display:flex;justify-content:space-between}
+/* test compare, notes pyramid, photo import */
+.cmp{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+.cmp th,.cmp td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.cmp th{color:var(--tx3);font-weight:500;font-size:12.5px;width:28%}
+.cmp td.win{color:var(--gold2);font-weight:600}
+.cmp-key{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--tx2);justify-content:center}
+.cmp-key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.pyr{display:grid;gap:6px;font-size:13.5px;color:var(--tx2)}
+.pyr b{color:var(--tx3);font-weight:500;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;margin-right:8px}
+.phrow{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.phrow img{width:52px;height:68px;object-fit:cover;border-radius:8px;flex:none;background:var(--bg2)}
+.phrow select{flex:1;min-width:0}
+.calc-out{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--tx2);display:grid;gap:6px}
+.calc-out b{color:var(--tx)}
+@media (max-width:520px){.vh .acts .btn{padding:9px 16px;font-size:13px}.pick-top{flex-direction:column;align-items:flex-start;gap:8px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -317,7 +364,6 @@ h1{font-size:38px}
 <button class="nb" data-act="tab" data-t="shelf"><svg><use href="#i-shelf"/></svg>Collection</button>
 <button class="nb" data-act="tab" data-t="journal"><svg><use href="#i-book"/></svg>Journal</button>
 <button class="nb" data-act="tab" data-t="ins"><svg><use href="#i-chart"/></svg>Stats</button>
-<button class="nb" data-act="tab" data-t="lib"><svg><use href="#i-lib"/></svg>Library</button>
 <button class="nb" data-act="tab" data-t="set"><svg><use href="#i-set"/></svg>Settings</button>
 </nav>
 <div class="rail-foot" id="railFoot"></div>
@@ -353,7 +399,7 @@ const FAMLIST=['Aromatic','Woody','Amber','Fresh','Citrus','Floral','Gourmand','
 const defaults=()=>({v:2,demo:false,
  shelves:[{id:'s1',name:'Daily'},{id:'s2',name:'Niche & special'},{id:'s3',name:'Summer & fresh'}],
  perfumes:[],wears:[],mine:[],
- settings:{spm:0,spmV:2,theme:'dark',cur:'€',remind:true,lastBackup:0,snooze:0,ins:{m:'ml',g:'perfume',p:'30'},rem:{am:false,amT:'08:30',pm:false,pmT:'20:30'},occ:'day'}});
+ settings:{spm:0,spmV:2,theme:'dark',cur:'€',remind:true,lastBackup:0,snooze:0,ins:{m:'ml',g:'perfume',p:'30'},rem:{am:false,amT:'08:30',pm:false,pmT:'20:30',test:true},occ:'day'}});
 function migrate(o){const d=defaults();const s=Object.assign(d,o||{});
  s.settings=Object.assign(defaults().settings,(o&&o.settings)||{});
  s.settings.ins=Object.assign(defaults().settings.ins,(o&&o.settings&&o.settings.ins)||{});
@@ -444,6 +490,47 @@ function inferFam(text){const s=norm(text);if(!s)return '';const K=[['Oud',/\bou
  ['Woody',/cedar|sandal|vetiver|patchouli|oak|cypress|guaiac|wood/],['Amber',/amber|labdanum|benzoin|resin|incense|myrrh|frankincense|olibanum/],['Aromatic',/lavender|sage|rosemary|mint|basil|thyme|artemisia/],
  ['Spicy',/pepper|cinnamon|cardamom|saffron|clove|ginger|nutmeg/],['Aquatic',/marine|sea |aquatic|ozone|salt/],['Musk',/musk|ambrette/],['Fruity',/apple|peach|pear|berry|cherry|plum|pineapple|fig|blackcurrant|lychee|mango/]];
  let best='',bs=0;for(const [n,re] of K){const m=s.match(new RegExp(re.source,'g'));if(m&&m.length>bs){bs=m.length;best=n}}return best}
+/* ================= notes pyramid, season guess, moods ================= */
+/* Notes are kept by house and name (S.pyr), so a bottle, a wishlist entry and a test of the same
+   fragrance share them, and they survive deleting and adding a bottle again. */
+const pkey=(b,n)=>norm((b||'')+' '+(n||''));
+const pyrOf=(b,n)=>(S.pyr||{})[pkey(b,n)]||null;
+const pyrAll=y=>y?[].concat(y.top||[],y.mid||[],y.base||[]):[];
+function setPyr(b,n,y){S.pyr=S.pyr||{};const k=pkey(b,n);if(y&&pyrAll(y).length)S.pyr[k]=y;else delete S.pyr[k]}
+const capNote=x=>x.charAt(0).toUpperCase()+x.slice(1);
+function splitNotes(t){const seen=new Set();return String(t||'').split(/[,;\n\u2022\u00b7|/]|\s+and\s+|\s+&\s+/i)
+ .map(x=>x.replace(/^[\s\-\u2013:.*]+|[\s\-\u2013:.*]+$/g,'').trim()).filter(x=>x&&x.length<=40&&!/notes?$|^(perfume pyramid|pyramid|accords?)$/i.test(x))
+ .map(capNote).filter(x=>{const k=norm(x);if(seen.has(k))return false;seen.add(k);return true}).slice(0,24)}
+/* Reads notes pasted from Fragrantica or any shop page: "Top notes are A, B and C; middle notes are ..."
+   or a pyramid with one note per line under Top / Middle / Base. Without those words it is one list. */
+function parseNotes(t){t=String(t||'').replace(/\r/g,'');const o={top:[],mid:[],base:[]},marks=[];
+ const re=/\b(top|head|opening|middle|heart|base|bottom)[ \t]+notes?\b(?:[ \t]+(?:are|is))?[ \t]*:?/gi;let m;
+ while((m=re.exec(t)))marks.push({k:/top|head|open/i.test(m[1])?'top':/mid|heart/i.test(m[1])?'mid':'base',s:m.index,e:m.index+m[0].length});
+ if(!marks.length){o.mid=splitNotes(t);return o}
+ marks.forEach((x,i)=>{let seg=t.slice(x.e,i+1<marks.length?marks[i+1].s:t.length);seg=seg.split(/\.(?:\s|$)|\n\s*\n/)[0];o[x.k]=splitNotes(o[x.k].join(',')+','+seg)});return o}
+const WARMN=/vanilla|amber|oud|agarwood|tobacco|leather|cinnamon|tonka|incense|olibanum|frankincense|benzoin|labdanum|patchouli|myrrh|praline|caramel|coffee|chocolate|cacao|rum|cognac|whisk|saffron|honey|clove|plum|resin|smok|suede|cashmeran|sandalwood/;
+const FRESHN=/bergamot|lemon|lime|grapefruit|orange|mandarin|yuzu|neroli|petitgrain|marine|sea |sea$|aquatic|ozon|salt|mint|cucumber|green|tea|melon|pineapple|ginger|lavender|basil|verbena|aldehyde|calone|water|citrus/;
+/* Seasons from the scent family and the notes: warm, dense scents lean to autumn and winter,
+   fresh and citrus ones to spring and summer. Only a suggestion; your own choice wins. */
+function seasonGuess(fam,notes){let w=0,f=0;const k=famKind(fam||'');if(fam&&k==='warm')w+=2;else if(fam&&k==='fresh')f+=2;
+ (notes||[]).forEach(n=>{const x=norm(n);if(WARMN.test(x))w++;else if(FRESHN.test(x))f++});
+ if(!w&&!f)return fam?['Spring','Autumn']:[];return w>f?['Autumn','Winter']:f>w?['Spring','Summer']:['Spring','Autumn']}
+const seasonsFor=p=>(p.seasons&&p.seasons.length)?p.seasons:seasonGuess(p.fam,pyrAll(pyrOf(p.brand,p.name)));
+const MOODS=[['relaxed','Relaxed'],['energetic','Energetic'],['cozy','Cozy'],['confident','Confident'],['romantic','Romantic'],['focused','Focused']];
+const moodName=m=>(MOODS.find(x=>x[0]===m)||[0,''])[1];
+const moodToday=()=>{const x=S.settings.mood;return x&&x.d===dkey(Date.now())?x.m:''};
+function pyrHtml(y){if(!y||!pyrAll(y).length)return '';const L=[['top','Top'],['mid',y.top.length||y.base.length?'Heart':'Notes'],['base','Base']].filter(r=>(y[r[0]]||[]).length);
+ return `<div class="pyr">${L.map(r=>`<div><b>${r[1]}</b>${esc(y[r[0]].join(', '))}</div>`).join('')}</div>`}
+function pyrFormHtml(y){y=y||{top:[],mid:[],base:[]};return `<div class="fg"><label for="py-paste">Paste notes</label><textarea id="py-paste" data-in="pyrPaste" placeholder="Copy the notes from Fragrantica or a shop page and paste them here. Top, heart and base fill in below." style="min-height:70px"></textarea></div>
+ <div class="fg"><label for="py-top">Top</label><input id="py-top" value="${esc((y.top||[]).join(', '))}" placeholder="Bergamot, Pink pepper"></div>
+ <div class="fg"><label for="py-mid">Heart</label><input id="py-mid" value="${esc((y.mid||[]).join(', '))}" placeholder="Iris, Rose"></div>
+ <div class="fg"><label for="py-base">Base</label><input id="py-base" value="${esc((y.base||[]).join(', '))}" placeholder="Vanilla, Amber, Musk"></div>`}
+function readPyrForm(){const g=id=>{const e=$('#'+id);return e?splitNotes(e.value):[]};return {top:g('py-top'),mid:g('py-mid'),base:g('py-base')}}
+/* Notes editor as its own sheet (Test lab); back() reopens where it came from. */
+let PYR=null;
+function openPyr(brand,name,back){PYR={brand,name,back};MODAL='pyr';openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Notes</h2><p class="muted" style="margin:4px 0 16px">${esc(name)} \u00b7 ${esc(brand)}</p>${pyrFormHtml(pyrOf(brand,name))}
+ <div class="foot"><button class="btn ghost" data-act="pyrBack">Back</button><button class="btn" data-act="pyrSave">Save notes</button></div>`)}
+
 /* ================= demo seed ================= */
 function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function seed(){const s=defaults(),now=Date.now(),rnd=mulberry(7);
@@ -481,8 +568,8 @@ function banners(){let h='';
   h+=`<div class="note"><span>Your last backup was ${d}. Your data lives in this browser only.</span><span class="acts"><button class="btn sm" data-act="bkNow">Back up now</button><button class="btn ghost sm" data-act="snooze">Later</button></span></div>`}
  return h}
 function vShelf(){const own=owned(),ml=own.reduce((a,p)=>a+p.ml,0);
- return `<header class="vh"><div><h1>Collection</h1><p class="sub2">${own.length} ${own.length===1?'fragrance':'fragrances'} \u00b7 ${fmtMl(ml)} \u00b7 about ${fmt(own.reduce((a,p)=>a+p.ml*rateOf(p),0))} sprays left</p></div><div class="acts"><button class="btn ghost" data-act="share">Share</button><button class="btn" data-act="add">Add fragrance</button></div></header>`+
- banners()+lowNote()+recapCard()+todayCard('shelf')+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
+ return `<header class="vh"><div><h1>Collection</h1><p class="sub2">${own.length} ${own.length===1?'fragrance':'fragrances'} \u00b7 ${fmtMl(ml)} \u00b7 about ${fmt(own.reduce((a,p)=>a+p.ml*rateOf(p),0))} sprays left</p></div><div class="acts"><button class="btn ghost" data-act="share">Share</button><button class="btn ghost" data-act="tab" data-t="lib">Library</button><button class="btn" data-act="add">Add fragrance</button></div></header>`+
+ banners()+lowNote()+recapCard()+todayCard()+`<div id="racks">${S.shelves.map(sh=>rack(sh.id,sh.name,false)).join('')}${rack('wish','Wishlist',true)}</div>`}
 
 /* ================= journal ================= */
 function lastWorn(pid){let t=0;allWears().forEach(w=>{if(w.pid===pid&&w.t>t)t=w.t});return t}
@@ -500,10 +587,10 @@ function vJournal(){
  const distinct=new Set(monthWears.map(wKey)).size;
  const sorted=[...AW].sort((a,b)=>b.t-a.t),shown=sorted.slice(0,ui.jlim);let list='',lastD='';
  shown.forEach(w=>{const p=wP(w);const k=dkey(w.t);if(k!==lastD){lastD=k;const d=new Date(w.t);list+=`<div class="day-h">${d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})}</div>`}
-  list+=`<div class="wr"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n===1?'spray':'sprays'}</small></div>${w.test?'<span class="wtag" title="From the Test lab">Test</span>':`<button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button>`}</div>`});
+  list+=`<div class="wr"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n===1?'spray':'sprays'}${w.mood?' \u00b7 '+esc(moodName(w.mood).toLowerCase()):''}${w.temp!=null?' \u00b7 '+w.temp+'\u00b0':''}</small></div>${w.test?'<span class="wtag" title="From the Test lab">Test</span>':`<button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button>`}</div>`});
  if(!list)list='<p class="muted" style="padding:14px 0">No wears logged yet. Log your first wear and the calendar fills in.</p>';
  return `<header class="vh"><div><h1>Journal</h1><p class="sub2">${streak()} day streak \u00b7 ${AW.length} wears logged</p></div><div class="acts"><button class="btn" data-act="wearOpen">Log a wear</button></div></header>
- <div class="g3">${todayCard('journal')}<div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div></div>
+ <div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div>
  <div class="card" style="margin-top:18px"><h3>History</h3>${list}${sorted.length>ui.jlim?`<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-act="jmore">Show more</button></div>`:''}</div>`}
 
 /* ================= insights ================= */
@@ -563,6 +650,7 @@ function vIns(){const {m,g,p}=S.settings.ins,d=insCompute();
  ${valueHtml()}
  <div class="card"><div class="ctl"><div class="fg"><label for="ins-m">Measure</label><select id="ins-m" data-ch="insM">${opt(MEAS,m)}</select></div><div class="fg"><label for="ins-g">Group by</label><select id="ins-g" data-ch="insG">${opt(GRPS,g)}</select></div></div><div id="donutBox">${donutHtml(d)}</div></div>
  <div class="card"><h3>Wear activity</h3><div id="actBox">${activityHtml(p==='all'?'365':p)}</div></div>
+ ${notesHtml()}${cpwHtml()}${tempHtml()}${emptyHtml()}
  ${forgottenHtml()}
  <div class="card"><div class="ch" style="margin-bottom:6px"><h3>Breakdown</h3><select data-ch="rank" style="width:auto"><option value="used"${ui.rank==='used'?' selected':''}>Most used</option><option value="idle"${ui.rank==='idle'?' selected':''}>Waiting longest</option><option value="age"${ui.rank==='age'?' selected':''}>Longest in collection</option><option value="left"${ui.rank==='left'?' selected':''}>Most remaining</option><option value="val"${ui.rank==='val'?' selected':''}>Most value left</option></select></div><div id="rankBox">${rankHtml(d)}</div></div>`}
 function updateIns(){if(ui.tab!=='ins')return;const d=insCompute();$('#kpis').innerHTML=kpisHtml(d);$('#donutBox').innerHTML=donutHtml(d);animateDonut();const p=S.settings.ins.p;$('#actBox').innerHTML=activityHtml(p==='all'?'365':p);$('#rankBox').innerHTML=rankHtml(d);
@@ -577,8 +665,7 @@ function libRows(){LIBV=libFind(ui.lq,{b:ui.lb,f:ui.lf,c:ui.lc});const show=LIBV
   return `<div class="lrow"><div class="th">${bt({name:e.n,brand:e.b,fam:e.f},.7)}</div><div class="mid"><div class="t1">${esc(e.n)}</div><div class="t2">${[esc(e.b),esc(e.f),esc(e.c),e.y||''].filter(Boolean).join(' \u00b7 ')}${e.s?' \u00b7 '+e.s+' ml':''}</div>${e.t?`<div class="t3">${esc(e.t)}</div>`:''}</div><div class="ac"><button class="ic${w?' on':''}" data-act="lwish" data-i="${i}" aria-label="Add to wishlist">${w?'\u2665':'\u2661'}</button><button class="btn sm" data-act="ladd" data-i="${i}">Add</button></div></div>`}).join('')+(LIBV.length>ui.llim?`<div style="text-align:center;padding:18px"><button class="btn ghost sm" data-act="lmore">Show more (${fmt(LIBV.length-ui.llim)} left)</button></div>`:'')}
 function updateLib(){const r=$('#libres');if(!r)return;r.innerHTML=libRows();$('#libcount').textContent=fmt(LIBV.length)+' of '+fmt(LIB.length)+' fragrances'}
 function vLib(){const nI=IMPORTED.length,nM=S.mine.length;
- return `<header class="vh"><div><h1>Library</h1><p class="sub2" id="libcount">${fmt(LIB.length)} fragrances</p></div><div class="acts"><button class="btn ghost" data-act="impPick">Import CSV or JSON</button><button class="btn" data-act="lnew">New entry</button></div></header>
- <input type="file" id="impFile" accept=".csv,.json,.txt,text/csv,application/json">
+ return `<header class="vh"><div><h1>Library</h1><p class="sub2" id="libcount">${fmt(LIB.length)} fragrances</p></div><div class="acts"><button class="btn ghost" data-act="tab" data-t="shelf">Back to Collection</button><button class="btn" data-act="lnew">New entry</button></div></header>
  <div class="card"><div class="filters"><div class="fg"><label for="lq">Search</label><input id="lq" data-in="lq" placeholder="Name or house" autocomplete="off" value="${esc(ui.lq)}"></div>
  <div class="fg"><label for="lb">House</label><input id="lb" data-in="lb" list="brand-list" placeholder="Any" autocomplete="off" value="${esc(ui.lb)}"></div>
  <div class="fg"><label for="lf">Family</label><select id="lf" data-ch="lf"><option value="">Any</option>${FAMLIST.map(f=>`<option${ui.lf===f?' selected':''}>${f}</option>`).join('')}</select></div>
@@ -592,6 +679,7 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  return `<header class="vh"><div><h1>Settings</h1><p class="sub2">Everything is stored in this browser. Back up to keep it safe.</p></div></header>
  <div class="card"><h3>Appearance and units</h3>
  <div class="set-row"><div>Theme</div><div class="sg">${[['dark','Dark'],['light','Light'],['auto','Match device']].map(x=>`<button data-act="theme" data-v="${x[0]}" class="${s.theme===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></div>
+ <div class="set-row"><div>Accent colour</div><div class="sg">${[['gold','Gold'],['rose','Rose gold'],['silver','Silver']].map(x=>`<button data-act="accent" data-v="${x[0]}" class="${(s.accent||'gold')===x[0]?'on':''}">${x[1]}</button>`).join('')}</div></div>
  <div class="set-row"><div>Sprays per ml<small>For bottles without their own number. Empty: by bottle size (10 for 100 ml, 12 for 50 to 75 ml, 15 for 30 ml and decants).</small></div><input type="number" min="1" max="40" step="0.5" value="${+s.spm>0?s.spm:''}" placeholder="Auto" data-ch="spm" style="width:100px"></div>
  <div class="set-row"><div>Currency symbol</div><input value="${esc(s.cur)}" maxlength="4" data-ch="cur" style="width:100px"></div></div>
  <div class="card"><h3>Shelves</h3><p class="muted" style="margin:6px 0 14px">Rename, reorder or remove shelves. Removing one moves its bottles to the first shelf.</p>
@@ -608,6 +696,10 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  ${snaps.length?snaps.map((x,i)=>`<div class="set-row"><div>${new Date(x.t).toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}<small>${esc(x.why)} \u00b7 ${x.n} fragrances</small></div><button class="btn ghost sm" data-act="snapRestore" data-i="${i}">Restore</button></div>`).join(''):'<p class="muted">None yet.</p>'}</div>
  <div class="card"><h3>Updates</h3><div class="set-row"><div>${window.LuxAndroid&&LuxAndroid.getVersion?'Lux '+esc(LuxAndroid.getVersion())+' for Android':'Lux web app'}<small>Updates keep your collection and settings</small></div><button class="btn ghost sm" data-act="checkUpdate">Check for updates</button></div></div>
  <div class="card"><h3>Library and data</h3>
+ <div class="set-row"><div>Library<small>${fmt(LIB.length)} fragrances for search and suggestions</small></div><div class="acts"><button class="btn ghost sm" data-act="tab" data-t="lib">Open library</button><button class="btn ghost sm" data-act="impPick">Import CSV or JSON</button></div></div>
+ <input type="file" id="impFile" accept=".csv,.json,.txt,text/csv,application/json">
+ <div class="set-row"><div>Photos<small>${(n=>n?n+(n===1?' bottle has':' bottles have')+' no photo. Pick several photos at once and match them to your bottles.':'Every bottle has a photo. You can still pick several at once.')(S.perfumes.filter(p=>!PHOTOS[p.id]).length)}</small></div><button class="btn ghost sm" data-act="photoMany">Add photos</button></div>
+ <input type="file" id="photoMany" accept="image/*" multiple>
  <div class="set-row"><div>Imported library<small>${fmt(IMPORTED.length)} entries. Your own entries are kept.</small></div><button class="btn ghost sm" data-act="clrImp">Clear imported</button></div>
  <div class="set-row"><div>Erase everything<small>Removes the collection, journal, photos and own entries</small></div><button class="btn danger sm" data-act="reset">Erase all</button></div></div>
  <div class="card"><h3>About</h3><div class="set-row"><div>Developed by<small>Ivan S. - Epicurus001, Oslo</small></div></div></div>`}
@@ -615,7 +707,7 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
 /* ================= render ================= */
 function render(){const v=$('#view');
  v.innerHTML=({shelf:vShelf,journal:vJournal,ins:vIns,lib:vLib,set:vSet}[ui.tab]||vShelf)();
- $$('#nav .nb').forEach(b=>b.classList.toggle('on',b.dataset.t===ui.tab));
+ $$('#nav .nb').forEach(b=>b.classList.toggle('on',b.dataset.t===(ui.tab==='lib'?'shelf':ui.tab)));
  const own=owned();$('#railFoot').innerHTML=`${own.length} in the cabinet<br>${fmt(LIB.length)} in the library`;
  if(ui.tab==='ins')animateDonut();
  if(ui.tab==='lib'){const bl=$('#brand-list');if(bl&&!bl.children.length){bl.innerHTML=[...new Set(LIB.map(e=>e.b))].sort().slice(0,4000).map(b=>`<option value="${esc(b)}">`).join('')}}}
@@ -727,6 +819,7 @@ function endConfirm(v){const d=$('#dlg');d.hidden=true;d.innerHTML='';if(confirm
    own theme, which is always dark); browsers use prefers-color-scheme. The app's status and
    navigation bars follow the page. */
 function applyTheme(){const t=S.settings.theme,r=document.documentElement,and=window.LuxAndroid&&LuxAndroid.isNight;
+ const ac=S.settings.accent;if(ac&&ac!=='gold')r.setAttribute('data-accent',ac);else r.removeAttribute('data-accent');
  const eff=t!=='auto'?t:and?(LuxAndroid.isNight()?'dark':'light'):matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
  if(t==='auto'&&!and)r.removeAttribute('data-theme');else r.setAttribute('data-theme',eff);
  const bg=getComputedStyle(r).getPropertyValue('--bg').trim(),m=document.querySelector('meta[name="theme-color"]');if(m&&bg)m.setAttribute('content',bg);
@@ -759,25 +852,27 @@ function sheetHtml(){const d=D,lv=(+d.maxMl)?clamp((+d.ml||0)/(+d.maxMl),0,1):0,
  <div class="fg"><span class="lb">Your rating</span>${starsHtml('rating',d.rating||0)}</div>
  <div class="fg"><span class="lb">Projection</span>${starsHtml('proj',d.proj||0,true)}</div>
  <div class="fg"><label for="f-long">Longevity on skin (hours)</label><input id="f-long" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.longevity)}"></div>
- <div class="fg"><span class="lb">Best in</span><div class="chips">${SEASONS.map(s=>`<button type="button" class="chip${(d.seasons||[]).includes(s)?' on':''}" data-act="season" data-v="${s}">${s}</button>`).join('')}</div></div></div>
+ <div class="fg"><span class="lb">Best in</span><div class="chips">${SEASONS.map(s=>`<button type="button" class="chip${(d.seasons||[]).includes(s)?' on':''}" data-act="season" data-v="${s}">${s}</button>`).join('')}</div>${(d.seasons||[]).length?'':(g=>g.length?`<small class="hint">Suggested from the family and notes: ${g.join(', ')} \u00b7 <button type="button" class="pk-more" style="margin:0" data-act="seasonUse">use it</button></small>`:'')(seasonGuess(d.fam,pyrAll(ui.pyrEdit?null:pyrOf(d.brand,d.name))))}</div></div>
  ${wish?`<div class="g2"><div class="fg"><label for="f-where">Where to buy</label><input id="f-where" data-in="sheet" placeholder="Shop, website or link" value="${esc(d.where||'')}"></div><div class="fg"><span class="lb">How much you want it</span>${starsHtml('prio',d.prio||0)}</div></div>`:''}
- <div class="fg"><label for="f-notes">Notes</label><textarea id="f-notes" data-in="sheet" placeholder="How it wears, when you reach for it">${esc(d.notes)}</textarea></div>
+ <div class="fg"><span class="lb">Notes pyramid</span>${ui.pyrEdit?pyrFormHtml(d._pyr||pyrOf(d.brand,d.name)):(pyrHtml(pyrOf(d.brand,d.name))||'<p class="muted" style="font-size:13.5px">No notes yet.</p>')+`<button type="button" class="btn ghost sm" data-act="pyrEdit" style="margin-top:8px">${pyrOf(d.brand,d.name)?'Edit notes':'Paste notes'}</button>`}</div>
+ <div class="fg"><label for="f-notes">Your notes</label><textarea id="f-notes" data-in="sheet" placeholder="How it wears, when you reach for it">${esc(d.notes)}</textarea></div>
  <div class="fg"><span class="lb">Photo</span><div class="acts"><button type="button" class="btn ghost sm" data-act="photoPick">${PHOTOS[d.id]?'Change photo':'Add photo'}</button>${PHOTOS[d.id]?'<button type="button" class="btn ghost sm" data-act="photoDel">Remove photo</button>':''}</div><input type="file" id="photoFile" accept="image/*"></div>
  ${sheetNew&&!known?`<div class="set-row" style="border:0;padding:4px 0"><label for="f-savelib" style="margin:0">Also save to my library</label><input type="checkbox" id="f-savelib" checked style="width:20px;height:20px"></div>`:''}
- <div class="foot">${sheetNew?'':'<button class="btn danger sp" data-act="sheetDel">Delete</button>'}${!sheetNew&&!wish?'<button class="btn ghost" data-act="sheetWear">Log a wear</button>':''}${!sheetNew&&wish&&window.__luxTest?'<button class="btn ghost" data-act="wishTest">Test</button>':''}${!sheetNew&&wish?'<button class="btn ghost" data-act="bought">I bought it</button>':''}<button class="btn" data-act="sheetSave">${sheetNew?'Add to cabinet':'Save changes'}</button></div>`}
+ <div class="foot">${sheetNew?'':'<button class="btn danger sp" data-act="sheetDel">Delete</button>'}${!sheetNew&&!wish?'<button class="btn ghost" data-act="sheetWear">Log a wear</button>':''}${!sheetNew&&wish&&window.__luxTest?'<button class="btn ghost" data-act="wishTest">Test</button>':''}${!sheetNew&&(wish||d.type==='Decant')?'<button class="btn ghost" data-act="calcSheet">Decant or bottle?</button>':''}${!sheetNew&&wish?'<button class="btn ghost" data-act="bought">I bought it</button>':''}<button class="btn" data-act="sheetSave">${sheetNew?'Add to cabinet':'Save changes'}</button></div>`}
 function paintSheet(){const p=$('#modal .panel');if(p){const sc=p.scrollTop;p.innerHTML=sheetHtml();p.scrollTop=sc}}
 function openSheet(id,pre){const p=id?byId(id):null;sheetNew=!p;
  D=p?JSON.parse(JSON.stringify(p)):Object.assign({id:uid(),name:'',brand:'',fam:'',conc:'EDP',year:'',shelf:S.shelves[0].id,type:'Bottle',maxMl:100,ml:100,price:'',rating:0,longevity:'',proj:0,seasons:[],notes:'',created:Date.now(),sprays:0},pre||{});
- MODAL='sheet';openModal(sheetHtml())}
+ ui.pyrEdit=false;MODAL='sheet';openModal(sheetHtml())}
 function readSheet(){if(!D||MODAL!=='sheet')return;const g=id=>{const e=$('#'+id);return e?e.value:undefined};
  const set=(k,id)=>{const v=g(id);if(v!==undefined)D[k]=v};
- set('name','f-name');set('brand','f-brand');set('fam','f-fam');set('conc','f-conc');set('year','f-year');set('shelf','f-shelf');set('type','f-type');set('maxMl','f-max');set('ml','f-ml');set('price','f-price');set('longevity','f-long');set('notes','f-notes');set('seen','f-seen');set('target','f-target');set('where','f-where');set('spm','f-spm')}
+ set('name','f-name');set('brand','f-brand');set('fam','f-fam');set('conc','f-conc');set('year','f-year');set('shelf','f-shelf');set('type','f-type');set('maxMl','f-max');set('ml','f-ml');set('price','f-price');set('longevity','f-long');set('notes','f-notes');set('seen','f-seen');set('target','f-target');set('where','f-where');set('spm','f-spm');if(ui.pyrEdit&&$('#py-top'))D._pyr=readPyrForm()}
 function refreshBt(){const mx=+D.maxMl||0,ml=clamp(+D.ml||0,0,mx||9999);const b=$('#sbt');if(b)b.innerHTML=bt(D,mx?ml/mx:0);
  const r=$('#f-mlr');if(r){r.max=mx||100;r.value=ml}}
 function suggest(){const box=$('#sugg');if(!box)return;const q=(D.name||'').trim();if(q.length<2){box.innerHTML='';return}
  box.innerHTML=libFind(q).slice(0,6).map(i=>{const e=LIB[i];return `<button type="button" data-act="sugg" data-i="${i}">${esc(e.n)} <small>${esc(e.b)}${e.c?' \u00b7 '+esc(e.c):''}</small></button>`}).join('')}
 function commitSheet(){readSheet();const d=D;d.name=String(d.name||'').trim();d.brand=String(d.brand||'').trim();
  if(!d.name||!d.brand){toast('Add a name and a house first');return false}
+ if(ui.pyrEdit&&d._pyr){setPyr(d.brand,d.name,d._pyr);ui.pyrEdit=false}delete d._pyr;
  d.maxMl=Math.max(1,+d.maxMl||100);d.ml=Math.round(clamp(+d.ml||0,0,d.maxMl)*10)/10;d.price=d.price===''?'':Math.max(0,+d.price||0);d.year=+d.year||'';d.longevity=d.longevity===''?'':Math.max(0,+d.longevity||0);
  ['seen','target'].forEach(k=>{if(d[k]!=null)d[k]=d[k]===''?'':Math.max(0,+d[k]||0)});if(d.where!=null)d.where=String(d.where).trim();if(d.spm!=null)d.spm=+d.spm>0?clamp(+d.spm,3,40):'';
  if(sheetNew){d.cal={ml:d.ml,sprays:d.sprays||0};S.perfumes.push(d);const sv=$('#f-savelib');
@@ -793,12 +888,16 @@ function wearHtml(){const own=owned();return `<button class="x" data-act="close"
  <div class="fg" style="margin-top:20px"><label for="w-p">Fragrance</label><select id="w-p" data-ch="wp">${own.map(p=>`<option value="${p.id}"${p.id===WD.pid?' selected':''}>${esc(p.name)} \u00b7 ${esc(p.brand)}</option>`).join('')}</select></div>
  <div class="fg"><label for="w-d">Date</label><input type="date" id="w-d" value="${WD.date}" max="${dkey(Date.now())}" data-ch="wd"></div>
  <span class="lb" style="text-align:center">Sprays</span><div class="stepper"><button data-act="step" data-d="-1" aria-label="Fewer sprays">\u2212</button><b id="w-n">${WD.n}</b><button data-act="step" data-d="1" aria-label="More sprays">+</button></div>
+ <div class="fg"><span class="lb">How do you feel (optional)</span><div class="chips">${MOODS.map(m=>`<button type="button" class="chip${WD.mood===m[0]?' on':''}" data-act="wmood" data-v="${m[0]}">${m[1]}</button>`).join('')}</div><small class="hint">Lux learns which scents you reach for in each mood and uses it in Today's pick.</small></div>
  <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="wearSave">Save wear</button></div>`}
 function openWear(pid){const own=owned();if(!own.length){toast('Add a fragrance first');return}
- const sg=suggestion();WD={pid:pid&&byId(pid)?pid:(sg?sg.p.id:own[0].id),n:3,date:dkey(Date.now())};MODAL='wear';openModal(wearHtml())}
+ const sg=suggestion();WD={pid:pid&&byId(pid)?pid:(sg?sg.p.id:own[0].id),n:3,date:dkey(Date.now()),mood:moodToday()};MODAL='wear';openModal(wearHtml())}
 function saveWear(){const p=byId(WD.pid);if(!p)return;const today=dkey(Date.now()),t=WD.date===today?Date.now():new Date(WD.date+'T12:00:00').getTime();
  const id=uid(),ml0=p.ml;p.ml=Math.max(0,Math.round((p.ml-WD.n/rateOf(p))*10)/10);p.sprays=(p.sprays||0)+WD.n;
- S.wears.push({id,pid:p.id,t,n:WD.n,ml:Math.round((ml0-p.ml)*10)/10}); /* ml: exactly what this wear took, so undo puts it back */save();closeModal();render();
+ const w={id,pid:p.id,t,n:WD.n,ml:Math.round((ml0-p.ml)*10)/10}; /* ml: exactly what this wear took, so undo puts it back */
+ if(WD.mood){w.mood=WD.mood;if(WD.date===today)S.settings.mood={d:today,m:WD.mood}}
+ const wx=wxFresh();if(wx&&WD.date===today)w.temp=wx.temp; /* for Stats: temperature and what you wear */
+ S.wears.push(w);save();closeModal();render();
  toastUndo(`Logged ${WD.n} ${WD.n===1?'spray':'sprays'} of ${p.name}`,()=>{if(removeWear(id)){render();toast('Wear removed')}})}
 
 /* ================= new library entry & import ================= */
@@ -929,8 +1028,8 @@ function exportCsv(kind){let rows,name;const d=v=>v?new Date(v).toISOString().sl
  if(kind==='col'){name='lux-collection-'+dkey(Date.now())+'.csv';
   rows=[['Name','House','Family','Concentration','Shelf','Type','Size ml','Left ml','Price paid','Value left','Price seen','Target price','Wears','Sprays','Last worn','Rating','Added']].concat(S.perfumes.map(p=>[p.name,p.brand,p.fam,p.conc,shelfName(p.shelf),p.type,p.maxMl,p.shelf==='wish'?'':p.ml,p.price,hasPrice(p)&&p.shelf!=='wish'?Math.round(valueLeft(p)):'',p.seen,p.target,allWears().filter(w=>w.pid===p.id).length,p.sprays||0,d(lastWorn(p.id)),p.rating||'',d(p.created)]))}
  else if(kind==='tests'){name='lux-tests-'+dkey(Date.now())+'.csv';const f=v=>v==null?'':Math.round(v*10)/10;
-  rows=[['Rank','Fragrance','House','Family','Score','Longevity','Sillage','Skin','Value','Tests','Hours','Would buy','Price','Last tested','Review']].concat(testedList().map((g,i)=>{const rv=g.done.find(s=>s.comment);
-   return [i+1,g.name,g.brand,g.fam,f(g.avg),f(g.crit.longevity),f(g.crit.sillage),f(g.crit.skin),f(g.crit.value),g.done.length,f(g.hours),g.buy||'',+g.price>0?g.price:'',d(g.last),rv?rv.comment:'']}))}
+  rows=[['Rank','Fragrance','House','Family','Score','Longevity','Sillage','Skin','Value','Tests','Hours','Would buy','Price','Last tested','Season','Notes','Review']].concat(testedList().map((g,i)=>{const rv=g.done.find(s=>s.comment);
+   return [i+1,g.name,g.brand,g.fam,f(g.avg),f(g.crit.longevity),f(g.crit.sillage),f(g.crit.skin),f(g.crit.value),g.done.length,f(g.hours),g.buy||'',+g.price>0?g.price:'',d(g.last),testSeason(g),pyrAll(pyrOf(g.brand,g.name)).join(', '),rv?rv.comment:'']}))}
  else{name='lux-journal-'+dkey(Date.now())+'.csv';
   rows=[['Date','Time','Fragrance','House','Sprays','ml','Value sprayed','Source']].concat(allWears().sort((a,b)=>b.t-a.t).map(w=>{const p=wP(w),m=wearMl(w),v=m*wearPerMl(w);
    return [d(w.t),new Date(w.t).toTimeString().slice(0,5),p.name,p.brand,w.n,Math.round(m*10)/10,v?Math.round(v*100)/100:'',w.test?'Test':'Wear']}))}
@@ -946,7 +1045,7 @@ function exportCsv(kind){let rows,name;const d=v=>v?new Date(v).toISOString().sl
    Test entries are read-only here; they are edited in the Test lab. */
 function testWears(){const T=(S.tt&&S.tt.sessions)||[];if(!T.length)return [];const real=new Set(S.wears.map(w=>w.pid+'@'+w.t));
  return T.filter(x=>!real.has(x.pid+'@'+x.t0)).map(x=>{const p=x.pid&&byId(x.pid);
-  return {id:'t'+x.id,pid:p?p.id:null,t:x.t0,n:+x.sprays||0,test:true,name:p?p.name:x.name,brand:p?p.brand:(x.brand||''),fam:p?p.fam:(x.fam||''),price:x.price}})}
+  return {id:'t'+x.id,pid:p?p.id:null,t:x.t0,n:+x.sprays||0,test:true,name:p?p.name:x.name,brand:p?p.brand:(x.brand||''),fam:p?p.fam:(x.fam||''),price:x.price,temp:x.weather&&x.weather.temp!=null?x.weather.temp:null}})}
 function allWears(){return S.wears.concat(testWears())}
 /* The bottle behind a wear, or a stand-in for a tested fragrance that is on no shelf. */
 function wP(w){return byId(w.pid)||{id:w.id,name:w.name||'?',brand:w.brand||'',fam:w.fam||'',maxMl:100,ml:100,shelf:'wish'}}
@@ -995,6 +1094,48 @@ function forgottenHtml(){const L=owned().filter(p=>p.ml>0&&idleDays(p)>=60).sort
  ${L.slice(0,8).map(p=>`<div class="row" data-act="open" data-id="${p.id}"><div class="th">${bt(p,p.maxMl?p.ml/p.maxMl:0)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)}</div></div><div class="rt">${lastWorn(p.id)?idleDays(p)+' days':'never worn'}</div></div>`).join('')}
  ${L.length>8?`<p class="muted" style="margin-top:10px;font-size:13.5px">and ${L.length-8} more</p>`:''}</div>`}
 
+/* ================= stats: cost per wear, temperature, running out, notes ================= */
+function cpwHtml(){const L=owned().filter(p=>+p.price>0).map(p=>{const n=allWears().filter(w=>w.pid===p.id).length;return {p,n,v:n?+p.price/n:Infinity}});
+ if(!L.length)return '';const worst=ui.cpw==='worst';L.sort((a,b)=>worst?b.v-a.v:a.v-b.v);const shown=L.slice(0,8),fin=L.filter(x=>x.n).map(x=>x.v),mx=Math.max(1,...fin);
+ return `<div class="card"><div class="ch" style="margin-bottom:6px"><h3>Cost per wear</h3><select class="mini" data-ch="cpw" aria-label="Order"><option value="best"${worst?'':' selected'}>Best value</option><option value="worst"${worst?' selected':''}>Most expensive</option></select></div>
+ <p class="muted" style="font-size:13.5px;margin-bottom:6px">What you paid divided by how often you wore it. Every wear makes a bottle better value.</p>
+ ${shown.map(x=>`<div class="hrow" data-act="open" data-id="${x.p.id}" role="button" tabindex="0"><div class="nmx">${esc(x.p.name)}<small>${esc(x.p.brand)} \u00b7 ${x.n} ${x.n===1?'wear':'wears'}</small></div><div class="htrack"><b style="width:${x.n?Math.max(3,x.v/mx*100):100}%;${x.n?'':'opacity:.3'}"></b></div><div class="v">${x.n?money(x.v,x.v<10):'not worn yet'}</div></div>`).join('')}
+ ${L.length>8?`<p class="muted" style="margin-top:10px;font-size:13.5px">and ${L.length-8} more</p>`:''}</div>`}
+/* Temperature on the day of each wear: saved with new wears when a city is set, tests bring their own,
+   and the last three months can be filled in from Open-Meteo. */
+function tempHtml(){const by={};allWears().forEach(w=>{if(w.temp==null)return;const q=wP(w),k=wKey(w);(by[k]=by[k]||{p:q,t:[]}).t.push(+w.temp)});
+ const L=Object.values(by).filter(x=>x.t.length>=2).sort((a,b)=>b.t.length-a.t.length).slice(0,8);
+ const miss=cityOf()&&S.wears.some(w=>w.temp==null&&w.t>Date.now()-90*DAY);
+ const btn=miss?`<button class="btn ghost sm" data-act="wxFill" style="margin-top:12px">Fill in weather for the last 3 months</button>`:'';
+ if(!L.length)return `<div class="card"><h3>Temperature and what you wear</h3><p class="muted" style="font-size:13.5px;margin-top:6px">${cityOf()?'Fills in as you log wears. Each fragrance shows up after two wears with a temperature.':'Add your city (Today\u2019s pick or Settings) and each wear keeps the day\u2019s temperature.'}</p>${btn}</div>`;
+ const all=L.flatMap(x=>x.t),lo=Math.min(-5,Math.floor(Math.min(...all)/5)*5),hi=Math.max(30,Math.ceil(Math.max(...all)/5)*5),X=t=>(t-lo)/(hi-lo)*100;
+ const med=a=>{const b=a.slice().sort((x,y)=>x-y);return b[Math.floor(b.length/2)]};
+ return `<div class="card"><h3>Temperature and what you wear</h3><p class="muted" style="font-size:13.5px;margin:6px 0 6px">Each dot is a wear on a day with that temperature; the band shows the usual range.</p>
+ ${L.map(x=>{const a=x.t.slice().sort((m,n)=>m-n),q1=a[Math.floor((a.length-1)/4)],q3=a[Math.ceil((a.length-1)*3/4)];
+  return `<div class="hrow"><div class="nmx">${esc(x.p.name)}<small>${x.t.length} wears</small></div><div class="htrack" style="background:var(--line)"><em style="left:${X(q1)}%;width:${Math.max(2,X(q3)-X(q1))}%"></em>${x.t.map(t=>`<i style="left:${X(t)}%;opacity:.55"></i>`).join('')}</div><div class="v">~${med(x.t)}\u00b0</div></div>`}).join('')}
+ <div class="hax"><span></span><div><span>${lo}\u00b0</span><span>${Math.round((lo+hi)/2)}\u00b0</span><span>${hi}\u00b0</span></div><span></span></div>${btn}</div>`}
+async function fillWeather(){const c=cityOf();if(!c)return;toast('Fetching weather\u2026');
+ try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+c.lat+'&longitude='+c.lon+'&timezone=auto&past_days=92&forecast_days=1&daily=temperature_2m_max,temperature_2m_min');if(!r.ok)throw 0;const j=await r.json(),d={};
+  (j.daily.time||[]).forEach((k,i)=>{const a=j.daily.temperature_2m_max[i],b=j.daily.temperature_2m_min[i];if(a!=null&&b!=null)d[k]=Math.round((a+b)/2)});
+  let n=0;S.wears.forEach(w=>{if(w.temp==null&&d[dkey(w.t)]!=null){w.temp=d[dkey(w.t)];n++}});save();render();toast(n?'Weather added to '+n+(n===1?' wear':' wears'):'Nothing to fill in')}
+ catch(e){toast('Could not reach the weather service')}}
+function emptyHtml(){const L=owned().filter(p=>p.ml>0).map(p=>({p,d:pace(p).days})).filter(x=>x.d!=null&&x.d<3650).sort((a,b)=>a.d-b.d).slice(0,8);if(!L.length)return '';
+ const mx=Math.max(90,...L.map(x=>Math.min(x.d,730)));
+ return `<div class="card"><h3>When bottles run out</h3><p class="muted" style="font-size:13.5px;margin:6px 0 6px">At your pace over the last three months. Handy to refill before the season.</p>
+ ${L.map(x=>`<div class="hrow" data-act="open" data-id="${x.p.id}" role="button" tabindex="0"><div class="nmx">${esc(x.p.name)}<small>${mlf(x.p.ml)} ml left</small></div><div class="htrack"><b style="width:${Math.max(3,Math.min(x.d,730)/mx*100)}%"></b></div><div class="v">${new Date(Date.now()+x.d*DAY).toLocaleDateString(undefined,{month:'short',year:'numeric'})}</div></div>`).join('')}</div>`}
+/* Every note of every fragrance you rated (tests first, else the stars of a bottle) gets that score;
+   a note's score is the average. Notes come from the pyramid and from what you smelled in tests. */
+function noteStats(){const by={},T=window.__luxTest,seen=new Set();
+ const push=(notes,sc,name)=>{new Set(notes.map(n=>norm(n))).forEach(k=>{if(!k)return;const o=by[k]||(by[k]={n:capNote(notes.find(x=>norm(x)===k)),s:[],f:[]});o.s.push(sc);o.f.push(name)})};
+ testedList().forEach(g=>{const tags=T?T.tagCounts(g).map(x=>x[0]):[];push(pyrAll(pyrOf(g.brand,g.name)).concat(tags),g.avg,g.name);seen.add(pkey(g.brand,g.name))});
+ owned().forEach(p=>{if(!p.rating||seen.has(pkey(p.brand,p.name)))return;const n=pyrAll(pyrOf(p.brand,p.name));if(n.length)push(n,p.rating*2,p.name)});
+ return Object.values(by).map(o=>({n:o.n,avg:o.s.reduce((a,b)=>a+b,0)/o.s.length,c:o.s.length,f:o.f}))}
+function notesHtml(){const L=noteStats();if(!L.length)return `<div class="card"><h3>Notes you rate highest</h3><p class="muted" style="font-size:13.5px;margin-top:6px">Rate tests in the Test lab, or paste the notes of your rated bottles (a bottle \u2192 Paste notes), and Lux shows which notes you like most.</p></div>`;
+ const min=L.filter(x=>x.c>=2).length>=5?2:1,M=L.filter(x=>x.c>=min).sort((a,b)=>b.avg-a.avg||b.c-a.c),top=M.slice(0,8),low=M.length>10?M.slice(-3).reverse():[];
+ const row=x=>`<div class="hrow"><div class="nmx">${esc(x.n)}<small>${x.c} ${x.c===1?'fragrance':'fragrances'}</small></div><div class="htrack"><b style="width:${x.avg*10}%"></b></div><div class="v">${(Math.round(x.avg*10)/10).toFixed(1)}</div></div>`;
+ return `<div class="card"><h3>Notes you rate highest</h3><p class="muted" style="font-size:13.5px;margin:6px 0 6px">Average score (out of 10) of the fragrances that have each note.</p>${top.map(row).join('')}
+ ${low.length?`<h3 style="font-size:17px;margin:18px 0 4px">Rated lowest</h3>${low.map(row).join('')}`:''}</div>`}
+
 /* ================= undo for the last wear ================= */
 function removeWear(id){const i=S.wears.findIndex(w=>w.id===id);if(i<0)return false;const w=S.wears[i],p=byId(w.pid);
  if(p){p.ml=Math.min(p.maxMl,Math.round((p.ml+(w.ml!=null?w.ml:w.n/rateOf(p)))*10)/10);p.sprays=Math.max(0,(p.sprays||0)-w.n)}S.wears.splice(i,1);save();return true}
@@ -1013,15 +1154,20 @@ async function loadWx(){const c=cityOf();if(!c||wxBusy||wxFresh()||Date.now()-wx
   if(!r.ok)throw 0;const j=await r.json();
   WXD={lat:c.lat,lon:c.lon,city:c.name||c.label,at:Date.now(),day:dkey(Date.now()),temp:Math.round(j.current.temperature_2m),code:j.current.weather_code,max:Math.round(j.daily.temperature_2m_max[0]),min:Math.round(j.daily.temperature_2m_min[0])};
   try{localStorage.setItem('lux.wx',JSON.stringify(WXD))}catch(e){}
-  if((ui.tab==='shelf'||ui.tab==='journal')&&$('#modal').hidden)render();syncReminders()}
+  if(ui.tab==='shelf'&&$('#modal').hidden)render();syncReminders()}
  catch(e){wxFail=Date.now()}finally{wxBusy=false}}
 const wxName=c=>c==null?'':c===0?'clear':c<=2?'partly cloudy':c===3?'overcast':c<=48?'foggy':c<=67?'rainy':c<=77?'snowy':c<=82?'showers':c<=86?'snow showers':'stormy';
 /* Scores every bottle with something left for a given day. wx is today's weather or null. */
-function rankPicks(day,wx,occ){const AW=allWears(),ss=season(day),d0=sod(day),yk=dkey(d0-DAY),dk=dkey(d0);
+/* mood: what you wore before when you felt that way; with little history, the kind of scent that fits it */
+function moodCounts(mood){const c={};let n=0;if(mood)S.wears.forEach(w=>{if(w.mood===mood){c[w.pid]=(c[w.pid]||0)+1;n++}});return {c,n}}
+function rankPicks(day,wx,occ,mood){const AW=allWears(),ss=season(day),d0=sod(day),yk=dkey(d0-DAY),dk=dkey(d0),MC=moodCounts(mood),ml=moodName(mood).toLowerCase();
  const t=wx?Math.round(wx.max!=null?(wx.max+wx.temp)/2:wx.temp):null,tb=t==null?null:t<12?'cold':t>=24?'hot':'mild';
  return owned().filter(p=>p.ml>0).map(p=>{const R=[];let sc=0;const add=(v,why)=>{sc+=v;if(why&&v>0)R.push([v,why])};
-  const k=famKind(p.fam),se=p.seasons||[],pr=+p.proj||0;
-  if(se.includes(ss))add(2,'Made for '+ss.toLowerCase());else if(se.length)add(-1);
+  const k=famKind(p.fam),own=(p.seasons||[]).length,se=seasonsFor(p),pr=+p.proj||0;
+  if(se.includes(ss))add(own?2:1,own?'Made for '+ss.toLowerCase():'Suits '+ss.toLowerCase());else if(own)add(-1);
+  if(mood){const c=MC.c[p.id]||0;if(MC.n>=3&&c)add(2+c/MC.n*4,'You often wear it when you feel '+ml);
+   else{const H={relaxed:[pr<=3||k==='mid','Soft and easy'],energetic:[k==='fresh','Fresh and lively'],cozy:[k==='warm','Warm and comforting'],confident:[pr>=4,'Has presence'],romantic:[k==='warm'||/flor|musk|powd/.test(norm(p.fam)),'Soft and sensual'],focused:[pr<=3&&k!=='warm','Quiet enough to focus']}[mood];
+    if(H&&H[0])add(2.4,H[1]+' for a '+ml+' day')}}
   if(tb==='cold')add(k==='warm'?2:k==='fresh'?-1:.4,k==='warm'?t+'° today, a warm and dense scent fits':'');
   else if(tb==='hot')add(k==='fresh'?2:k==='warm'?-1.5:.3,k==='fresh'?t+'° today, something fresh and light':'');
   else if(tb==='mild')add(k==='mid'?.8:.3,k==='mid'?t+'° today, easy weather for it':'');
@@ -1034,23 +1180,24 @@ function rankPicks(day,wx,occ){const AW=allWears(),ss=season(day),d0=sod(day),yk
   add((p.rating||0)*.35,p.rating>=4?'You gave it '+p.rating+' stars':'');
   sc+=(hash(dk+p.id)%100)/250;
   return {p,sc,d:d==null?60:d,why:R.sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1])}}).sort((a,b)=>b.sc-a.sc)}
-function todayPick(){const L=rankPicks(Date.now(),wxFresh(),S.settings.occ||'day');return L.length?L[ui.pick%L.length]:null}
-function todayCard(where){const own=owned();
+function todayPick(){const L=rankPicks(Date.now(),wxFresh(),S.settings.occ||'day',moodToday());return L.length?L[ui.pick%L.length]:null}
+function todayCard(){const own=owned();
  if(!own.length)return `<section class="card pick"><span class="eyebrow">Today's pick</span><p class="muted" style="margin-top:10px">Add a fragrance to get a daily suggestion.</p></section>`;
  const c=cityOf(),wx=wxFresh();if(c&&!wx)loadWx();
- const occ=S.settings.occ||'day',tw=allWears().filter(w=>dkey(w.t)===dkey(Date.now())&&(w.test||byId(w.pid))),worn=tw.map(wP);
- if(where==='shelf'&&tw.length&&ui.pickDay!==dkey(Date.now())){const n={},nm={};tw.forEach(w=>{const k=wKey(w);n[k]=(n[k]||0)+w.n;nm[k]=wP(w).name});
+ const occ=S.settings.occ||'day',mood=moodToday(),tw=allWears().filter(w=>dkey(w.t)===dkey(Date.now())&&(w.test||byId(w.pid))),worn=tw.map(wP);
+ if(tw.length&&ui.pickDay!==dkey(Date.now())){const n={},nm={};tw.forEach(w=>{const k=wKey(w);n[k]=(n[k]||0)+w.n;nm[k]=wP(w).name});
   return `<button class="today-line" data-act="pickOpen" aria-label="Show today's pick"><span class="ck">\u2713</span><span>Today: ${Object.entries(n).map(([id,k])=>`<b>${esc(nm[id])}</b> \u00b7 ${k} ${k===1?'spray':'sprays'}`).join(', ')}</span><span class="more">Open</span></button>`}
  const sg=todayPick();
- const meta=[season(),wx?`${wx.temp}° ${wxName(wx.code)} in ${esc(wx.city)}`:''].filter(Boolean).join(' · ');
- const top=`<div class="pick-top"><span class="eyebrow">Today's pick · ${meta}</span><div class="sg occ" role="group" aria-label="Occasion">${OCC.map(o=>`<button data-act="occ" data-v="${o[0]}" class="${occ===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`;
- const wl=worn.length?`<p class="worn">Worn today: <b>${[...new Set(worn.map(p=>esc(p.name)))].join(', ')}</b></p>`:'';
+ const wxt=wx?`${wx.temp}° ${wxName(wx.code)}`:'';
+ const top=`<div class="pick-top"><span class="eyebrow">Today's pick · ${season()} · <button data-act="cityOpen" aria-label="${c?'Change the city for weather':'Add your city for weather'}">${c?(wxt||esc(c.name||c.label)):'add city'}</button></span>
+ <div class="pick-ctl"><div class="sg occ" role="group" aria-label="Occasion">${OCC.map(o=>`<button data-act="occ" data-v="${o[0]}" class="${occ===o[0]?'on':''}">${o[1]}</button>`).join('')}</div>
+ <select class="mini" data-ch="mood" aria-label="How do you feel today"><option value="">Mood</option>${MOODS.map(m=>`<option value="${m[0]}"${mood===m[0]?' selected':''}>${m[1]}</option>`).join('')}</select></div></div>`;
+ const wl=worn.length?`<p class="worn">Worn today: <b>${[...new Set(worn.map(p=>esc(p.name)))].join(', ')}</b> <button class="pk-more" data-act="pickClose">hide</button></p>`:'';
  if(!sg)return `<section class="card pick">${top}${wl}<p class="muted">Every bottle is empty. Refill one to get suggestions.</p></section>`;
  const p=sg.p,why=sg.why.length?sg.why:['A good fit for today'];
- return `<section class="card pick">${top}${wl}<div class="today"><div>${bt(p,p.maxMl?p.ml/p.maxMl:1)}</div><div style="flex:1;min-width:200px"><h2>${esc(p.name)}</h2><div class="muted">${esc(p.brand)}${p.fam?' · '+esc(p.fam):''}</div>
- <ul class="why">${why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>
- <div class="acts" style="margin-top:16px"><button class="btn sm" data-act="wearOpen" data-id="${p.id}">${worn.length?'Wear this too':'Wear it today'}</button><button class="btn ghost sm" data-act="another">Another idea</button>${worn.length?'<button class="btn ghost sm" data-act="wearOpen">Add another wear</button>':`<button class="btn ghost sm" data-act="open" data-id="${p.id}">Details</button>`}${where==='shelf'&&worn.length?'<button class="btn ghost sm" data-act="pickClose">Hide</button>':''}</div></div></div>
- <button class="linkbtn" data-act="cityOpen">${c?'Weather for '+esc(c.name||c.label)+' · change':'Add your city for weather-aware picks'}</button></section>`}
+ return `<section class="card pick">${top}${wl}<div class="pk"><button class="pk-bt" data-act="open" data-id="${p.id}" aria-label="Details of ${esc(p.name)}">${bt(p,p.maxMl?p.ml/p.maxMl:1)}</button><div class="pk-mid"><h2>${esc(p.name)}</h2><div class="muted" style="font-size:13.5px">${esc(p.brand)}${p.fam?' · '+esc(p.fam):''}</div>
+ <p class="pk-why">${esc(ui.pickWhy?why.join(' · '):why[0])}${why.length>1&&!ui.pickWhy?`<button class="pk-more" data-act="pickWhy">+${why.length-1} more</button>`:''}</p></div></div>
+ <div class="acts"><button class="btn sm" data-act="wearOpen" data-id="${p.id}">${worn.length?'Wear this too':'Wear it today'}</button><button class="btn ghost sm" data-act="another">Another idea</button></div></section>`}
 
 /* city for weather (shared with the Test lab when it has one) */
 let cityT,CITYRES=[];
@@ -1065,6 +1212,47 @@ async function cityFind(q){const box=$('#c-res');if(!box)return;if(q.length<2){b
  catch(e){box.innerHTML='<p class="muted">Could not search. Are you online?</p>'}}
 function setCity(c){S.settings.city=c;WXD=null;wxFail=0;ui.pick=0;save();closeModal();render();loadWx()}
 
+/* ================= photos: several at once ================= */
+/* Each photo is matched to a bottle whose name is in the file name; the rest are picked by hand. */
+let PH=[];
+function photoMatch(fname){const f=' '+norm(fname.replace(/\.[a-z0-9]+$/i,'')).replace(/[_\-.]+/g,' ')+' ';let best=null,bs=0;
+ S.perfumes.forEach(p=>{const w=norm(p.name).split(/\s+/).filter(x=>x.length>1);if(!w.length||!w.every(x=>f.includes(x)))return;
+  const sc=w.length*2+norm(p.brand).split(/\s+/).filter(x=>x.length>1&&f.includes(x)).length-(PHOTOS[p.id]?1:0);if(sc>bs){bs=sc;best=p}});return best?best.id:''}
+async function startPhotoBatch(files){PH=[];toast('Reading photos\u2026');
+ for(const f of [...files].slice(0,40)){try{PH.push({url:await compressImage(f),pid:photoMatch(f.name),name:f.name})}catch(e){}}
+ if(!PH.length){toast('Those images could not be read');return}
+ const opts=S.perfumes.slice().sort((a,b)=>(a.brand+a.name).localeCompare(b.brand+b.name));
+ MODAL='photos';openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Add photos</h2><p class="muted" style="margin:6px 0 14px">${PH.length} ${PH.length===1?'photo':'photos'}. Choose the bottle for each one; photos matched by file name are already set.</p>
+ ${PH.map((x,i)=>`<div class="phrow"><img src="${x.url}" alt=""><select data-ph="${i}" aria-label="Bottle for ${esc(x.name)}"><option value="">Skip this photo</option>${opts.map(p=>`<option value="${p.id}"${x.pid===p.id?' selected':''}>${esc(p.name)} \u00b7 ${esc(p.brand)}${p.shelf==='wish'?' (wishlist)':''}${PHOTOS[p.id]?' \u00b7 has a photo':''}</option>`).join('')}</select></div>`).join('')}
+ <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="phSave">Save photos</button></div>`)}
+async function savePhotoBatch(){let n=0;for(const sel of $$('#modal [data-ph]')){const x=PH[+sel.dataset.ph],id=sel.value;if(!x||!id||!byId(id))continue;PHOTOS[id]=x.url;await idb.set('photo:'+id,x.url);n++}
+ PH=[];closeModal();render();toast(n?n+(n===1?' photo saved':' photos saved'):'No photo was matched')}
+
+/* ================= decant or bottle ================= */
+/* Price per ml of a decant and of the full bottle, and how long each lasts at your pace
+   (about 10 sprays per ml). Starts from what Lux knows; every field can be changed. */
+let CALC=null;
+function calcFor(o,back){const k=pkey(o.brand,o.name),p=o.pid&&byId(o.pid)||S.perfumes.find(q=>pkey(q.brand,q.name)===k),e=LIB.find(x=>x.k===k);
+ const W=allWears().filter(w=>{const q=wP(w);return pkey(q.brand,q.name)===k}),recent=W.filter(w=>w.t>Date.now()-90*DAY).length;
+ const dec=p&&p.type==='Decant',bottle=p&&!dec?p:null;
+ return {name:o.name,brand:o.brand,back,dMl:dec?p.maxMl:'',dPrice:dec&&+p.price>0?p.price:'',bMl:bottle?bottle.maxMl:(e&&e.s)||100,
+  bPrice:bottle&&bottle.shelf==='wish'&&+bottle.seen>0?bottle.seen:+o.price>0?o.price:bottle&&+bottle.price>0?bottle.price:'',
+  wpm:recent?Math.max(1,Math.round(recent/3)):4,spw:W.length?Math.max(1,Math.round(W.reduce((a,w)=>a+(+w.n||0),0)/W.length)):3}}
+function openCalc(o){CALC=o;MODAL='calc';openModal(calcHtml())}
+function calcHtml(){const o=CALC,f=(id,l,v,st)=>`<div class="fg"><label for="${id}">${l}</label><input id="${id}" type="number" min="0" step="${st}" inputmode="decimal" data-in="calc" value="${v==null?'':esc(v)}"></div>`;
+ return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Decant or bottle?</h2><p class="muted" style="margin:4px 0 16px">${esc(o.name)}${o.brand?' \u00b7 '+esc(o.brand):''}. Price per ml and how long each lasts at your pace.</p>
+ <div class="g2">${f('c-dml','Decant or sample (ml)',o.dMl,.5)}${f('c-dp','Decant price ('+esc(cur())+')',o.dPrice,.5)}${f('c-bml','Full bottle (ml)',o.bMl,1)}${f('c-bp','Bottle price ('+esc(cur())+')',o.bPrice,.5)}${f('c-wpm','Wears a month',o.wpm,1)}${f('c-spw','Sprays a wear',o.spw,1)}</div>
+ <div class="calc-out" id="calcOut">${calcOut(o)}</div>
+ <div class="foot">${o.back?'<button class="btn ghost" data-act="calcBack">Back</button>':''}<button class="btn" data-act="close">Done</button></div>`}
+function calcOut(o){const dMl=+o.dMl||0,dp=+o.dPrice||0,bMl=+o.bMl||0,bp=+o.bPrice||0,mlM=(+o.wpm||0)*(+o.spw||0)/10;
+ const dpm=dp&&dMl?dp/dMl:0,bpm=bp&&bMl?bp/bMl:0,L=[];
+ const dur=m=>m<1?Math.max(1,Math.round(m*4.3))+' weeks':m<24?Math.round(m)+' months':(Math.round(m/12*10)/10)+' years';
+ if(dpm)L.push(`Decant: <b>${money(dpm,1)}</b> per ml${mlM?', lasts about '+dur(dMl/mlM):''}`);
+ if(bpm)L.push(`Bottle: <b>${money(bpm,1)}</b> per ml${mlM?', lasts about '+dur(bMl/mlM):''}`);
+ if(dpm&&bpm){L.push(bpm<dpm?`Per ml the bottle is <b>${Math.round((1-bpm/dpm)*100)}% cheaper</b>. ${fmt(bMl)} ml in decants would cost ${money(dpm*bMl)}.`:'Per ml the decant is as cheap as the bottle or cheaper.');
+  if(mlM&&bpm<dpm)L.push(bMl/mlM>36?`At this pace the bottle lasts over ${Math.floor(bMl/mlM/12)} years. A decant may be all you need.`:`You would use the bottle up in about ${dur(bMl/mlM)}, so it pays off.`)}
+ if(!L.length)L.push('Add a price and a size to compare.');return L.map(x=>`<div>${x}</div>`).join('')}
+
 /* ================= wishlist details ================= */
 function wishLine(p){const s=+p.seen>0?+p.seen:0,t=+p.target>0?+p.target:0;
  if(s&&t&&s<=t)return `<span class="deal">${esc(money(s))} · good price</span>`;
@@ -1077,7 +1265,11 @@ function syncReminders(){if(!window.LuxAndroid||!LuxAndroid.setReminders)return;
  const r=S.settings.rem,picks={},now=Date.now();
  for(let i=0;i<8;i++){const day=now+i*DAY,q=rankPicks(day,i===0?wxFresh():null,'day')[0];if(q)picks[dkey(day)]={t:q.p.name,b:[q.p.brand].concat(q.why).join(' · ')}}
  const worn=[...new Set(allWears().filter(w=>w.t>now-3*DAY).map(w=>dkey(w.t)))];
- LuxAndroid.setReminders(JSON.stringify({am:!!r.am,amT:r.amT,pm:!!r.pm,pmT:r.pmT,picks,worn}))}catch(e){}},600)}
+ /* test check-ins: 2 and 6 hours after spraying, while the test is still open */
+ const tests=[];if(r.test)((S.tt&&S.tt.sessions)||[]).forEach(x=>{if(x.status==='done'||x.fadedAt)return;[2,6].forEach(h=>{const at=x.t0+h*36e5;
+  if(at>now+6e4&&at<now+12*36e5)tests.push({id:x.id+'-'+h,at,t:'How does '+x.name+' smell now?',b:h+' hours after spraying. Tap to add an impression.'})})});
+ tests.sort((a,b)=>a.at-b.at);
+ LuxAndroid.setReminders(JSON.stringify({am:!!r.am,amT:r.amT,pm:!!r.pm,pmT:r.pmT,picks,worn,tests:tests.slice(0,6)}))}catch(e){}},600)}
 function remHtml(){const r=S.settings.rem,and=!!(window.LuxAndroid&&LuxAndroid.setReminders),c=cityOf();
  const off=and&&(r.am||r.pm)&&LuxAndroid.notificationsAllowed&&!LuxAndroid.notificationsAllowed();
  const row=(k,tk,title,sub)=>`<div class="set-row"><div>${title}<small>${sub}</small></div><div class="acts" style="align-items:center">${and?`<input type="time" value="${esc(r[tk])}" data-ch="remT" data-k="${tk}" style="width:120px" aria-label="${title} time"${r[k]?'':' disabled'}>`:''}<button class="chip${r[k]?' on':''}" data-act="remTog" data-k="${k}"${and?'':' disabled'}>${r[k]?'On':'Off'}</button></div></div>`;
@@ -1086,13 +1278,14 @@ function remHtml(){const r=S.settings.rem,and=!!(window.LuxAndroid&&LuxAndroid.s
  ${off?'<div class="note" style="margin:12px 0 0"><span>Notifications are turned off for Lux on this phone.</span><button class="btn sm" data-act="remAllow">Allow</button></div>':''}
  ${row('am','amT','Morning pick','A notification with today’s suggestion')}
  ${row('pm','pmT','Evening reminder','Only when nothing is logged for the day')}
+ <div class="set-row"><div>Test check-ins<small>Two and six hours after you spray a test: how does it smell now?</small></div><button class="chip${r.test?' on':''}" data-act="remTog" data-k="test"${and?'':' disabled'}>${r.test?'On':'Off'}</button></div>
  <div class="set-row"><div>City for weather<small>${c?esc(c.label||c.name):'Not set. Picks use the season only.'}</small></div><button class="btn ghost sm" data-act="cityOpen">${c?'Change':'Add city'}</button></div></div>`}
 /* Android back button: close what is open first, then go back to Collection; false lets the app ask to exit. */
 window.luxBack=()=>{if(!$('#dlg').hidden){endConfirm(false);return true}if(!$('#modal').hidden){closeModal();return true}
  if(ui.tab!=='shelf'){ui.tab='shelf';render();scrollTo(0,0);return true}return false};
 window.luxNotifChanged=()=>{if(ui.tab==='set'&&$('#modal').hidden)render()};
 /* The Android app calls this when a notification is tapped. */
-window.luxOpen=k=>{if(k==='log'){if($('#modal').hidden)openWear()}else{ui.tab='shelf';if($('#modal').hidden)render();scrollTo(0,0)}};
+window.luxOpen=k=>{if(k==='log'){if($('#modal').hidden)openWear()}else if(k==='test'){ui.tab='test';if($('#modal').hidden)render();scrollTo(0,0)}else{ui.tab='shelf';if($('#modal').hidden)render();scrollTo(0,0)}};
 
 /* ================= share as image ================= */
 const SHK=[['tested','Best tested'],['top','Most worn'],['month','This month'],['year','This year'],['shelf','My collection'],['wish','Wishlist']];
@@ -1124,11 +1317,11 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
  const rows=async(list,val)=>{let y=420;for(let i=0;i<list.length;i++){const {p}=list[i];
   x.fillStyle=GOLD;x.font=`500 58px ${SER}`;x.fillText(String(i+1),84,y+92);
   drawIn(x,await bottleImg(p,p.shelf==='wish'?1:p.maxMl?p.ml/p.maxMl:1),200,y+4,86,138);
-  x.fillStyle=TX;x.font=`600 50px ${SER}`;x.fillText(ell(x,p.name,540),276,y+72);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(ell(x,p.brand,540),278,y+112);
+  x.fillStyle=TX;x.font=`600 50px ${SER}`;x.fillText(ell(x,p.name,540),276,y+72);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(ell(x,list[i].sub||p.brand,540),278,y+112);
   x.textAlign='right';x.fillStyle=GOLD;x.font=`500 30px ${SAN}`;x.fillText(val(list[i]),W-84,y+86);x.textAlign='left';
   if(i<list.length-1){x.fillStyle='rgba(232,220,190,.12)';x.fillRect(84,y+150,W-168,1.5)}y+=152}};
  if(k==='tested'){const G=testedList(),nt=G.reduce((a,g)=>a+g.done.length,0);head('My best tested',G.length+(G.length===1?' fragrance':' fragrances')+' rated · '+nt+(nt===1?' test':' tests')+' · out of 10');
-  if(G.length)await rows(G.slice(0,5).map(g=>({p:testP(g),g})),r=>r.g.avg.toFixed(1)+(r.g.buy==='yes'?' · buy':''));else empty('Nothing rated in the Test lab yet')}
+  if(G.length)await rows(G.slice(0,5).map(g=>{const se=testSeason(g);return {p:testP(g),g,sub:g.brand+(se?' \u00b7 '+se.toLowerCase():'')}}),r=>r.g.avg.toFixed(1)+(r.g.buy==='yes'?' · buy':''));else empty('Nothing rated in the Test lab yet')}
  else if(k==='top'){const L=cnt(now-90*DAY).slice(0,5);head('My most worn','The last 90 days · '+allWears().filter(w=>w.t>=now-90*DAY).length+' wears');
   if(L.length)await rows(L,r=>r.v+(r.v===1?' wear':' wears'));else empty('No wears in the last 90 days yet')}
  else if(k==='month'||k==='year'){const d=new Date(),yr=k==='year',y=SHR.year||d.getFullYear(),m0=new Date(d.getFullYear(),d.getMonth()+(SHR.mo||0),1);
@@ -1157,13 +1350,18 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
  if(n!==SHR.n)return;SHR.url=c.toDataURL('image/png');const pv=$('#shPrev');if(pv)pv.innerHTML=`<img src="${SHR.url}" alt="Preview of the image to share">`}
 /* Test lab results: best first, as a picture (Share), as text for a chat and as CSV. */
 function testedList(){return window.LuxTT?LuxTT.ranked():[]}
+/* Seasons of a tested fragrance: the temperature band where your tests scored best, else a guess
+   from the family and notes. */
+function testSeason(g){const T=window.LuxTT&&LuxTT.season;const r=T?T(g):null;if(r)return r;
+ const p=g.pid&&byId(g.pid),se=p?seasonsFor(p):seasonGuess(g.fam,pyrAll(pyrOf(g.brand,g.name)));return se.join(' & ')}
 function testP(g){return (g.pid&&byId(g.pid))||{id:'g'+g.key,name:g.name,brand:g.brand,fam:g.fam,shelf:'wish'}}
 function testsText(){const f=v=>v==null?'\u2014':String(Math.round(v*10)/10),G=testedList();
  const L=['Lux Test lab results, '+new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}),'Scores out of 10, best first.',''];
  G.forEach((g,i)=>{const p=g.pid&&byId(g.pid),b=[f(g.avg)+'/10','longevity '+f(g.crit.longevity),'sillage '+f(g.crit.sillage),'skin '+f(g.crit.skin)];
   if(g.crit.value!=null)b.push('value '+f(g.crit.value));b.push(g.done.length+(g.done.length===1?' test':' tests'));
   if(g.hours!=null)b.push('lasted about '+f(g.hours)+' h');if(g.buy)b.push('would buy: '+g.buy);if(+g.price>0)b.push('price '+money(g.price));
-  if(p)b.push(p.shelf==='wish'?'on wishlist':'owned');
+  if(p)b.push(p.shelf==='wish'?'on wishlist':'owned');const se=testSeason(g);if(se)b.push('season: '+se.toLowerCase());
+  const ny=pyrAll(pyrOf(g.brand,g.name));if(ny.length)b.push('notes: '+ny.join(', '));
   L.push((i+1)+'. '+g.brand+' \u2013 '+g.name+(g.fam?' ('+g.fam+')':'')+': '+b.join(', '));
   const rv=g.done.find(s=>s.comment);if(rv)L.push('   \u201c'+rv.comment.replace(/\s+/g,' ').trim()+'\u201d')});
  return L.join('\n')}
@@ -1183,13 +1381,13 @@ const ACT={
  lreset:()=>{ui.lq=ui.lb=ui.lf=ui.lc='';ui.llim=60;render()},
  csvCol:()=>exportCsv('col'),csvJournal:()=>exportCsv('journal'),csvTests:()=>exportCsv('tests'),
  wishTest:()=>{if(!commitSheet())return;const p=D;closeModal();render();window.__luxTest.openStart({pid:p.id,name:p.name,brand:p.brand,fam:p.fam})},
- pickOpen:()=>{ui.pickDay=dkey(Date.now());render()},pickClose:()=>{ui.pickDay=null;render()},
+ pickOpen:()=>{ui.pickDay=dkey(Date.now());render()},pickWhy:()=>{ui.pickWhy=true;render()},pickClose:()=>{ui.pickDay=null;render()},
  lowHide:()=>{S.settings.lowSeen=owned().filter(lowOf).map(p=>p.id);save();render()},
  recapHide:a=>{if(a.dataset.k==='year')S.settings.yearSeen=+a.dataset.v;else S.settings.recapSeen=a.dataset.v;save();render()},
  recapShare:a=>{if(a.dataset.k==='year')openShare('year',{year:+a.dataset.v});else openShare('month',{mo:-1})},
- prices:()=>openPrices(),
+ prices:()=>openPrices(),wxFill:()=>fillWeather(),
  pricesSave:()=>{let n=0;$$('#modal [data-pid]').forEach(i=>{const v=+i.value,p=byId(i.dataset.pid);if(v>0&&p){p.price=v;n++}});save();closeModal();render();toast(n?'Prices saved':'Nothing to save')},
- occ:a=>{S.settings.occ=a.dataset.v;ui.pick=0;save();render()},
+ occ:a=>{S.settings.occ=a.dataset.v;ui.pick=0;ui.pickWhy=false;save();render()},
  cityOpen:()=>openCity(),cityPick:a=>{const c=CITYRES[+a.dataset.i];if(c)setCity(c)},
  cityGeo:()=>{if(!navigator.geolocation){toast('Location is not available here');return}
   navigator.geolocation.getCurrentPosition(p=>setCity({name:'your area',label:'Current location',lat:+p.coords.latitude.toFixed(3),lon:+p.coords.longitude.toFixed(3)}),()=>toast('Location was blocked. Type your city instead.'),{timeout:9000})},
@@ -1209,6 +1407,12 @@ const ACT={
   const ids=new Set(S.perfumes.filter(p=>p.demo).map(p=>p.id));S.perfumes=S.perfumes.filter(p=>!ids.has(p.id));S.wears=S.wears.filter(w=>!ids.has(w.pid));S.demo=false;save();render()}),
  snooze:()=>{S.settings.snooze=Date.now()+7*DAY;save();render()},
  star:a=>{readSheet();const k=a.dataset.k,v=+a.dataset.v;D[k]=D[k]===v?0:v;paintSheet()},
+ calcSheet:()=>{if(!commitSheet())return;const p=D;closeModal();render();openCalc(calcFor({pid:p.id,name:p.name,brand:p.brand},()=>openSheet(p.id)))},
+ calcBack:()=>{const b=CALC&&CALC.back;closeModal();if(b)b()},
+ seasonUse:()=>{readSheet();D.seasons=seasonGuess(D.fam,pyrAll(pyrOf(D.brand,D.name)));paintSheet()},
+ pyrEdit:()=>{readSheet();ui.pyrEdit=true;paintSheet();const t=$('#py-paste');if(t)t.focus()},
+ pyrSave:()=>{if(!PYR)return;setPyr(PYR.brand,PYR.name,readPyrForm());save();toast('Notes saved');const b=PYR.back;PYR=null;closeModal();if(b)b()},
+ pyrBack:()=>{const b=PYR&&PYR.back;PYR=null;closeModal();if(b)b()},
  season:a=>{readSheet();const s=a.dataset.v,l=D.seasons||[];D.seasons=l.includes(s)?l.filter(x=>x!==s):l.concat(s);paintSheet()},
  photoPick:()=>{const f=$('#photoFile');if(f)f.click()},
  photoDel:()=>{readSheet();delete PHOTOS[D.id];idb.del('photo:'+D.id);paintSheet()},
@@ -1219,9 +1423,10 @@ const ACT={
  sugg:a=>{readSheet();const e=LIB[+a.dataset.i];if(!e)return;D.name=e.n;D.brand=e.b;D.fam=e.f||D.fam;D.conc=e.c||D.conc;D.year=e.y||'';D.maxMl=e.s||100;D.ml=D.maxMl;paintSheet()},
  wearOpen:a=>openWear(a.dataset.id),
  step:a=>{WD.n=clamp(WD.n+(+a.dataset.d),1,20);$('#w-n').textContent=WD.n},
+ wmood:a=>{WD.mood=WD.mood===a.dataset.v?'':a.dataset.v;$$('#modal [data-act="wmood"]').forEach(b=>b.classList.toggle('on',b.dataset.v===WD.mood))},
  wearSave:()=>saveWear(),
  wdel:a=>{if(removeWear(a.dataset.id)){render();toast('Entry removed')}},
- another:()=>{ui.pick++;render()},jprev:()=>{ui.jm--;render()},jnext:()=>{ui.jm++;render()},jmore:()=>{ui.jlim+=40;render()},
+ another:()=>{ui.pick++;ui.pickWhy=false;render()},jprev:()=>{ui.jm--;render()},jnext:()=>{ui.jm++;render()},jmore:()=>{ui.jlim+=40;render()},
  insP:a=>{S.settings.ins.p=a.dataset.v;save();updateIns()},
  lmore:()=>{ui.llim+=60;updateLib()},lnew:()=>openEntry(),entrySave:()=>saveEntry(),
  lwish:a=>{const e=LIB[+a.dataset.i];if(!e)return;const i=S.perfumes.findIndex(p=>p.shelf==='wish'&&norm(p.brand+' '+p.name)===e.k);
@@ -1231,6 +1436,9 @@ const ACT={
  ladd:a=>{const e=LIB[+a.dataset.i];if(!e)return;openSheet(null,{name:e.n,brand:e.b,fam:e.f,conc:e.c||'EDP',year:e.y||'',maxMl:e.s||100,ml:e.s||100})},
  impPick:()=>{const f=$('#impFile');if(f)f.click()},impGo:()=>doImport(),
  theme:a=>{S.settings.theme=a.dataset.v;applyTheme();save();render()},
+ accent:a=>{S.settings.accent=a.dataset.v;applyTheme();save();render()},
+ photoMany:()=>{const f=$('#photoMany');if(f)f.click()},
+ phSave:()=>savePhotoBatch(),
  shAdd:()=>{S.shelves.push({id:'s'+uid(),name:'New shelf'});save();render()},
  shUp:a=>{const i=+a.dataset.i;if(i>0){[S.shelves[i-1],S.shelves[i]]=[S.shelves[i],S.shelves[i-1]];save();render()}},
  shDn:a=>{const i=+a.dataset.i;if(i<S.shelves.length-1){[S.shelves[i+1],S.shelves[i]]=[S.shelves[i],S.shelves[i+1]];save();render()}},
@@ -1257,22 +1465,27 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dlg').hidde
 const IN={
  lq:e=>{ui.lq=e.value;ui.llim=60;debounceLib()},lb:e=>{ui.lb=e.value;ui.llim=60;debounceLib()},
  sheet:e=>{readSheet();if(e.id==='f-name'&&sheetNew)suggest();refreshBt()},
+ calc:()=>{const g=id=>{const e=$('#'+id);return e?e.value:''};Object.assign(CALC,{dMl:g('c-dml'),dPrice:g('c-dp'),bMl:g('c-bml'),bPrice:g('c-bp'),wpm:g('c-wpm'),spw:g('c-spw')});$('#calcOut').innerHTML=calcOut(CALC)},
+ pyrPaste:e=>{const y=parseNotes(e.value);if(!pyrAll(y).length)return;[['py-top','top'],['py-mid','mid'],['py-base','base']].forEach(([id,k])=>{const i=$('#'+id);if(i)i.value=y[k].join(', ')})},
  cityQ:e=>{clearTimeout(cityT);const q=e.value.trim();cityT=setTimeout(()=>cityFind(q),350)},
  mlr:e=>{const f=$('#f-ml');f.value=e.value;readSheet();refreshBt()}};
 document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.in;if(k&&IN[k])IN[k](e.target,e)});
 const CH={
  insM:e=>{S.settings.ins.m=e.value;save();updateIns()},insG:e=>{S.settings.ins.g=e.value;save();updateIns()},
+ cpw:e=>{ui.cpw=e.value;render()},
  rank:e=>{ui.rank=e.value;const d=insCompute();$('#rankBox').innerHTML=rankHtml(d)},
  lf:e=>{ui.lf=e.value;ui.llim=60;updateLib()},lc:e=>{ui.lc=e.value;ui.llim=60;updateLib()},
  spm:e=>{S.settings.spm=e.value===''?0:clamp(+e.value||0,1,40);save();toast('Saved')},cur:e=>{S.settings.cur=e.value.trim();save();toast('Saved')},
  shName:e=>{const s=S.shelves.find(x=>x.id===e.dataset.id);if(s){s.name=e.value.trim()||s.name;save();toast('Shelf renamed')}},
  remT:e=>{if(e.value){S.settings.rem[e.dataset.k]=e.value;save();toast('Saved')}},
+ mood:e=>{S.settings.mood={d:dkey(Date.now()),m:e.value};ui.pick=0;ui.pickWhy=false;save();render()},
  wp:e=>{WD.pid=e.value},wd:e=>{WD.date=e.value||dkey(Date.now())},
  impMap:e=>{const f=e.dataset.f;IMP.map[f]=e.value==='combo'?'combo':parseInt(e.value,10);
   const {rows,map}=IMP;$('#imp-pv').innerHTML=rows.slice(0,3).map(r=>`${esc(map.name>=0?r[map.name]:'?')}${map.brand>=0?' <span class="muted">\u00b7 '+esc(r[map.brand])+'</span>':''}`).join('<br>')}};
 document.addEventListener('change',async e=>{const t=e.target,k=t.dataset&&t.dataset.ch;
  if(k&&CH[k]){CH[k](t,e);return}
  if(t.id==='photoFile'&&t.files[0]&&D){try{readSheet();const url=await compressImage(t.files[0]);PHOTOS[D.id]=url;await idb.set('photo:'+D.id,url);paintSheet()}catch(err){toast('That image could not be read')}}
+ else if(t.id==='photoMany'&&t.files.length){const fs=[...t.files];t.value='';startPhotoBatch(fs)}
  else if(t.id==='impFile'&&t.files[0]){const f=t.files[0];const txt=await f.text();t.value='';startImport(txt,f.name)}
  else if(t.id==='bkFile'&&t.files[0]){const f=t.files[0];const txt=await f.text();t.value='';restoreText(txt)}});
 
