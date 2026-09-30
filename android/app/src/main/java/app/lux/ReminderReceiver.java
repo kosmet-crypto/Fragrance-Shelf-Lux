@@ -19,18 +19,23 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Morning pick and evening wear reminder. The page sends its settings and the picks for the
- * coming days (see syncReminders in index.html); alarms are rescheduled after each one fires,
- * after a reboot and after an app update.
+ * Morning pick and evening wear reminder, and check-ins while a Test lab test runs. The page sends
+ * its settings, the picks for the coming days and the upcoming test check-ins (see syncReminders
+ * in index.html); alarms are rescheduled after each one fires, after a reboot and after an app update.
  */
 public class ReminderReceiver extends BroadcastReceiver {
 
     static final String ACTION = "app.lux.REMIND";
     private static final String CHANNEL = "daily";
+    private static final String TEST_CHANNEL = "tests";
+    private static final int TEST_SLOTS = 6;
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
-        if (ACTION.equals(intent.getAction())) show(ctx, intent.getStringExtra("kind"));
+        if (ACTION.equals(intent.getAction())) {
+            if ("test".equals(intent.getStringExtra("kind"))) showTest(ctx, intent.getStringExtra("id"));
+            else show(ctx, intent.getStringExtra("kind"));
+        }
         if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())) SelfUpdate.notifyUpdated(ctx);
         schedule(ctx);
     }
@@ -53,6 +58,63 @@ public class ReminderReceiver extends BroadcastReceiver {
         if (am == null) return;
         set(ctx, am, "am", c.optBoolean("am"), c.optString("amT", "08:30"), 1);
         set(ctx, am, "pm", c.optBoolean("pm"), c.optString("pmT", "20:30"), 2);
+        scheduleTests(ctx, am, c.optJSONArray("tests"));
+    }
+
+    /** One alarm per upcoming check-in; slots left over are cancelled. */
+    private static void scheduleTests(Context ctx, AlarmManager am, JSONArray tests) {
+        long now = System.currentTimeMillis();
+        int slot = 0;
+        for (int i = 0; tests != null && i < tests.length() && slot < TEST_SLOTS; i++) {
+            JSONObject t = tests.optJSONObject(i);
+            if (t == null || t.optLong("at") <= now) continue;
+            PendingIntent pi = testIntent(ctx, slot++, t.optString("id"));
+            am.cancel(pi);
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, t.optLong("at"), pi);
+        }
+        for (; slot < TEST_SLOTS; slot++) am.cancel(testIntent(ctx, slot, ""));
+    }
+
+    private static PendingIntent testIntent(Context ctx, int slot, String id) {
+        Intent i = new Intent(ctx, ReminderReceiver.class).setAction(ACTION).putExtra("kind", "test").putExtra("id", id);
+        return PendingIntent.getBroadcast(ctx, 20 + slot, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    /** Shown only while the page still lists the check-in (the test is not rated or faded yet). */
+    private static void showTest(Context ctx, String id) {
+        if (id == null || id.isEmpty()) return;
+        JSONArray tests = config(ctx).optJSONArray("tests");
+        JSONObject t = null;
+        for (int i = 0; tests != null && i < tests.length(); i++) {
+            JSONObject o = tests.optJSONObject(i);
+            if (o != null && id.equals(o.optString("id"))) t = o;
+        }
+        if (t == null) return;
+        SharedPreferences sp = prefs(ctx);
+        String shown = sp.getString("tests_shown", "");
+        if (("," + shown + ",").contains("," + id + ",")) return;
+        NotificationManager nm = ctx.getSystemService(NotificationManager.class);
+        if (nm == null || !nm.areNotificationsEnabled()) return;
+        nm.createNotificationChannel(new NotificationChannel(TEST_CHANNEL, "Test check-ins",
+                NotificationManager.IMPORTANCE_DEFAULT));
+        Intent open = new Intent(ctx, MainActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .putExtra("from", "test");
+        PendingIntent pi = PendingIntent.getActivity(ctx, 5, open,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        String text = t.optString("b");
+        Notification n = new Notification.Builder(ctx, TEST_CHANNEL)
+                .setSmallIcon(R.drawable.ic_notif)
+                .setColor(0xFFCAA96B)
+                .setContentTitle(t.optString("t"))
+                .setContentText(text)
+                .setStyle(new Notification.BigTextStyle().bigText(text))
+                .setContentIntent(pi)
+                .setAutoCancel(true)
+                .build();
+        nm.notify(10, n);
+        String keep = shown.length() > 400 ? shown.substring(shown.length() - 300) : shown;
+        sp.edit().putString("tests_shown", keep + "," + id).apply();
     }
 
     private static void set(Context ctx, AlarmManager am, String kind, boolean on, String time, int code) {
