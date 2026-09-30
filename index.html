@@ -1815,6 +1815,45 @@ select.mini {
     gap: 8px;
   }
 }
+/* Settings: the update card stands out; the reminders card is compact */
+.card.upd {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+  border-color: var(--gold);
+  background: radial-gradient(420px 160px at 0% 0%, var(--glow), transparent 70%), var(--surf);
+}
+.upd svg {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  fill: none;
+  stroke: var(--gold2);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.upd-t {
+  flex: 1;
+  min-width: 160px;
+}
+.upd-t small {
+  display: block;
+  color: var(--tx3);
+  font-size: 12.5px;
+}
+.card.rem {
+  padding: 18px 20px;
+}
+.rem .set-row {
+  padding: 9px 0;
+}
+.rem h3 {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
@@ -1963,6 +2002,7 @@ function migrate(o) {
   const s = Object.assign(d, o || {});
   s.settings = Object.assign(defaults().settings, (o && o.settings) || {});
   s.settings.ins = Object.assign(defaults().settings.ins, (o && o.settings && o.settings.ins) || {});
+  if (o && o.settings && o.settings.rem) o.settings.rem.pm = false; /* only the morning pick is kept */
   s.settings.rem = Object.assign(defaults().settings.rem, (o && o.settings && o.settings.rem) || {});
   /* v2 of sprays per ml: 0 means by bottle size; the old default of 11 becomes that */
   if (s.settings.spmV !== 2) {
@@ -3085,6 +3125,7 @@ function vSet() {
     ? new Date(s.lastBackup).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
     : 'never';
   return `<header class="vh"><div><h1>Settings</h1><p class="sub2">Everything is stored in this browser. Back up to keep it safe.</p></div></header>
+ <div class="card upd"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg><div class="upd-t"><b>${window.LuxAndroid && LuxAndroid.getVersion ? 'Lux ' + esc(LuxAndroid.getVersion()) : 'Lux web app'}</b><small>Updates keep your collection and settings.${window.LuxAndroid ? ' On Samsung, turn off Auto Blocker before updating.' : ''}</small></div><button class="btn sm" data-act="checkUpdate">Check for updates</button></div>
  <div class="card"><h3>Appearance and units</h3>
  <div class="set-row"><div>Theme</div><div class="sg">${[
    ['dark', 'Dark'],
@@ -3117,7 +3158,6 @@ function vSet() {
  <div class="set-row" style="margin-top:16px"><div>Remind me to back up<small>A gentle note on the Collection page every two weeks</small></div><button class="chip${s.remind ? ' on' : ''}" data-act="remind">${s.remind ? 'On' : 'Off'}</button></div>
  <h3 style="margin:22px 0 4px">Automatic snapshots</h3><p class="muted" style="margin-bottom:8px;font-size:13.5px">Saved in this browser about once a day, and before every restore.</p>
  ${snaps.length ? snaps.map((x, i) => `<div class="set-row"><div>${new Date(x.t).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}<small>${esc(x.why)} \u00b7 ${x.n} fragrances</small></div><button class="btn ghost sm" data-act="snapRestore" data-i="${i}">Restore</button></div>`).join('') : '<p class="muted">None yet.</p>'}</div>
- <div class="card"><h3>Updates</h3><div class="set-row"><div>${window.LuxAndroid && LuxAndroid.getVersion ? 'Lux ' + esc(LuxAndroid.getVersion()) + ' for Android' : 'Lux web app'}<small>Updates keep your collection and settings</small></div><button class="btn ghost sm" data-act="checkUpdate">Check for updates</button></div></div>
  <div class="card"><h3>Library and data</h3>
  <div class="set-row"><div>Library<small>${fmt(LIB.length)} fragrances for search and suggestions</small></div><div class="acts"><button class="btn ghost sm" data-act="tab" data-t="lib">Open library</button><button class="btn ghost sm" data-act="impPick">Import CSV or JSON</button><button class="btn ghost sm" data-act="csvTpl">Table template</button></div></div>
  <input type="file" id="impFile" accept=".csv,.json,.txt,text/csv,application/json">
@@ -5326,16 +5366,15 @@ function remHtml() {
   const r = S.settings.rem,
     and = !!(window.LuxAndroid && LuxAndroid.setReminders),
     c = cityOf();
-  const off = and && (r.am || r.pm) && LuxAndroid.notificationsAllowed && !LuxAndroid.notificationsAllowed();
+  const off = and && (r.am || r.test) && LuxAndroid.notificationsAllowed && !LuxAndroid.notificationsAllowed();
   const row = (k, tk, title, sub) =>
-    `<div class="set-row"><div>${title}<small>${sub}</small></div><div class="acts" style="align-items:center">${and ? `<input type="time" value="${esc(r[tk])}" data-ch="remT" data-k="${tk}" style="width:120px" aria-label="${title} time"${r[k] ? '' : ' disabled'}>` : ''}<button class="chip${r[k] ? ' on' : ''}" data-act="remTog" data-k="${k}"${and ? '' : ' disabled'}>${r[k] ? 'On' : 'Off'}</button></div></div>`;
-  return `<div class="card"><h3>Daily pick and reminders</h3>
+    `<div class="set-row"><div>${title}<small>${sub}</small></div><div class="acts" style="align-items:center">${and ? `<input type="time" value="${esc(r[tk])}" data-ch="remT" data-k="${tk}" style="width:140px" aria-label="${title} time"${r[k] ? '' : ' disabled'}>` : ''}<button class="chip${r[k] ? ' on' : ''}" data-act="remTog" data-k="${k}"${and ? '' : ' disabled'}>${r[k] ? 'On' : 'Off'}</button></div></div>`;
+  return `<div class="card rem"><h3>Daily pick and reminders</h3>
  ${and ? '' : '<p class="muted" style="margin:6px 0 4px">Notifications are part of the <a href="https://github.com/kosmet-crypto/Fragrance-Shelf-Lux/releases/latest/download/lux.apk" style="color:var(--gold2)">Lux Android app</a>.</p>'}
  ${off ? '<div class="note" style="margin:12px 0 0"><span>Notifications are turned off for Lux on this phone.</span><button class="btn sm" data-act="remAllow">Allow</button></div>' : ''}
- ${row('am', 'amT', 'Morning pick', 'A notification with today’s suggestion')}
- ${row('pm', 'pmT', 'Evening reminder', 'Only when nothing is logged for the day')}
- <div class="set-row"><div>Test check-ins<small>Two and six hours after you spray a test: how does it smell now?</small></div><button class="chip${r.test ? ' on' : ''}" data-act="remTog" data-k="test"${and ? '' : ' disabled'}>${r.test ? 'On' : 'Off'}</button></div>
- <div class="set-row"><div>City for weather<small>${c ? esc(c.label || c.name) : 'Not set. Picks use the season only.'}</small></div><button class="btn ghost sm" data-act="cityOpen">${c ? 'Change' : 'Add city'}</button></div></div>`;
+ ${row('am', 'amT', 'Morning pick', 'Today’s suggestion as a notification')}
+ <div class="set-row"><div>Test check-ins<small>2 and 6 hours after spraying a test</small></div><button class="chip${r.test ? ' on' : ''}" data-act="remTog" data-k="test"${and ? '' : ' disabled'}>${r.test ? 'On' : 'Off'}</button></div>
+ <div class="set-row"><div>City for weather<small>${c ? esc(c.label || c.name) : 'Not set: picks use the season only'}</small></div><button class="btn ghost sm" data-act="cityOpen">${c ? 'Change' : 'Add city'}</button></div></div>`;
 }
 /* Android back button: close what is open first, then go back to Collection; false lets the app ask to exit. */
 window.luxBack = () => {

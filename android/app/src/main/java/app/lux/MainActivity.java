@@ -244,7 +244,9 @@ public class MainActivity extends Activity {
         if (isFinishing()) return;
         new AlertDialog.Builder(this)
                 .setTitle("Update available")
-                .setMessage("Lux " + version + " is ready. The app closes for a moment while it updates. Your data stays in place.")
+                .setMessage("Lux " + version + " is ready. The app closes for a moment while it updates. Your data stays in place."
+                        + ("samsung".equalsIgnoreCase(Build.MANUFACTURER)
+                        ? "\n\nOn Samsung, turn off Auto Blocker first (Settings > Security and privacy > Auto Blocker), or the update is silently refused." : ""))
                 .setPositiveButton("Update", (d, w) -> startSelfUpdate())
                 .setNegativeButton("Later", null)
                 .show();
