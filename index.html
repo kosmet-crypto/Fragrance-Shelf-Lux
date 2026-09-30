@@ -599,7 +599,7 @@ function vSet(){const s=S.settings,snaps=(()=>{try{return JSON.parse(localStorag
  <button class="btn ghost sm" data-act="shAdd" style="margin-top:6px">Add shelf</button></div>
  ${remHtml()}
  <div class="card"><h3>Backup and restore</h3><p class="muted" style="margin:6px 0 16px">Last backup: ${lb}. A backup holds your collection, journal, settings, photos and own library entries.</p>
- <div class="acts"><button class="btn" data-act="bkNow">Download backup</button><button class="btn ghost" data-act="csvCol">Collection as CSV</button><button class="btn ghost" data-act="csvJournal">Journal as CSV</button><button class="btn ghost" data-act="bkCopy">Copy as text</button><button class="btn ghost" data-act="bkFile">Restore from file</button></div>
+ <div class="acts"><button class="btn" data-act="bkNow">Download backup</button><button class="btn ghost" data-act="csvCol">Collection as CSV</button><button class="btn ghost" data-act="csvJournal">Journal as CSV</button><button class="btn ghost" data-act="csvTests">Tests as CSV</button><button class="btn ghost" data-act="bkCopy">Copy as text</button><button class="btn ghost" data-act="bkFile">Restore from file</button></div>
  <input type="file" id="bkFile" accept=".json,application/json,text/plain">
  <div class="fg" style="margin-top:18px"><label for="bk-text">Or paste a backup here</label><textarea id="bk-text" placeholder="Paste backup text"></textarea></div>
  <button class="btn ghost sm" data-act="bkText">Restore from text</button>
@@ -928,6 +928,9 @@ function csvText(rows){return '\ufeff'+rows.map(r=>r.map(v=>{v=v==null?'':String
 function exportCsv(kind){let rows,name;const d=v=>v?new Date(v).toISOString().slice(0,10):'';
  if(kind==='col'){name='lux-collection-'+dkey(Date.now())+'.csv';
   rows=[['Name','House','Family','Concentration','Shelf','Type','Size ml','Left ml','Price paid','Value left','Price seen','Target price','Wears','Sprays','Last worn','Rating','Added']].concat(S.perfumes.map(p=>[p.name,p.brand,p.fam,p.conc,shelfName(p.shelf),p.type,p.maxMl,p.shelf==='wish'?'':p.ml,p.price,hasPrice(p)&&p.shelf!=='wish'?Math.round(valueLeft(p)):'',p.seen,p.target,allWears().filter(w=>w.pid===p.id).length,p.sprays||0,d(lastWorn(p.id)),p.rating||'',d(p.created)]))}
+ else if(kind==='tests'){name='lux-tests-'+dkey(Date.now())+'.csv';const f=v=>v==null?'':Math.round(v*10)/10;
+  rows=[['Rank','Fragrance','House','Family','Score','Longevity','Sillage','Skin','Value','Tests','Hours','Would buy','Price','Last tested','Review']].concat(testedList().map((g,i)=>{const rv=g.done.find(s=>s.comment);
+   return [i+1,g.name,g.brand,g.fam,f(g.avg),f(g.crit.longevity),f(g.crit.sillage),f(g.crit.skin),f(g.crit.value),g.done.length,f(g.hours),g.buy||'',+g.price>0?g.price:'',d(g.last),rv?rv.comment:'']}))}
  else{name='lux-journal-'+dkey(Date.now())+'.csv';
   rows=[['Date','Time','Fragrance','House','Sprays','ml','Value sprayed','Source']].concat(allWears().sort((a,b)=>b.t-a.t).map(w=>{const p=wP(w),m=wearMl(w),v=m*wearPerMl(w);
    return [d(w.t),new Date(w.t).toTimeString().slice(0,5),p.name,p.brand,w.n,Math.round(m*10)/10,v?Math.round(v*100)/100:'',w.test?'Test':'Wear']}))}
@@ -1092,13 +1095,13 @@ window.luxNotifChanged=()=>{if(ui.tab==='set'&&$('#modal').hidden)render()};
 window.luxOpen=k=>{if(k==='log'){if($('#modal').hidden)openWear()}else{ui.tab='shelf';if($('#modal').hidden)render();scrollTo(0,0)}};
 
 /* ================= share as image ================= */
-const SHK=[['top','Most worn'],['month','This month'],['year','This year'],['shelf','My collection'],['wish','Wishlist']];
+const SHK=[['tested','Best tested'],['top','Most worn'],['month','This month'],['year','This year'],['shelf','My collection'],['wish','Wishlist']];
 let SHR={kind:'top',url:null,n:0,mo:0,year:null};
 function openShare(kind,o){o=o||{};SHR={kind:kind||(owned().length?'top':'wish'),url:null,n:0,mo:o.mo||0,year:o.year||null};MODAL='share';openModal(shareHtml());drawShare()}
 function shareHtml(){return `<button class="x" data-act="close" aria-label="Close">×</button><h2>Share</h2><p class="muted" style="margin:6px 0 16px">A picture of your cabinet for Instagram, WhatsApp or anywhere you like.</p>
- <div class="chips" style="margin-bottom:16px">${SHK.map(k=>`<button type="button" class="chip${SHR.kind===k[0]?' on':''}" data-act="shKind" data-v="${k[0]}">${k[0]==='month'&&SHR.mo?'Last month':k[0]==='year'&&SHR.year?String(SHR.year):k[1]}</button>`).join('')}</div>
+ <div class="chips" style="margin-bottom:16px">${SHK.filter(k=>k[0]!=='tested'||testedList().length).map(k=>`<button type="button" class="chip${SHR.kind===k[0]?' on':''}" data-act="shKind" data-v="${k[0]}">${k[0]==='month'&&SHR.mo?'Last month':k[0]==='year'&&SHR.year?String(SHR.year):k[1]}</button>`).join('')}</div>
  <div class="shprev" id="shPrev"><span class="muted">Drawing…</span></div>
- <div class="foot"><button class="btn ghost" data-act="shSave">Save image</button><button class="btn" data-act="shGo">Share</button></div>`}
+ <div class="foot"><button class="btn ghost" data-act="shCopy" id="shCopy"${SHR.kind==='tested'?'':' hidden'}>Copy as text</button><button class="btn ghost" data-act="shSave">Save image</button><button class="btn" data-act="shGo">Share</button></div>`}
 function bottleImg(p,level){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);
  if(PHOTOS[p.id]){im.src=PHOTOS[p.id];return}
  const defs='<defs>'+['g-cap','g-shade'].map(id=>{const e=document.getElementById(id);return e?e.outerHTML:''}).join('')+'</defs>';
@@ -1124,7 +1127,9 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
   x.fillStyle=TX;x.font=`600 50px ${SER}`;x.fillText(ell(x,p.name,540),276,y+72);x.fillStyle=TX2;x.font=`400 27px ${SAN}`;x.fillText(ell(x,p.brand,540),278,y+112);
   x.textAlign='right';x.fillStyle=GOLD;x.font=`500 30px ${SAN}`;x.fillText(val(list[i]),W-84,y+86);x.textAlign='left';
   if(i<list.length-1){x.fillStyle='rgba(232,220,190,.12)';x.fillRect(84,y+150,W-168,1.5)}y+=152}};
- if(k==='top'){const L=cnt(now-90*DAY).slice(0,5);head('My most worn','The last 90 days · '+allWears().filter(w=>w.t>=now-90*DAY).length+' wears');
+ if(k==='tested'){const G=testedList(),nt=G.reduce((a,g)=>a+g.done.length,0);head('My best tested',G.length+(G.length===1?' fragrance':' fragrances')+' rated · '+nt+(nt===1?' test':' tests')+' · out of 10');
+  if(G.length)await rows(G.slice(0,5).map(g=>({p:testP(g),g})),r=>r.g.avg.toFixed(1)+(r.g.buy==='yes'?' · buy':''));else empty('Nothing rated in the Test lab yet')}
+ else if(k==='top'){const L=cnt(now-90*DAY).slice(0,5);head('My most worn','The last 90 days · '+allWears().filter(w=>w.t>=now-90*DAY).length+' wears');
   if(L.length)await rows(L,r=>r.v+(r.v===1?' wear':' wears'));else empty('No wears in the last 90 days yet')}
  else if(k==='month'||k==='year'){const d=new Date(),yr=k==='year',y=SHR.year||d.getFullYear(),m0=new Date(d.getFullYear(),d.getMonth()+(SHR.mo||0),1);
   const t0=yr?new Date(y,0,1).getTime():m0.getTime(),t1=yr?new Date(y+1,0,1).getTime():new Date(m0.getFullYear(),m0.getMonth()+1,1).getTime(),L=cnt(t0,t1),mw=allWears().filter(w=>w.t>=t0&&w.t<t1&&(w.test||byId(w.pid)));
@@ -1150,6 +1155,21 @@ async function drawShare(){const k=SHR.kind,n=++SHR.n,W=1080,H=1350,c=document.c
  x.fillStyle='rgba(202,169,107,.38)';x.fillRect(84,1238,W-168,1.5);x.fillStyle=TX3;x.font=`400 22px ${SAN}`;x.fillText('Made with Lux',84,1278);
  x.textAlign='right';x.fillText(new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}),W-84,1278);x.textAlign='left';
  if(n!==SHR.n)return;SHR.url=c.toDataURL('image/png');const pv=$('#shPrev');if(pv)pv.innerHTML=`<img src="${SHR.url}" alt="Preview of the image to share">`}
+/* Test lab results: best first, as a picture (Share), as text for a chat and as CSV. */
+function testedList(){return window.LuxTT?LuxTT.ranked():[]}
+function testP(g){return (g.pid&&byId(g.pid))||{id:'g'+g.key,name:g.name,brand:g.brand,fam:g.fam,shelf:'wish'}}
+function testsText(){const f=v=>v==null?'\u2014':String(Math.round(v*10)/10),G=testedList();
+ const L=['Lux Test lab results, '+new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}),'Scores out of 10, best first.',''];
+ G.forEach((g,i)=>{const p=g.pid&&byId(g.pid),b=[f(g.avg)+'/10','longevity '+f(g.crit.longevity),'sillage '+f(g.crit.sillage),'skin '+f(g.crit.skin)];
+  if(g.crit.value!=null)b.push('value '+f(g.crit.value));b.push(g.done.length+(g.done.length===1?' test':' tests'));
+  if(g.hours!=null)b.push('lasted about '+f(g.hours)+' h');if(g.buy)b.push('would buy: '+g.buy);if(+g.price>0)b.push('price '+money(g.price));
+  if(p)b.push(p.shelf==='wish'?'on wishlist':'owned');
+  L.push((i+1)+'. '+g.brand+' \u2013 '+g.name+(g.fam?' ('+g.fam+')':'')+': '+b.join(', '));
+  const rv=g.done.find(s=>s.comment);if(rv)L.push('   \u201c'+rv.comment.replace(/\s+/g,' ').trim()+'\u201d')});
+ return L.join('\n')}
+async function copyText(txt,done){let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(e){}
+ if(!ok){const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.focus();ta.select();try{ok=document.execCommand('copy')}catch(e){}ta.remove()}
+ toast(ok?done:'Copying is blocked here')}
 async function shareGo(saveOnly){if(!SHR.url){toast('One moment, still drawing');return}
  const name='lux-'+SHR.kind+'-'+dkey(Date.now())+'.png',b64=SHR.url.split(',')[1];
  if(window.LuxAndroid&&LuxAndroid.shareImage){if(saveOnly)LuxAndroid.saveImage(name,b64);else LuxAndroid.shareImage(b64);return}
@@ -1161,7 +1181,7 @@ async function shareGo(saveOnly){if(!SHR.url){toast('One moment, still drawing')
 let libT;const debounceLib=()=>{clearTimeout(libT);libT=setTimeout(updateLib,120)};
 const ACT={
  lreset:()=>{ui.lq=ui.lb=ui.lf=ui.lc='';ui.llim=60;render()},
- csvCol:()=>exportCsv('col'),csvJournal:()=>exportCsv('journal'),
+ csvCol:()=>exportCsv('col'),csvJournal:()=>exportCsv('journal'),csvTests:()=>exportCsv('tests'),
  wishTest:()=>{if(!commitSheet())return;const p=D;closeModal();render();window.__luxTest.openStart({pid:p.id,name:p.name,brand:p.brand,fam:p.fam})},
  pickOpen:()=>{ui.pickDay=dkey(Date.now());render()},pickClose:()=>{ui.pickDay=null;render()},
  lowHide:()=>{S.settings.lowSeen=owned().filter(lowOf).map(p=>p.id);save();render()},
@@ -1178,8 +1198,8 @@ const ACT={
   /* commitSheet reads the form again, so move the bottle there: first shelf, full */
   const sh=$('#f-shelf'),ml=$('#f-ml');if(sh)sh.value=S.shelves[0].id;if(ml)ml.value=+D.maxMl||D.ml;
   if(commitSheet()){D=JSON.parse(JSON.stringify(D));paintSheet();render();toast('Moved to '+shelfName(D.shelf)+'. Check the price and size.')}},
- share:()=>openShare(),shKind:a=>{SHR.kind=a.dataset.v;SHR.url=null;$$('#modal [data-act="shKind"]').forEach(b=>b.classList.toggle('on',b===a));drawShare()},
- shGo:()=>shareGo(false),shSave:()=>shareGo(true),
+ share:()=>openShare(),shKind:a=>{SHR.kind=a.dataset.v;SHR.url=null;const cp=$('#shCopy');if(cp)cp.hidden=SHR.kind!=='tested';$$('#modal [data-act="shKind"]').forEach(b=>b.classList.toggle('on',b===a));drawShare()},
+ shCopy:()=>copyText(testsText(),'Results copied. Paste them into a chat.'),shGo:()=>shareGo(false),shSave:()=>shareGo(true),
  remTog:a=>{const k=a.dataset.k,r=S.settings.rem;r[k]=!r[k];if(r[k]&&window.LuxAndroid&&LuxAndroid.requestNotifications)LuxAndroid.requestNotifications();save();render()},
  remAllow:()=>{if(window.LuxAndroid&&LuxAndroid.requestNotifications)LuxAndroid.requestNotifications()},
  tab:a=>{ui.tab=a.dataset.t;render();scrollTo(0,0)},
