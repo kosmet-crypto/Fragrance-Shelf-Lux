@@ -43,6 +43,45 @@
             android:name=".SelfUpdate"
             android:exported="false" />
 
+        <!-- Home screen widget (Lux quick log); see Widgets.java. -->
+        <receiver
+            android:name=".WidgetLog"
+            android:exported="true"
+            android:label="Lux quick log">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_log_info" />
+        </receiver>
+
+        <!-- Home screen widget (Lux today’s pick); see Widgets.java. -->
+        <receiver
+            android:name=".WidgetPick"
+            android:exported="true"
+            android:label="Lux today’s pick">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pick_info" />
+        </receiver>
+
+        <!-- Home screen widget (Lux stats); see Widgets.java. -->
+        <receiver
+            android:name=".WidgetStats"
+            android:exported="true"
+            android:label="Lux stats">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_stats_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

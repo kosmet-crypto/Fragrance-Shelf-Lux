@@ -38,6 +38,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())) SelfUpdate.notifyUpdated(ctx);
         schedule(ctx);
+        Widgets.updateAll(ctx);
     }
 
     static SharedPreferences prefs(Context ctx) {
@@ -100,7 +101,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         Intent open = new Intent(ctx, MainActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 .putExtra("from", "test");
-        PendingIntent pi = PendingIntent.getActivity(ctx, 5, open,
+        // request code 6: 5 is the "Lux is updated" notification (SelfUpdate), which would replace this intent
+        PendingIntent pi = PendingIntent.getActivity(ctx, 6, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         String text = t.optString("b");
         Notification n = new Notification.Builder(ctx, TEST_CHANNEL)

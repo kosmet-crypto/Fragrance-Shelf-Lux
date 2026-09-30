@@ -365,6 +365,15 @@ public class MainActivity extends Activity {
         public void setReminders(String json) {
             ReminderReceiver.prefs(MainActivity.this).edit().putString("cfg", json).apply();
             ReminderReceiver.schedule(MainActivity.this);
+            Widgets.updateAll(MainActivity.this);
+        }
+
+        /** Wears logged from the home screen widget since the page last looked (JSON array); cleared. */
+        @JavascriptInterface
+        public String takePendingWears() {
+            String s = Widgets.takePending(MainActivity.this);
+            Widgets.updateAll(MainActivity.this);
+            return s;
         }
 
         @JavascriptInterface
