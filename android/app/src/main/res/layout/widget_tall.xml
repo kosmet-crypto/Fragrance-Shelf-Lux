@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 1 x 2, upright: today's pick as a picture, Wear (one tap) and + (open the wear log) below it. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="6dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/w_img"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/ic_launcher_foreground" />
+
+        <TextView
+            android:id="@+id/w_done"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/widget_btn"
+            android:gravity="center"
+            android:text="✓"
+            android:textColor="#19130A"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/w_wear"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/widget_btn"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="Wear"
+        android:textColor="#19130A"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/w_other"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/widget_btn_ghost"
+        android:gravity="center"
+        android:text="+"
+        android:textColor="#F5F0E4"
+        android:textSize="22sp" />
+</LinearLayout>

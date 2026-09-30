@@ -11,7 +11,8 @@
         android:id="@+id/w_img"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="40dp"
+        android:layout_margin="6dp"
+        android:layout_marginBottom="46dp"
         android:scaleType="fitCenter"
         android:src="@mipmap/ic_launcher_foreground" />
 
@@ -30,7 +31,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="34dp"
+        android:layout_height="38dp"
         android:layout_gravity="bottom"
         android:orientation="horizontal">
 
@@ -44,18 +45,18 @@
             android:maxLines="1"
             android:text="Wear"
             android:textColor="#19130A"
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/w_other"
-            android:layout_width="34dp"
+            android:layout_width="38dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="6dp"
             android:background="@drawable/widget_btn_ghost"
             android:gravity="center"
             android:text="+"
             android:textColor="#F5F0E4"
-            android:textSize="18sp" />
+            android:textSize="24sp" />
     </LinearLayout>
 </FrameLayout>

@@ -69,6 +69,19 @@
                 android:resource="@xml/widget_pick_info" />
         </receiver>
 
+        <!-- Home screen widget (Lux quick log, upright); see Widgets.java. -->
+        <receiver
+            android:name=".WidgetTall"
+            android:exported="true"
+            android:label="Lux quick log (upright)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_tall_info" />
+        </receiver>
+
         <!-- Home screen widget (Lux stats); see Widgets.java. -->
         <receiver
             android:name=".WidgetStats"

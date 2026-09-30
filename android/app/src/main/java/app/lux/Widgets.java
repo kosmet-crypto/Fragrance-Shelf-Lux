@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 /**
- * Home screen widgets, 2 x 2: quick log (today's pick as a picture, Wear logs it in one tap, + opens
+ * Home screen widgets: quick log 2 x 2 and 1 x 2 upright (today's pick as a picture, Wear logs it in one tap, + opens
  * the wear log), today's pick as a picture, and a small stats card. They read what the page sends with the reminders (syncReminders and
  * widgetData in index.html). A wear logged from the widget waits in "pending" until the page takes
  * it (takePendingWears) and logs it like any other wear.
@@ -49,11 +49,13 @@ final class Widgets {
         AppWidgetManager m = AppWidgetManager.getInstance(ctx);
         if (m == null) return;
         int[] a = m.getAppWidgetIds(new ComponentName(ctx, WidgetLog.class));
-        if (a.length > 0) m.updateAppWidget(a, logViews(ctx));
+        if (a.length > 0) m.updateAppWidget(a, logViews(ctx, R.layout.widget_log));
         int[] b = m.getAppWidgetIds(new ComponentName(ctx, WidgetPick.class));
         if (b.length > 0) m.updateAppWidget(b, pickViews(ctx));
         int[] c = m.getAppWidgetIds(new ComponentName(ctx, WidgetStats.class));
         if (c.length > 0) m.updateAppWidget(c, statsViews(ctx));
+        int[] d = m.getAppWidgetIds(new ComponentName(ctx, WidgetTall.class));
+        if (d.length > 0) m.updateAppWidget(d, logViews(ctx, R.layout.widget_tall));
     }
 
     /** The data the page sent, but only when it is from today. */
@@ -106,11 +108,13 @@ final class Widgets {
         if (bm != null) v.setImageViewBitmap(R.id.w_img, bm);
         else v.setImageViewResource(R.id.w_img, R.mipmap.ic_launcher_foreground);
         v.setContentDescription(R.id.w_img, p == null ? "Lux" : "Today's pick: " + p.optString("t"));
+        v.setInt(R.id.w_img, "setImageAlpha", 225);
     }
 
-    private static RemoteViews logViews(Context ctx) {
+    /** Quick log, square (widget_log) or upright (widget_tall); both have the same views. */
+    private static RemoteViews logViews(Context ctx, int layout) {
         JSONObject cfg = ReminderReceiver.config(ctx);
-        RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_log);
+        RemoteViews v = new RemoteViews(ctx.getPackageName(), layout);
         JSONObject p = pick(cfg);
         String done = loggedToday(ctx, cfg);
         image(ctx, v, p);

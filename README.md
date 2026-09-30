@@ -8,8 +8,7 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
 * **Today's pick** (top of Collection and Journal): suggests a bottle for the day from the season, today's weather
   in your city, the occasion (Everyday, Work, Evening), how long it has rested and your rating, and says why.
   Set the city in Settings → *Daily pick and reminders*. Weather comes from Open-Meteo, no account needed.
-* **Reminders** (Android app): a morning notification with today's pick and an evening reminder that only shows
-  when nothing is logged for the day. Both have their own time.
+* **Reminders** (Android app): a morning notification with today's pick, at the time you choose.
 * **Wishlist**: price seen, target price, where to buy and how much you want it. *I bought it* moves the bottle
   to your first shelf with the price filled in.
 * **Share**: Collection → *Share* draws a picture (most worn, this month, the collection or the wishlist) to share
@@ -43,8 +42,11 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
   The imported library stays on the phone and is part of the backup.
 * **Widgets** (Android, 2 x 2): *Lux quick log* shows today's pick as a picture (your photo, else the drawn
   bottle); *Wear* logs it in one tap with your usual sprays, *+* opens the wear log. *Lux today's pick* is the
-  picture alone, *Lux stats* the day streak and wears this month. A wear from the widget is added when Lux opens.
+  picture alone, *Lux stats* the day streak and wears this month. *Lux quick log (upright)* is the same quick log
+  in 1 x 2. Every widget shows today's pick, the same as on Collection. A wear from the widget is added when Lux opens.
 * When the in-app update is refused, a message shows Android's reason before the install screen opens.
+  **Samsung:** Auto Blocker (Settings → Security and privacy) silently refuses app updates from outside the
+  Galaxy Store; turn it off while updating.
 
 ## Stats, value and bottles
 * **Stats** (was Insights): periods Today, 7, 30, 90 days, Year and All time; wears, sprays, amount used and value
