@@ -59,6 +59,8 @@ function groups(){
     return g;
   });
 }
+/* Rated fragrances, best first; Share (image, text) and the tests CSV in index.html use it. */
+window.LuxTT = { ranked: () => groups().filter(g => g.done.length).sort((a,b) => b.avg - a.avg) };
 function condStats(g){
   const out = {};
   g.done.forEach(s => { const b = bucket(s.weather && s.weather.temp); if (b) (out[b] = out[b] || []).push(score(s)); });
@@ -202,7 +204,7 @@ function testHtml(){
   const all = tt().sessions, gs = groups().filter(g => g.done.length), act = activeList();
   const doneS = all.filter(isDone), hours = mean(doneS.map(s => s.fadedAt ? (s.fadedAt - s.t0)/H : NaN));
   const kp = [[all.length, 'Tests'], [gs.length, 'Rated fragrances'], [doneS.length ? r1(mean(doneS.map(score))) : '\u2014', 'Average score'], [hours != null ? r1(hours)+' h' : '\u2014', 'Average longevity'], [gs.filter(g => g.buy === 'yes').length, 'Would buy']];
-  return `<header class="vh"><div><h1>Test lab</h1><p class="sub2">${act.length ? act.length+' running now' : 'Timed tests, impressions and a lasting average per fragrance'}</p></div><div class="acts"><button class="btn" data-ta="start">Start test</button></div></header>
+  return `<header class="vh"><div><h1>Test lab</h1><p class="sub2">${act.length ? act.length+' running now' : 'Timed tests, impressions and a lasting average per fragrance'}</p></div><div class="acts">${gs.length ? '<button class="btn ghost" data-ta="tshare">Share results</button>' : ''}<button class="btn" data-ta="start">Start test</button></div></header>
   ${act.length ? act.map(activeCard).join('<div style="height:14px"></div>') : `<div class="card"><p class="muted">No test running. Tap Start test the moment you spray. The clock starts then, and every impression is stamped with the time since.</p></div>`}
   <div class="kpis" style="margin-top:22px">${kp.map(x => `<div class="kpi"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div>
   <div class="card"><div class="ch" style="margin-bottom:10px"><h3>Tested fragrances</h3><select data-tc="tsort" style="width:auto"><option value="best"${TSORT==='best'?' selected':''}>Best rated</option><option value="recent"${TSORT==='recent'?' selected':''}>Most recent</option><option value="name"${TSORT==='name'?' selected':''}>Name</option></select></div>
@@ -406,6 +408,7 @@ const findGroup = k => groups().find(g => g.key === k);
 /* ---------- actions ---------- */
 const TA = {
   start: () => openStart(),
+  tshare: () => openShare('tested'),
   open: a => openDetail(a.dataset.id),
   dback: a => openDetail(a.dataset.id),
   group: a => { const g = findGroup(a.dataset.k); if (g) { MODAL = 'tt'; openModal(groupHtml(g)); } },

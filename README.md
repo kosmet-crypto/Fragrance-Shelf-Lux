@@ -14,6 +14,9 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
   to your first shelf with the price filled in.
 * **Share**: Collection → *Share* draws a picture (most worn, this month, the collection or the wishlist) to share
   or save.
+* **Test lab results**: Test lab → *Share results* draws your five best tested fragrances with their scores;
+  *Copy as text* copies every rated fragrance with its scores, longevity and review, ready to paste into a chat.
+  Settings → *Tests as CSV* saves the same list as a spreadsheet.
 
 ## Stats, value and bottles
 * **Stats** (was Insights): periods Today, 7, 30, 90 days, Year and All time; wears, sprays, amount used and value
