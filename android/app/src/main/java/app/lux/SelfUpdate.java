@@ -96,7 +96,10 @@ public class SelfUpdate extends BroadcastReceiver {
             ctx.getSharedPreferences("update", Context.MODE_PRIVATE).edit().remove("selfUpdating").apply();
             if (status != PackageInstaller.STATUS_FAILURE_ABORTED) {
                 // The quiet install was refused (some phones do); use Android's install screen instead.
-                Toast.makeText(ctx, "Opening the installer…", Toast.LENGTH_SHORT).show();
+                // The reason is shown so a phone that keeps refusing can be diagnosed.
+                String why = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
+                Toast.makeText(ctx, "Update refused (" + status + (why != null ? ": " + why : "") + "). Opening the installer…",
+                        Toast.LENGTH_LONG).show();
                 ctx.startActivity(new Intent(ctx, MainActivity.class)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         .putExtra(EXTRA_FALLBACK, true));

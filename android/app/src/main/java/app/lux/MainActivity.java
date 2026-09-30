@@ -368,6 +368,12 @@ public class MainActivity extends Activity {
             Widgets.updateAll(MainActivity.this);
         }
 
+        /** Picture of today's pick for the widgets (PNG, base64). */
+        @JavascriptInterface
+        public void setWidgetImage(String id, String base64) {
+            Widgets.setImage(MainActivity.this, id, base64);
+        }
+
         /** Wears logged from the home screen widget since the page last looked (JSON array); cleared. */
         @JavascriptInterface
         public String takePendingWears() {

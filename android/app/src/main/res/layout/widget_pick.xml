@@ -1,49 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 2 x 2: today's pick as a picture; tap opens it in Lux. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/w_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
-    android:orientation="vertical"
-    android:padding="14dp">
+    android:padding="8dp">
 
-    <TextView
-        android:id="@+id/w_head"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:letterSpacing="0.14"
-        android:text="TODAY’S PICK"
-        android:textColor="#DCBD7E"
-        android:textSize="10sp" />
-
-    <TextView
-        android:id="@+id/w_name"
+    <ImageView
+        android:id="@+id/w_img"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:ellipsize="end"
-        android:fontFamily="serif"
-        android:maxLines="2"
-        android:text="Lux"
-        android:textColor="#F5F0E4"
-        android:textSize="22sp" />
-
-    <TextView
-        android:id="@+id/w_sub"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="#A39D8C"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/w_why"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:textColor="#CDC7B8"
-        android:textSize="13sp" />
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/ic_launcher_foreground" />
+</FrameLayout>

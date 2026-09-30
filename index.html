@@ -5246,8 +5246,35 @@ function syncReminders() {
           widget: widgetData()
         })
       );
+      const t = rankPicks(now, wxFresh(), S.settings.occ || 'day', moodToday())[0];
+      if (t) sendWidgetImage(t.p);
     } catch (e) {}
   }, 600);
+}
+/* The widgets show today's pick as a picture (the bottle's photo, else the drawn bottle), sent to the
+   app only when the pick or its photo changes. */
+let widgetImgKey = '';
+async function sendWidgetImage(p) {
+  if (!window.LuxAndroid || !LuxAndroid.setWidgetImage) return;
+  const key = p.id + ':' + (PHOTOS[p.id] ? PHOTOS[p.id].length : 0) + ':' + Math.round((p.ml / (p.maxMl || 1)) * 20);
+  if (key === widgetImgKey) return;
+  widgetImgKey = key;
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const x = c.getContext('2d'),
+    im = await bottleImg(p, p.maxMl ? p.ml / p.maxMl : 1);
+  if (!im) return;
+  if (PHOTOS[p.id]) {
+    // a photo fills a rounded square
+    const k = Math.max(256 / im.width, 256 / im.height);
+    x.beginPath();
+    x.roundRect(0, 0, 256, 256, 28);
+    x.clip();
+    x.drawImage(im, (256 - im.width * k) / 2, (256 - im.height * k) / 2, im.width * k, im.height * k);
+  } else drawIn(x, im, 128, 8, 240, 240);
+  try {
+    LuxAndroid.setWidgetImage(p.id, c.toDataURL('image/png').split(',')[1]);
+  } catch (e) {}
 }
 /* What the home screen widgets show (android/.../Widgets.java): today's pick with your usual sprays
    for it, what is logged today, streak, wears this month and the bottle that runs out first. */

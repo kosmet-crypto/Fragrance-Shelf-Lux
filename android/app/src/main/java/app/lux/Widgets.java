@@ -6,25 +6,32 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
 /**
- * Home screen widgets: quick log (today's pick in one tap, or open the wear log), today's pick, and
- * a small stats card. They read what the page sends with the reminders (syncReminders and
+ * Home screen widgets, 2 x 2: quick log (today's pick as a picture, Wear logs it in one tap, + opens
+ * the wear log), today's pick as a picture, and a small stats card. They read what the page sends with the reminders (syncReminders and
  * widgetData in index.html). A wear logged from the widget waits in "pending" until the page takes
  * it (takePendingWears) and logs it like any other wear.
  */
 final class Widgets {
 
     static final String ACTION_LOG = "app.lux.WIDGET_LOG";
+    private static final String IMG = "widget_pick.png";
 
     private Widgets() {
     }
@@ -90,44 +97,43 @@ final class Widgets {
         return PendingIntent.getActivity(ctx, code, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
+    /** The pick as a picture when the page sent one for it, else the Lux mark. */
+    private static void image(Context ctx, RemoteViews v, JSONObject p) {
+        String id = p == null ? "" : p.optString("id");
+        File f = new File(ctx.getFilesDir(), IMG);
+        Bitmap bm = !id.isEmpty() && id.equals(prefs(ctx).getString("imgId", "")) && f.isFile()
+                ? BitmapFactory.decodeFile(f.getPath()) : null;
+        if (bm != null) v.setImageViewBitmap(R.id.w_img, bm);
+        else v.setImageViewResource(R.id.w_img, R.mipmap.ic_launcher_foreground);
+        v.setContentDescription(R.id.w_img, p == null ? "Lux" : "Today's pick: " + p.optString("t"));
+    }
+
     private static RemoteViews logViews(Context ctx) {
         JSONObject cfg = ReminderReceiver.config(ctx);
         RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_log);
         JSONObject p = pick(cfg);
         String done = loggedToday(ctx, cfg);
-        v.setTextViewText(R.id.w_head, done != null ? "LOGGED TODAY" : "TODAY'S PICK");
-        if (p == null) {
-            v.setTextViewText(R.id.w_name, done != null ? done : "Open Lux");
-            v.setTextViewText(R.id.w_sub, "Your pick appears after Lux opens once today.");
-            v.setTextViewText(R.id.w_wear, "Log a wear");
-            v.setOnClickPendingIntent(R.id.w_wear, open(ctx, 31, "pm"));
+        image(ctx, v, p);
+        boolean pickDone = p != null && p.optString("t").equals(done);
+        v.setViewVisibility(R.id.w_done, done != null ? View.VISIBLE : View.GONE);
+        v.setTextViewText(R.id.w_wear, pickDone ? "Worn \u2713" : "Wear");
+        if (p == null || pickDone) {
+            v.setOnClickPendingIntent(R.id.w_wear, open(ctx, p == null ? 31 : 30, p == null ? "pm" : null));
         } else {
             int n = Math.max(1, p.optInt("n", 3));
-            boolean pickDone = p.optString("t").equals(done);
-            v.setTextViewText(R.id.w_name, done != null ? "✓ " + done : p.optString("t"));
-            v.setTextViewText(R.id.w_sub, done != null ? "Tap Other to add one more." : join(p.optString("b"), p.optString("why")));
-            v.setTextViewText(R.id.w_wear, pickDone ? "Logged ✓" : (done != null ? "Also " + p.optString("t") : "Wear it · " + n + (n == 1 ? " spray" : " sprays")));
-            if (pickDone) {
-                v.setOnClickPendingIntent(R.id.w_wear, open(ctx, 30, null));
-            } else {
-                Intent log = new Intent(ctx, WidgetLog.class).setAction(ACTION_LOG)
-                        .putExtra("pid", p.optString("id")).putExtra("name", p.optString("t")).putExtra("n", n);
-                v.setOnClickPendingIntent(R.id.w_wear, PendingIntent.getBroadcast(ctx, 34, log,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-            }
+            Intent log = new Intent(ctx, WidgetLog.class).setAction(ACTION_LOG)
+                    .putExtra("pid", p.optString("id")).putExtra("name", p.optString("t")).putExtra("n", n);
+            v.setOnClickPendingIntent(R.id.w_wear, PendingIntent.getBroadcast(ctx, 34, log,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         }
         v.setOnClickPendingIntent(R.id.w_other, open(ctx, 31, "pm"));
-        v.setOnClickPendingIntent(R.id.w_root, open(ctx, 30, null));
+        v.setOnClickPendingIntent(R.id.w_root, open(ctx, 32, "am"));
         return v;
     }
 
     private static RemoteViews pickViews(Context ctx) {
-        JSONObject cfg = ReminderReceiver.config(ctx);
         RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_pick);
-        JSONObject p = pick(cfg);
-        v.setTextViewText(R.id.w_name, p == null ? "Open Lux" : p.optString("t"));
-        v.setTextViewText(R.id.w_sub, p == null ? "Your pick appears after Lux opens once today." : p.optString("b"));
-        v.setTextViewText(R.id.w_why, p == null ? "" : p.optString("why"));
+        image(ctx, v, pick(ReminderReceiver.config(ctx)));
         v.setOnClickPendingIntent(R.id.w_root, open(ctx, 32, "am"));
         return v;
     }
@@ -136,21 +142,23 @@ final class Widgets {
         JSONObject cfg = ReminderReceiver.config(ctx);
         JSONObject w = cfg.optJSONObject("widget");
         RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_stats);
-        int month = w == null ? 0 : w.optInt("month");
-        int streak = w == null || fresh(cfg) == null ? 0 : w.optInt("streak");
         // wears waiting from the widget count too
-        JSONArray pend = pending(ctx);
-        month += pend.length();
+        int month = (w == null ? 0 : w.optInt("month")) + pending(ctx).length();
+        int streak = fresh(cfg) == null ? 0 : w.optInt("streak");
         v.setTextViewText(R.id.w_streak, String.valueOf(streak));
         v.setTextViewText(R.id.w_month, String.valueOf(month));
-        JSONObject low = w == null ? null : w.optJSONObject("low");
-        v.setTextViewText(R.id.w_low, low == null ? "No bottle is running low." : "Runs out first: " + low.optString("t") + " · " + low.optString("left"));
         v.setOnClickPendingIntent(R.id.w_root, open(ctx, 33, null));
         return v;
     }
 
-    private static String join(String a, String b) {
-        return b == null || b.isEmpty() ? a : a + " · " + b;
+    /** Picture of today's pick from the page (PNG, base64). */
+    static void setImage(Context ctx, String id, String base64) {
+        try (FileOutputStream out = new FileOutputStream(new File(ctx.getFilesDir(), IMG))) {
+            out.write(Base64.decode(base64, Base64.DEFAULT));
+            prefs(ctx).edit().putString("imgId", id).apply();
+        } catch (Exception ignored) {
+        }
+        updateAll(ctx);
     }
 
     static JSONArray pending(Context ctx) {

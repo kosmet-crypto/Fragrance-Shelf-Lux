@@ -41,8 +41,10 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
 * **Your own library table**: Settings → *Table template* gives a CSV with House, Name, Family, Concentration, Year,
   Size, Top, Middle, Base. Fill it (Google Sheets works), then *Import CSV or JSON*: the notes become pyramids.
   The imported library stays on the phone and is part of the backup.
-* **Widgets** (Android): *Lux quick log* (today's pick in one tap with your usual sprays, or *Other…* to open the
-  wear log), *Lux today's pick* and *Lux stats*. A wear from the widget is added when Lux opens.
+* **Widgets** (Android, 2 x 2): *Lux quick log* shows today's pick as a picture (your photo, else the drawn
+  bottle); *Wear* logs it in one tap with your usual sprays, *+* opens the wear log. *Lux today's pick* is the
+  picture alone, *Lux stats* the day streak and wears this month. A wear from the widget is added when Lux opens.
+* When the in-app update is refused, a message shows Android's reason before the install screen opens.
 
 ## Stats, value and bottles
 * **Stats** (was Insights): periods Today, 7, 30, 90 days, Year and All time; wears, sprays, amount used and value
