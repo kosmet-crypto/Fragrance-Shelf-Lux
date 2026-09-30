@@ -34,18 +34,28 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
 * **Test check-ins** (Android): a notification two and six hours after you spray a test. Settings → *Daily pick and reminders*.
 * **Photos**: Settings → *Add photos* picks several at once; photos named after a bottle are matched by themselves.
 * **Accent colour**: Settings → gold, rose gold or silver, in both themes.
+* **Layering**: in *Log a wear*, *Layer with another* logs two bottles at once (each loses its own sprays);
+  Stats → *Layering* lists the pairs you wear.
+* **This week's rotation** (Journal): seven bottles that waited longest, one a day; today's gets a push in the pick.
+* **Close to what you own**: a wishlist bottle or a tested fragrance shows which of your bottles share its notes or family.
+* **Your own library table**: Settings → *Table template* gives a CSV with House, Name, Family, Concentration, Year,
+  Size, Top, Middle, Base. Fill it (Google Sheets works), then *Import CSV or JSON*: the notes become pyramids.
+  The imported library stays on the phone and is part of the backup.
+* **Widgets** (Android): *Lux quick log* (today's pick in one tap with your usual sprays, or *Other…* to open the
+  wear log), *Lux today's pick* and *Lux stats*. A wear from the widget is added when Lux opens.
 
 ## Stats, value and bottles
 * **Stats** (was Insights): periods Today, 7, 30, 90 days, Year and All time; wears, sprays, amount used and value
   sprayed for the period; the collection's current value against what you paid; measures for current value,
   value sprayed and amount used; bottles without a price can be priced from there; bottles not worn for two
   months are listed and get a push in Today's pick.
-* **Notes you rate highest**, **Cost per wear**, **Temperature and what you wear** (new wears keep the day's
+* **Notes you rate highest**, **Cost of a wear** (your usual sprays × the price per ml), **Temperature and what you wear** (new wears keep the day's
   temperature when a city is set; the last three months can be filled in) and **When bottles run out**.
 * **Sprays per ml** per bottle: your own number, or what Lux learns when you correct the remaining ml by hand,
   or the default from Settings, or by bottle size (10 for 100 ml, 12 for 50 to 75 ml, 15 for 30 ml and decants;
   common atomizers spray about 0.06 to 0.12 ml).
-* **Almost empty** note under 10%, with the time left at your pace. **Undo** right after logging a wear.
+* **Almost empty** note under 10%, with the time left at your pace (last three months, and the last year for
+  older bottles; the empty date is shown as a range). **Undo** right after logging a wear.
 * **Monthly recap** in the first week of a month and **year in review** in December, both shareable as images.
 * After a wear is logged, Today's pick on Collection folds into a line; tap it to add another wear.
 
