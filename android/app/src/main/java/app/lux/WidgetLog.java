@@ -21,6 +21,10 @@ public class WidgetLog extends AppWidgetProvider {
             Toast.makeText(ctx, "Logged " + name + ". Lux adds it when you open the app.", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (Widgets.ACTION_NEXT.equals(intent.getAction())) {
+            Widgets.next(ctx);
+            return;
+        }
         super.onReceive(ctx, intent);
     }
 }

@@ -31,7 +31,7 @@ import java.util.UUID;
 final class Widgets {
 
     static final String ACTION_LOG = "app.lux.WIDGET_LOG";
-    private static final String IMG = "widget_pick.png";
+    static final String ACTION_NEXT = "app.lux.WIDGET_NEXT";
 
     private Widgets() {
     }
@@ -64,8 +64,31 @@ final class Widgets {
         return w != null && today().equals(w.optString("day")) ? w : null;
     }
 
-    /** Today's pick: from today's data, else from the picks the page prepared for the coming days. */
-    private static JSONObject pick(JSONObject cfg) {
+    /** Today's suggestions (the pick first) that the arrow steps through; empty when none from today. */
+    private static JSONArray choices(JSONObject cfg) {
+        JSONObject w = fresh(cfg);
+        JSONArray a = w == null ? null : w.optJSONArray("choices");
+        return a == null ? new JSONArray() : a;
+    }
+
+    /** Which suggestion the arrow is on; back to the first one every new day. */
+    private static int index(Context ctx, int n) {
+        SharedPreferences sp = prefs(ctx);
+        if (n == 0 || !today().equals(sp.getString("idxDay", ""))) return 0;
+        return Math.max(0, sp.getInt("idx", 0)) % n;
+    }
+
+    /** One step of the arrow. */
+    static void next(Context ctx) {
+        int n = choices(ReminderReceiver.config(ctx)).length();
+        prefs(ctx).edit().putString("idxDay", today()).putInt("idx", n == 0 ? 0 : (index(ctx, n) + 1) % n).apply();
+        updateAll(ctx);
+    }
+
+    /** The suggestion on show: today's choices, else the pick the page prepared for today. */
+    private static JSONObject pick(Context ctx, JSONObject cfg) {
+        JSONArray c = choices(cfg);
+        if (c.length() > 0) return c.optJSONObject(index(ctx, c.length()));
         JSONObject w = fresh(cfg);
         if (w != null && w.optJSONObject("pick") != null) return w.optJSONObject("pick");
         JSONObject picks = cfg.optJSONObject("picks");
@@ -102,9 +125,8 @@ final class Widgets {
     /** The pick as a picture when the page sent one for it, else the Lux mark. */
     private static void image(Context ctx, RemoteViews v, JSONObject p) {
         String id = p == null ? "" : p.optString("id");
-        File f = new File(ctx.getFilesDir(), IMG);
-        Bitmap bm = !id.isEmpty() && id.equals(prefs(ctx).getString("imgId", "")) && f.isFile()
-                ? BitmapFactory.decodeFile(f.getPath()) : null;
+        File f = imageFile(ctx, id);
+        Bitmap bm = !id.isEmpty() && f.isFile() ? BitmapFactory.decodeFile(f.getPath()) : null;
         if (bm != null) v.setImageViewBitmap(R.id.w_img, bm);
         else v.setImageViewResource(R.id.w_img, R.mipmap.ic_launcher_foreground);
         v.setContentDescription(R.id.w_img, p == null ? "Lux" : "Today's pick: " + p.optString("t"));
@@ -115,7 +137,7 @@ final class Widgets {
     private static RemoteViews logViews(Context ctx, int layout) {
         JSONObject cfg = ReminderReceiver.config(ctx);
         RemoteViews v = new RemoteViews(ctx.getPackageName(), layout);
-        JSONObject p = pick(cfg);
+        JSONObject p = pick(ctx, cfg);
         String done = loggedToday(ctx, cfg);
         image(ctx, v, p);
         boolean pickDone = p != null && p.optString("t").equals(done);
@@ -132,12 +154,16 @@ final class Widgets {
         }
         v.setOnClickPendingIntent(R.id.w_other, open(ctx, 31, "pm"));
         v.setOnClickPendingIntent(R.id.w_root, open(ctx, 32, "am"));
+        boolean more = choices(cfg).length() > 1;
+        v.setViewVisibility(R.id.w_next, more ? View.VISIBLE : View.GONE);
+        if (more) v.setOnClickPendingIntent(R.id.w_next, PendingIntent.getBroadcast(ctx, 35,
+                new Intent(ctx, WidgetLog.class).setAction(ACTION_NEXT), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         return v;
     }
 
     private static RemoteViews pickViews(Context ctx) {
         RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.widget_pick);
-        image(ctx, v, pick(ReminderReceiver.config(ctx)));
+        image(ctx, v, pick(ctx, ReminderReceiver.config(ctx)));
         v.setOnClickPendingIntent(R.id.w_root, open(ctx, 32, "am"));
         return v;
     }
@@ -155,13 +181,22 @@ final class Widgets {
         return v;
     }
 
-    /** Picture of today's pick from the page (PNG, base64). */
+    private static File imageFile(Context ctx, String id) {
+        return new File(ctx.getFilesDir(), "w_" + id.replaceAll("[^A-Za-z0-9]", "") + ".png");
+    }
+
+    /** Picture of one of today's suggestions from the page (PNG, base64); pictures of others are removed. */
     static void setImage(Context ctx, String id, String base64) {
-        try (FileOutputStream out = new FileOutputStream(new File(ctx.getFilesDir(), IMG))) {
+        try (FileOutputStream out = new FileOutputStream(imageFile(ctx, id))) {
             out.write(Base64.decode(base64, Base64.DEFAULT));
-            prefs(ctx).edit().putString("imgId", id).apply();
         } catch (Exception ignored) {
         }
+        java.util.Set<String> keep = new java.util.HashSet<>();
+        keep.add(imageFile(ctx, id).getName());
+        JSONArray c = choices(ReminderReceiver.config(ctx));
+        for (int i = 0; i < c.length(); i++) keep.add(imageFile(ctx, c.optJSONObject(i).optString("id")).getName());
+        File[] old = ctx.getFilesDir().listFiles((d, n) -> n.startsWith("w_") && n.endsWith(".png") && !keep.contains(n));
+        if (old != null) for (File f : old) f.delete();
         updateAll(ctx);
     }
 

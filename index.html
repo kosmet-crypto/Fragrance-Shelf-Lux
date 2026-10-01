@@ -1854,6 +1854,16 @@ select.mini {
   font-size: 18px;
   margin-bottom: 2px;
 }
+.sh-opts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.sh-opts .sg button {
+  padding: 6px 12px;
+  font-size: 12.5px;
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
@@ -2787,7 +2797,7 @@ function vJournal() {
       const d = new Date(w.t);
       list += `<div class="day-h">${d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</div>`;
     }
-    list += `<div class="wr"><div class="th">${bt(p, p.maxMl ? p.ml / p.maxMl : 1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n === 1 ? 'spray' : 'sprays'}${w.layer ? (q => (q ? ' \u00b7 with ' + esc(wP(q).name) : ''))(S.wears.find(x => x.layer === w.layer && x.id !== w.id)) : ''}${w.mood ? ' \u00b7 ' + esc(moodName(w.mood).toLowerCase()) : ''}${w.temp != null ? ' \u00b7 ' + w.temp + '\u00b0' : ''}</small></div>${w.test ? '<span class="wtag" title="From the Test lab">Test</span>' : `<button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button>`}</div>`;
+    list += `<div class="wr"${w.test ? '' : ` data-act="wedit" data-id="${w.id}" role="button" tabindex="0" style="cursor:pointer"`}><div class="th">${bt(p, p.maxMl ? p.ml / p.maxMl : 1)}</div><div class="mid">${esc(p.name)}<small>${esc(p.brand)} \u00b7 ${w.n} ${w.n === 1 ? 'spray' : 'sprays'}${w.layer ? (q => (q ? ' \u00b7 with ' + esc(wP(q).name) : ''))(S.wears.find(x => x.layer === w.layer && x.id !== w.id)) : ''}${w.mood ? ' \u00b7 ' + esc(moodName(w.mood).toLowerCase()) : ''}${w.temp != null ? ' \u00b7 ' + w.temp + '\u00b0' : ''}</small></div>${w.test ? '<span class="wtag" title="From the Test lab">Test</span>' : `<button data-act="wdel" data-id="${w.id}" aria-label="Delete entry">\u00d7</button>`}</div>`;
   });
   if (!list)
     list =
@@ -3634,6 +3644,46 @@ function saveWear() {
       toast('Wear removed');
     }
   });
+}
+
+/* Edit a logged wear: another fragrance, sprays or day, or delete it. The old wear is undone (its ml
+   goes back) and the new one logged with the same mood, temperature and layering. */
+let WE = null;
+function wearEditHtml() {
+  const own = owned();
+  return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Edit wear</h2>
+ <div class="fg" style="margin-top:20px"><label for="we-p">Fragrance</label><select id="we-p">${own.map(p => `<option value="${p.id}"${p.id === WE.pid ? ' selected' : ''}>${esc(p.name)} \u00b7 ${esc(p.brand)}</option>`).join('')}</select></div>
+ <div class="fg"><label for="we-d">Date</label><input type="date" id="we-d" value="${WE.date}" max="${dkey(Date.now())}"></div>
+ <span class="lb" style="text-align:center">Sprays</span><div class="stepper"><button data-act="weStep" data-d="-1" aria-label="Fewer sprays">\u2212</button><b id="we-n">${WE.n}</b><button data-act="weStep" data-d="1" aria-label="More sprays">+</button></div>
+ <div class="foot"><button class="btn danger sp" data-act="weDel">Delete</button><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="weSave">Save</button></div>`;
+}
+function openWearEdit(id) {
+  const w = S.wears.find(x => x.id === id);
+  if (!w) return;
+  if (!byId(w.pid) || byId(w.pid).shelf === 'wish') {
+    toast('This bottle is no longer in the cabinet');
+    return;
+  }
+  WE = { id, pid: w.pid, n: w.n, date: dkey(w.t) };
+  MODAL = 'wedit';
+  openModal(wearEditHtml());
+}
+function saveWearEdit() {
+  const w = S.wears.find(x => x.id === WE.id),
+    p = byId($('#we-p').value),
+    date = $('#we-d').value || WE.date;
+  if (!w || !p) return;
+  const t = date === dkey(w.t) ? w.t : date === dkey(Date.now()) ? Date.now() : new Date(date + 'T12:00:00').getTime(),
+    keep = {};
+  ['mood', 'temp', 'layer', 'wid'].forEach(k => {
+    if (w[k] != null) keep[k] = w[k];
+  });
+  removeWear(w.id);
+  logWear(p, WE.n, t, keep);
+  save();
+  closeModal();
+  render();
+  toast('Wear updated');
 }
 
 /* ================= new library entry & import ================= */
@@ -5286,19 +5336,20 @@ function syncReminders() {
           widget: widgetData()
         })
       );
-      const t = rankPicks(now, wxFresh(), S.settings.occ || 'day', moodToday())[0];
-      if (t) sendWidgetImage(t.p);
+      rankPicks(now, wxFresh(), S.settings.occ || 'day', moodToday())
+        .slice(0, 5)
+        .forEach(q => sendWidgetImage(q.p));
     } catch (e) {}
   }, 600);
 }
 /* The widgets show today's pick as a picture (the bottle's photo, else the drawn bottle), sent to the
    app only when the pick or its photo changes. */
-let widgetImgKey = '';
+const widgetImgKey = {};
 async function sendWidgetImage(p) {
   if (!window.LuxAndroid || !LuxAndroid.setWidgetImage) return;
   const key = p.id + ':' + (PHOTOS[p.id] ? PHOTOS[p.id].length : 0) + ':' + Math.round((p.ml / (p.maxMl || 1)) * 20);
-  if (key === widgetImgKey) return;
-  widgetImgKey = key;
+  if (widgetImgKey[p.id] === key) return;
+  widgetImgKey[p.id] = key;
   const c = document.createElement('canvas');
   c.width = c.height = 256;
   const x = c.getContext('2d'),
@@ -5316,11 +5367,12 @@ async function sendWidgetImage(p) {
     LuxAndroid.setWidgetImage(p.id, c.toDataURL('image/png').split(',')[1]);
   } catch (e) {}
 }
-/* What the home screen widgets show (android/.../Widgets.java): today's pick with your usual sprays
-   for it, what is logged today, streak, wears this month and the bottle that runs out first. */
+/* What the home screen widgets show (android/.../Widgets.java): today's pick and the next four
+   suggestions (the arrow on the widget) with your usual sprays for each, what is logged today, streak, wears this month and the bottle that runs out first. */
 function widgetData() {
   const now = Date.now(),
-    sg = rankPicks(now, wxFresh(), S.settings.occ || 'day', moodToday())[0],
+    L = rankPicks(now, wxFresh(), S.settings.occ || 'day', moodToday()).slice(0, 5),
+    sg = L[0],
     AW = allWears(),
     d0 = sod(now);
   const today = AW.filter(w => w.t >= d0 && (w.test || byId(w.pid))).map(w => wP(w).name),
@@ -5330,12 +5382,11 @@ function widgetData() {
     .map(p => ({ p, d: pace(p).days }))
     .filter(x => x.d != null && x.d < 3650)
     .sort((a, b) => a.d - b.d)[0];
-  const pick = sg
-    ? { id: sg.p.id, t: sg.p.name, b: sg.p.brand, why: sg.why[0] || '', n: Math.max(1, Math.round(wearCost(sg.p).avg)) }
-    : null;
+  const one = q => ({ id: q.p.id, t: q.p.name, b: q.p.brand, why: q.why[0] || '', n: Math.max(1, Math.round(wearCost(q.p).avg)) });
   return {
     day: dkey(now),
-    pick,
+    pick: sg ? one(sg) : null,
+    choices: L.map(one), // the widget's arrow steps through these
     today: [...new Set(today)],
     streak: streak(),
     month: AW.filter(w => w.t >= m0).length,
@@ -5349,17 +5400,23 @@ function takePending() {
   try {
     a = JSON.parse(LuxAndroid.takePendingWears() || '[]');
   } catch (e) {}
-  let n = 0;
+  const ids = [];
   a.forEach(x => {
     const p = byId(x.pid);
     if (!p || p.shelf === 'wish' || S.wears.some(w => w.wid === x.id)) return;
-    logWear(p, clamp(+x.n || 3, 1, 20), +x.t || Date.now(), { wid: x.id });
-    n++;
+    ids.push(logWear(p, clamp(+x.n || 3, 1, 20), +x.t || Date.now(), { wid: x.id }).id);
   });
-  if (n) {
+  if (ids.length) {
     save();
     render();
-    toast(n === 1 ? 'Wear from the widget added' : n + ' wears from the widget added');
+    const last = S.wears.find(w => w.id === ids[ids.length - 1]);
+    /* undo right here; later a tap on the entry in the Journal edits or deletes it */
+    toastUndo(ids.length === 1 ? 'From the widget: ' + wP(last).name : ids.length + ' wears from the widget added', () => {
+      if (ids.map(removeWear).some(Boolean)) {
+        render();
+        toast('Removed');
+      }
+    });
   }
 }
 function remHtml() {
@@ -5424,10 +5481,28 @@ const SHK = [
 let SHR = { kind: 'top', url: null, n: 0, mo: 0, year: null };
 function openShare(kind, o) {
   o = o || {};
-  SHR = { kind: kind || (owned().length ? 'top' : 'wish'), url: null, n: 0, mo: o.mo || 0, year: o.year || null };
+  SHR = { kind: kind || (owned().length ? 'top' : 'wish'), url: null, n: 0, mo: o.mo || 0, year: o.year || null, bg: ui.shBg, acc: ui.shAcc };
   MODAL = 'share';
   openModal(shareHtml());
   drawShare();
+}
+/* Share images follow a background (dark or light) and an accent, by default the app's own. */
+const SHACC = { gold: ['#caa96b', '#7a5a1c'], rose: ['#d99a86', '#8e4a3a'], silver: ['#bfc4ca', '#4f5660'] };
+function sharePal() {
+  const light = (SHR.bg || (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark')) === 'light',
+    acc = SHACC[SHR.acc || S.settings.accent || 'gold'] || SHACC.gold,
+    gold = acc[light ? 1 : 0],
+    rgb = [1, 3, 5].map(i => parseInt(gold.slice(i, i + 2), 16)).join(','),
+    a = v => 'rgba(' + rgb + ',' + v + ')';
+  return light
+    ? { light, bg: '#efe9dd', tx: '#1a160f', tx2: '#4a4336', tx3: '#7a7262', line: 'rgba(44,36,20,.14)', gold, glow: a(0.2), glow0: a(0), edge: a(0.45), edge2: a(0.4) }
+    : { light, bg: '#0d0f0e', tx: '#ece6d6', tx2: '#a8a293', tx3: '#787466', line: 'rgba(232,220,190,.12)', gold, glow: a(0.3), glow0: a(0), edge: a(0.38), edge2: a(0.34) };
+}
+function shareOptsHtml() {
+  const P = sharePal(),
+    acc = SHR.acc || S.settings.accent || 'gold';
+  return `<div class="sh-opts"><div class="sg" role="group" aria-label="Background">${[['dark', 'Dark'], ['light', 'Light']].map(x => `<button data-act="shBg" data-v="${x[0]}" class="${(P.light ? 'light' : 'dark') === x[0] ? 'on' : ''}">${x[1]}</button>`).join('')}</div>
+  <div class="sg" role="group" aria-label="Accent">${[['gold', 'Gold'], ['rose', 'Rose gold'], ['silver', 'Silver']].map(x => `<button data-act="shAcc" data-v="${x[0]}" class="${acc === x[0] ? 'on' : ''}">${x[1]}</button>`).join('')}</div></div>`;
 }
 function shareHtml() {
   return `<button class="x" data-act="close" aria-label="Close">×</button><h2>Share</h2><p class="muted" style="margin:6px 0 16px">A picture of your cabinet for Instagram, WhatsApp or anywhere you like.</p>
@@ -5437,10 +5512,12 @@ function shareHtml() {
        `<button type="button" class="chip${SHR.kind === k[0] ? ' on' : ''}" data-act="shKind" data-v="${k[0]}">${k[0] === 'month' && SHR.mo ? 'Last month' : k[0] === 'year' && SHR.year ? String(SHR.year) : k[1]}</button>`
    )
    .join('')}</div>
+ <div id="shOpts">${shareOptsHtml()}</div>
  <div class="shprev" id="shPrev"><span class="muted">Drawing…</span></div>
  <div class="foot"><button class="btn ghost" data-act="shCopy" id="shCopy"${SHR.kind === 'tested' ? '' : ' hidden'}>Copy as text</button><button class="btn ghost" data-act="shSave">Save image</button><button class="btn" data-act="shGo">Share</button></div>`;
 }
-function bottleImg(p, level) {
+/* A bottle as an image for canvases: its photo, else the drawn bottle (glass lines dark on light pictures). */
+function bottleImg(p, level, light) {
   return new Promise(res => {
     const im = new Image();
     im.onload = () => res(im);
@@ -5461,8 +5538,8 @@ function bottleImg(p, level) {
     const s = bottle(p, level)
       .replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="320" ')
       .replace(/(<svg[^>]*>)/, '$1' + defs)
-      .replace('class="gl"', 'fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.34)"')
-      .replace('class="sh"', 'fill="rgba(255,255,255,.16)"');
+      .replace('class="gl"', light ? 'fill="rgba(0,0,0,.04)" stroke="rgba(40,30,10,.4)"' : 'fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.34)"')
+      .replace('class="sh"', light ? 'fill="rgba(255,255,255,.5)"' : 'fill="rgba(255,255,255,.16)"');
     im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
   });
 }
@@ -5490,10 +5567,11 @@ async function drawShare() {
   const x = c.getContext('2d');
   const SER = '"Cormorant Garamond",Georgia,serif',
     SAN = '"Hanken Grotesk",system-ui,sans-serif',
-    GOLD = '#caa96b',
-    TX = '#ece6d6',
-    TX2 = '#a8a293',
-    TX3 = '#787466';
+    P = sharePal(),
+    GOLD = P.gold,
+    TX = P.tx,
+    TX2 = P.tx2,
+    TX3 = P.tx3;
   try {
     await Promise.all([
       document.fonts.load('500 60px "Cormorant Garamond"'),
@@ -5501,14 +5579,14 @@ async function drawShare() {
       document.fonts.load('500 30px "Hanken Grotesk"')
     ]);
   } catch (e) {}
-  x.fillStyle = '#0d0f0e';
+  x.fillStyle = P.bg;
   x.fillRect(0, 0, W, H);
   let g = x.createRadialGradient(880, 60, 10, 880, 60, 980);
-  g.addColorStop(0, 'rgba(202,169,107,.30)');
-  g.addColorStop(1, 'rgba(202,169,107,0)');
+  g.addColorStop(0, P.glow);
+  g.addColorStop(1, P.glow0);
   x.fillStyle = g;
   x.fillRect(0, 0, W, H);
-  x.strokeStyle = 'rgba(202,169,107,.38)';
+  x.strokeStyle = P.edge;
   x.lineWidth = 2;
   x.strokeRect(34, 34, W - 68, H - 68);
   x.textBaseline = 'alphabetic';
@@ -5557,7 +5635,7 @@ async function drawShare() {
       x.fillStyle = GOLD;
       x.font = `500 58px ${SER}`;
       x.fillText(String(i + 1), 84, y + 92);
-      drawIn(x, await bottleImg(p, p.shelf === 'wish' ? 1 : p.maxMl ? p.ml / p.maxMl : 1), 200, y + 4, 86, 138);
+      drawIn(x, await bottleImg(p, p.shelf === 'wish' ? 1 : p.maxMl ? p.ml / p.maxMl : 1, P.light), 200, y + 4, 86, 138);
       x.fillStyle = TX;
       x.font = `600 50px ${SER}`;
       x.fillText(ell(x, p.name, 540), 276, y + 72);
@@ -5570,7 +5648,7 @@ async function drawShare() {
       x.fillText(val(list[i]), W - 84, y + 86);
       x.textAlign = 'left';
       if (i < list.length - 1) {
-        x.fillStyle = 'rgba(232,220,190,.12)';
+        x.fillStyle = P.line;
         x.fillRect(84, y + 150, W - 168, 1.5);
       }
       y += 152;
@@ -5637,15 +5715,15 @@ async function drawShare() {
       stat(String(mw.length), mw.length === 1 ? 'wear' : 'wears', W / 6 + 40);
       stat(String(L.length), 'fragrances', W / 2);
       stat(tf ? tf[0] : '\u2014', 'favourite family', (W * 5) / 6 - 40);
-      x.fillStyle = 'rgba(232,220,190,.12)';
+      x.fillStyle = P.line;
       x.fillRect(84, 650, W - 168, 1.5);
       const T = L.slice(0, 3),
         cw = (W - 168) / 3;
       for (let i = 0; i < T.length; i++) {
         const p = T[i].p,
           cx = 84 + cw * i + cw / 2;
-        drawIn(x, await bottleImg(p, p.maxMl ? p.ml / p.maxMl : 1), cx, 700, 150, 240);
-        x.fillStyle = 'rgba(202,169,107,.34)';
+        drawIn(x, await bottleImg(p, p.maxMl ? p.ml / p.maxMl : 1, P.light), cx, 700, 150, 240);
+        x.fillStyle = P.edge2;
         x.fillRect(cx - cw / 2 + 16, 946, cw - 32, 2);
         x.textAlign = 'center';
         x.fillStyle = TX;
@@ -5672,7 +5750,7 @@ async function drawShare() {
           r = Math.floor(i / 4),
           cx = 84 + cw * (i % 4) + cw / 2,
           top = 400 + r * 262;
-        drawIn(x, await bottleImg(p, p.maxMl ? p.ml / p.maxMl : 1), cx, top, 104, 166);
+        drawIn(x, await bottleImg(p, p.maxMl ? p.ml / p.maxMl : 1, P.light), cx, top, 104, 166);
         x.textAlign = 'center';
         x.fillStyle = TX;
         x.font = `600 29px ${SER}`;
@@ -5682,7 +5760,7 @@ async function drawShare() {
         x.fillText(ell(x, p.brand, cw - 18), cx, top + 234);
         x.textAlign = 'left';
         if (i % 4 === 0) {
-          x.fillStyle = 'rgba(202,169,107,.34)';
+          x.fillStyle = P.edge2;
           x.fillRect(84, top + 170, W - 168, 2);
         }
       }
@@ -5705,7 +5783,7 @@ async function drawShare() {
       );
     else empty('The wishlist is empty');
   }
-  x.fillStyle = 'rgba(202,169,107,.38)';
+  x.fillStyle = P.edge;
   x.fillRect(84, 1238, W - 168, 1.5);
   x.fillStyle = TX3;
   x.font = `400 22px ${SAN}`;
@@ -5962,6 +6040,18 @@ const ACT = {
     $$('#modal [data-act="shKind"]').forEach(b => b.classList.toggle('on', b === a));
     drawShare();
   },
+  shBg: a => {
+    SHR.bg = ui.shBg = a.dataset.v;
+    SHR.url = null;
+    $('#shOpts').innerHTML = shareOptsHtml();
+    drawShare();
+  },
+  shAcc: a => {
+    SHR.acc = ui.shAcc = a.dataset.v;
+    SHR.url = null;
+    $('#shOpts').innerHTML = shareOptsHtml();
+    drawShare();
+  },
   shCopy: () => copyText(testsText(), 'Results copied. Paste them into a chat.'),
   shGo: () => shareGo(false),
   shSave: () => shareGo(true),
@@ -6141,6 +6231,20 @@ const ACT = {
     $$('#modal [data-act="wmood"]').forEach(b => b.classList.toggle('on', b.dataset.v === WD.mood));
   },
   wearSave: () => saveWear(),
+  wedit: a => openWearEdit(a.dataset.id),
+  weStep: a => {
+    WE.n = clamp(WE.n + +a.dataset.d, 1, 20);
+    $('#we-n').textContent = WE.n;
+  },
+  weSave: () => saveWearEdit(),
+  weDel: () => {
+    const id = WE.id;
+    closeModal();
+    if (removeWear(id)) {
+      render();
+      toast('Entry removed');
+    }
+  },
   wdel: a => {
     if (removeWear(a.dataset.id)) {
       render();

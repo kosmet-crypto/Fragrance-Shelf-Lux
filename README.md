@@ -12,7 +12,7 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
 * **Wishlist**: price seen, target price, where to buy and how much you want it. *I bought it* moves the bottle
   to your first shelf with the price filled in.
 * **Share**: Collection → *Share* draws a picture (most worn, this month, the collection or the wishlist) to share
-  or save.
+  or save, on a dark or light background with a gold, rose gold or silver accent.
 * **Test lab results**: Test lab → *Share results* draws your five best tested fragrances with their scores;
   *Copy as text* copies every rated fragrance with its scores, longevity and review, ready to paste into a chat.
   Settings → *Tests as CSV* saves the same list as a spreadsheet.
@@ -33,6 +33,7 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
 * **Test check-ins** (Android): a notification two and six hours after you spray a test. Settings → *Daily pick and reminders*.
 * **Photos**: Settings → *Add photos* picks several at once; photos named after a bottle are matched by themselves.
 * **Accent colour**: Settings → gold, rose gold or silver, in both themes.
+* **Fix a wear**: tap an entry in the Journal to change the fragrance, sprays or day, or delete it (× deletes too).
 * **Layering**: in *Log a wear*, *Layer with another* logs two bottles at once (each loses its own sprays);
   Stats → *Layering* lists the pairs you wear.
 * **This week's rotation** (Journal): seven bottles that waited longest, one a day; today's gets a push in the pick.
@@ -41,7 +42,8 @@ A private cabinet for your fragrance collection: shelves, wears, journal, statis
   Size, Top, Middle, Base. Fill it (Google Sheets works), then *Import CSV or JSON*: the notes become pyramids.
   The imported library stays on the phone and is part of the backup.
 * **Widgets** (Android, 2 x 2): *Lux quick log* shows today's pick as a picture (your photo, else the drawn
-  bottle); *Wear* logs it in one tap with your usual sprays, *+* opens the wear log. *Lux today's pick* is the
+  bottle); *Wear* logs it in one tap with your usual sprays, *+* opens the wear log, and the arrow *›* steps through today's pick and the next four suggestions, so *Wear*
+  logs the one you see. Lux offers *Undo* when it adds a wear from the widget. *Lux today's pick* is the
   picture alone, *Lux stats* the day streak and wears this month. *Lux quick log (upright)* is the same quick log
   in 1 x 2. Every widget shows today's pick, the same as on Collection. A wear from the widget is added when Lux opens.
 * When the in-app update is refused, a message shows Android's reason before the install screen opens.
