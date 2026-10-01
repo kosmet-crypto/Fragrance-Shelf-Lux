@@ -5649,7 +5649,7 @@ function remHtml() {
   const row = (k, tk, title, sub) =>
     `<div class="set-row"><div>${title}<small>${sub}</small></div><div class="acts" style="align-items:center">${and ? `<input type="time" value="${esc(r[tk])}" data-ch="remT" data-k="${tk}" style="width:140px" aria-label="${title} time"${r[k] ? '' : ' disabled'}>` : ''}<button class="chip${r[k] ? ' on' : ''}" data-act="remTog" data-k="${k}"${and ? '' : ' disabled'}>${r[k] ? 'On' : 'Off'}</button></div></div>`;
   return `<div class="card rem"><h3>Daily pick and reminders</h3>
- ${and ? '' : '<p class="muted" style="margin:6px 0 4px">Notifications are part of the <a href="https://github.com/kosmet-crypto/Fragrance-Shelf-Lux/releases/latest/download/lux.apk" style="color:var(--gold2)">Lux Android app</a>.</p>'}
+ ${and ? '' : '<p class="muted" style="margin:6px 0 4px">Notifications are part of the <a href="https://github.com/kosmet-crypto/Lux-Perfume-Cabinet/releases/latest/download/lux.apk" style="color:var(--gold2)">Lux Android app</a>.</p>'}
  ${off ? '<div class="note" style="margin:12px 0 0"><span>Notifications are turned off for Lux on this phone.</span><button class="btn sm" data-act="remAllow">Allow</button></div>' : ''}
  ${row('am', 'amT', 'Morning pick', 'Today’s suggestion as a notification')}
  <div class="set-row"><div>Test check-ins<small>2 and 6 hours after spraying a test</small></div><button class="chip${r.test ? ' on' : ''}" data-act="remTog" data-k="test"${and ? '' : ' disabled'}>${r.test ? 'On' : 'Off'}</button></div>

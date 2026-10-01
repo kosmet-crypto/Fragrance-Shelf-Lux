@@ -83,7 +83,7 @@ bump `VERSION` in `sw.js` so installed copies pick up the update.
 
 ## Android app (APK)
 Every change merged into `main` builds a new APK with GitHub Actions and publishes it as a release.
-Always the newest version: https://github.com/kosmet-crypto/Fragrance-Shelf-Lux/releases/latest/download/lux.apk
+Always the newest version: https://github.com/kosmet-crypto/Lux-Perfume-Cabinet/releases/latest/download/lux.apk
 
 1. Open the link on your Android phone and download `lux.apk`.
 2. Open the file. Android will ask to allow installs from your browser or file manager; allow it once.
