@@ -819,7 +819,7 @@
   <h3 style="margin:22px 0 4px">Timeline</h3>${timelineSvg(s)}
   ${notes.length ? `<input type="range" min="0" max="${dur}" step="60000" value="${dur}" data-ti="scrub" data-id="${s.id}" aria-label="Scrub through the test"><div class="tt-scr" id="tt-scr">${scrubText(s, dur)}</div>` : ''}
   <div style="margin-top:10px">${rows}</div>
-  <div class="foot"><button class="btn danger sp" data-ta="sdel" data-id="${s.id}">Delete</button><button class="btn ghost" data-ta="note" data-id="${s.id}">Add impression</button><button class="btn ghost" data-ta="respray" data-id="${s.id}">New spray</button><button class="btn ghost" data-ta="tedit" data-id="${s.id}">Edit</button>${s.fadedAt ? '' : `<button class="btn ghost" data-ta="fade" data-id="${s.id}">Faded out</button>`}<button class="btn" data-ta="rate" data-id="${s.id}">${s.rating ? 'Edit rating' : 'Rate'}</button></div>`;
+  <div class="foot"><button class="btn danger sp" data-ta="sdel" data-id="${s.id}">Delete</button><button class="btn ghost" data-ta="note" data-id="${s.id}">Add impression</button><button class="btn ghost" data-ta="respray" data-id="${s.id}">New spray</button><button class="btn ghost" data-ta="tedit" data-id="${s.id}">Edit</button>${s.fadedAt ? '' : `<button class="btn ghost" data-ta="fade" data-id="${s.id}">Faded out</button>`}<button class="btn" data-ta="rate" data-id="${s.id}">${s.rating ? 'Rate again' : 'Rate'}</button></div>`;
   }
   /* Edit a test: fragrance, sprays, time, where on the body, where tested and price. */
   let ED = null;
