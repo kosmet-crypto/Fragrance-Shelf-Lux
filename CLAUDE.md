@@ -1,4 +1,4 @@
-# Working on Lux (Fragrance-Shelf-Lux)
+# Working on Lux (Lux-Perfume-Cabinet)
 
 ## How the owner wants to work (keep costs low)
 - Reply in Serbian (Cyrillic). Keep messages short: what was done and what to try on the phone.
