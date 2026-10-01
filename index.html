@@ -1006,6 +1006,77 @@ label,
 .cal .d.e {
   background: transparent;
 }
+.cal .d.w {
+  color: #19130a;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
+}
+.cal .d sup {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 9px;
+}
+.sg.jv {
+  margin-bottom: 14px;
+}
+.flg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--tx2);
+}
+.flg span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.flg i,
+.fdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: -1px;
+}
+.flg b {
+  color: var(--tx3);
+  font-weight: 500;
+}
+.ycal {
+  display: grid;
+  grid-template-columns: 28px repeat(31, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 4px;
+}
+.ycal .yd {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--glass);
+}
+.ycal .yd.t {
+  outline: 1px solid var(--gold);
+}
+.ycal .yn {
+  font-size: 8.5px;
+  color: var(--tx3);
+  text-align: center;
+}
+.ycal .ym {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 11px;
+  color: var(--tx2);
+  text-align: left;
+  cursor: pointer;
+  line-height: 1;
+}
 .ch {
   display: flex;
   align-items: center;
@@ -1426,6 +1497,33 @@ label,
   height: 100%;
   background: var(--gold);
   border-radius: 99px;
+}
+.vbar.over b,
+.bar.over {
+  background: #c9583a;
+}
+.over {
+  color: #d9694a;
+  font-style: normal;
+}
+.bars.sm {
+  height: 70px;
+  margin-top: 18px;
+}
+.nb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.nb-t small {
+  display: block;
+  color: var(--tx3);
+  font-size: 12.5px;
+  margin-top: 2px;
 }
 .prow {
   display: flex;
@@ -2757,6 +2855,62 @@ function streak() {
   }
   return n;
 }
+/* Colour of a day in the Journal calendar: the scent families worn, split when there are several. */
+function dayPaint(a) {
+  const c = [...new Set(a.map(w => famColor(wP(w).fam)))];
+  if (!c.length) return '';
+  if (c.length === 1) return `background:${c[0]};`;
+  const st = 100 / c.length;
+  return `background:linear-gradient(135deg,${c.map((x, i) => `${x} ${Math.round(i * st)}% ${Math.round((i + 1) * st)}%`).join(',')});`;
+}
+function famLegend(W) {
+  const g = {};
+  W.forEach(w => {
+    const f = String(wP(w).fam || '').trim(),
+      k = famColor(f),
+      o = (g[k] = g[k] || { n: 0, names: {} });
+    o.n++;
+    o.names[f || 'No family'] = (o.names[f || 'No family'] || 0) + 1;
+  });
+  const L = Object.entries(g).sort((a, b) => b[1].n - a[1].n);
+  if (!L.length) return '';
+  return `<div class="flg">${L.map(([c, o]) => `<span><i style="background:${c}"></i>${esc(capNote(Object.entries(o.names).sort((a, b) => b[1] - a[1])[0][0]))} <b>${o.n}</b></span>`).join('')}</div>`;
+}
+function yearHtml(AW, cnt) {
+  const y = new Date().getFullYear() + (ui.jyo || 0),
+    today = dkey(Date.now());
+  let h = '<div class="ycal"><span></span>';
+  for (let d = 1; d <= 31; d++) h += `<span class="yn">${d % 5 === 0 || d === 1 ? d : ''}</span>`;
+  for (let m = 0; m < 12; m++) {
+    const dim = new Date(y, m + 1, 0).getDate();
+    h += `<button class="ym" data-act="jmon" data-y="${y}" data-m="${m}">${MON[m].slice(0, 3)}</button>`;
+    for (let d = 1; d <= 31; d++) {
+      if (d > dim) {
+        h += '<span></span>';
+        continue;
+      }
+      const k = dkey(new Date(y, m, d)),
+        a = cnt[k] || [];
+      h += `<span class="yd${k === today ? ' t' : ''}"${a.length ? ` title="${esc(d + ' ' + MON[m] + ': ' + a.map(w => wP(w).name).join(', '))}" style="${dayPaint(a)}"` : ''}></span>`;
+    }
+  }
+  const W = AW.filter(w => new Date(w.t).getFullYear() === y),
+    days = new Set(W.map(w => dkey(w.t))).size;
+  return `<div class="ch"><button data-act="jprev" aria-label="Previous year">\u2039</button><h3>${y}</h3><button data-act="jnext" aria-label="Next year">\u203a</button></div>${h}</div>${famLegend(W)}<p class="muted" style="font-size:13px;margin-top:12px">${W.length} wears on ${days} ${days === 1 ? 'day' : 'days'} \u00b7 ${new Set(W.map(wKey)).size} different fragrances \u00b7 tap a month to open it</p>`;
+}
+function openDay(k) {
+  const a = allWears()
+    .filter(w => dkey(w.t) === k)
+    .sort((x, y) => x.t - y.t);
+  if (!a.length) return;
+  MODAL = 'day';
+  openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>${new Date(k + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</h2><div style="margin-top:14px">${a
+    .map(w => {
+      const p = wP(w);
+      return `<div class="wr"${w.test ? '' : ` data-act="wedit" data-id="${w.id}" role="button" tabindex="0" style="cursor:pointer"`}><div class="th">${bt(p, p.maxMl ? p.ml / p.maxMl : 1)}</div><div class="mid">${esc(p.name)}<small><i class="fdot" style="background:${famColor(p.fam)}"></i>${esc(p.fam || 'No family')} \u00b7 ${esc(p.brand)} \u00b7 ${w.n} ${w.n === 1 ? 'spray' : 'sprays'}</small></div>${w.test ? '<span class="wtag">Test</span>' : ''}</div>`;
+    })
+    .join('')}</div><div class="foot"><button class="btn" data-act="close">Done</button></div>`);
+}
 function vJournal() {
   const now = new Date(),
     first = new Date(now.getFullYear(), now.getMonth() + ui.jm, 1),
@@ -2773,12 +2927,11 @@ function vJournal() {
   for (let d = 1; d <= dim; d++) {
     const k = dkey(new Date(first.getFullYear(), first.getMonth(), d));
     const a = cnt[k] || [];
-    const al = a.length ? Math.min(0.9, 0.22 + a.length * 0.22) : 0;
     const names = a
       .map(w => wP(w).name)
       .filter(Boolean)
       .join(', ');
-    cal += `<div class="d${k === dkey(Date.now()) ? ' t' : ''}" title="${esc(names)}" style="${al ? `background:color-mix(in srgb,var(--gold) ${Math.round(al * 100)}%,transparent);color:var(--goldink);font-weight:600` : ''}">${d}</div>`;
+    cal += `<div class="d${k === dkey(Date.now()) ? ' t' : ''}${a.length ? ' w' : ''}"${a.length ? ` data-act="jday" data-k="${k}" role="button" tabindex="0" aria-label="${esc(d + ': ' + names)}"` : ''} title="${esc(names)}" style="${dayPaint(a)}">${d}${a.length > 1 ? `<sup>${a.length}</sup>` : ''}</div>`;
   }
   const monthWears = AW.filter(w => {
     const d = new Date(w.t);
@@ -2803,7 +2956,7 @@ function vJournal() {
     list =
       '<p class="muted" style="padding:14px 0">No wears logged yet. Log your first wear and the calendar fills in.</p>';
   return `<header class="vh"><div><h1>Journal</h1><p class="sub2">${streak()} day streak \u00b7 ${AW.length} wears logged</p></div><div class="acts"><button class="btn" data-act="wearOpen">Log a wear</button></div></header>
- <div class="card"><div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div><p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances</p></div>${rotationHtml()}
+ <div class="card"><div class="sg jv" role="group" aria-label="Calendar view"><button data-act="jview" data-v="m" class="${ui.jy ? '' : 'on'}">Month</button><button data-act="jview" data-v="y" class="${ui.jy ? 'on' : ''}">Year</button></div>${ui.jy ? yearHtml(AW, cnt) : `<div class="ch"><button data-act="jprev" aria-label="Previous month">\u2039</button><h3>${MON[first.getMonth()]} ${first.getFullYear()}</h3><button data-act="jnext" aria-label="Next month">\u203a</button></div><div class="cal">${cal}</div>${famLegend(monthWears)}<p class="muted" style="font-size:13px;margin-top:12px">${monthWears.length} wears \u00b7 ${distinct} different fragrances${monthWears.length ? ' \u00b7 tap a day to see it' : ''}</p>`}</div>${rotationHtml()}
  <div class="card" style="margin-top:18px"><h3>History</h3>${list}${sorted.length > ui.jlim ? `<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-act="jmore">Show more</button></div>` : ''}</div>`;
 }
 
@@ -3063,7 +3216,7 @@ function vIns() {
   return `<header class="vh"><div><h1>Stats</h1><p class="sub2">Pick a period and the numbers and charts follow.</p></div></header>
  <div class="sg per" id="ins-p" role="group" aria-label="Period">${PERS.map(x => `<button data-act="insP" data-v="${x[0]}" class="${x[0] === p ? 'on' : ''}">${x[1]}</button>`).join('')}</div>
  <div class="kpis" id="kpis">${kpisHtml(d)}</div>
- ${valueHtml()}
+ ${valueHtml()}${buyHtml()}
  <div class="card"><div class="ctl"><div class="fg"><label for="ins-m">Measure</label><select id="ins-m" data-ch="insM">${opt(MEAS, m)}</select></div><div class="fg"><label for="ins-g">Group by</label><select id="ins-g" data-ch="insG">${opt(GRPS, g)}</select></div></div><div id="donutBox">${donutHtml(d)}</div></div>
  <div class="card"><h3>Wear activity</h3><div id="actBox">${activityHtml(p === 'all' ? '365' : p)}</div></div>
  ${notesHtml()}${cpwHtml()}${layerHtml()}${tempHtml()}${emptyHtml()}
@@ -3414,7 +3567,7 @@ function sheetHtml() {
      : `<div class="fg"><input id="f-mlr" type="range" min="0" max="${+d.maxMl || 100}" step="0.5" value="${+d.ml || 0}" data-in="mlr" aria-label="Remaining volume"></div>
  <div class="fg"><label for="f-spm">Sprays per ml</label><input id="f-spm" type="number" min="3" max="40" step="0.5" data-in="sheet" value="${+d.spm > 0 ? esc(d.spm) : ''}" placeholder="${rateOf(Object.assign({}, d, { spm: '' }))} (${rateSrc(Object.assign({}, d, { spm: '' }))})"><small class="hint">Leave empty and Lux estimates it. When you check the bottle, correct the remaining ml above: Lux then learns how much this atomizer really sprays.</small></div>`
  }
- <div class="g2">${wish ? `<div class="fg"><label for="f-seen">Price seen (${esc(cur())})</label><input id="f-seen" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.seen == null ? '' : d.seen)}"></div><div class="fg"><label for="f-target">Target price (${esc(cur())})</label><input id="f-target" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.target == null ? '' : d.target)}"></div>` : `<div class="fg"><label for="f-price">Price paid (${esc(cur())})</label><input id="f-price" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.price)}"></div>`}
+ <div class="g2">${wish ? `<div class="fg"><label for="f-seen">Price seen (${esc(cur())})</label><input id="f-seen" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.seen == null ? '' : d.seen)}"></div><div class="fg"><label for="f-target">Target price (${esc(cur())})</label><input id="f-target" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.target == null ? '' : d.target)}"></div>` : `<div class="fg"><label for="f-price">Price paid (${esc(cur())})</label><input id="f-price" type="number" min="0" step="0.5" data-in="sheet" value="${esc(d.price)}"></div><div class="fg"><label for="f-bought">Bought on</label><input id="f-bought" type="date" data-in="sheet" max="${dkey(Date.now())}" value="${+d.bought > 0 ? dkey(+d.bought) : ''}"></div>`}
  <div class="fg"><label for="f-year">Launch year</label><input id="f-year" type="number" min="1700" max="2100" data-in="sheet" value="${d.year ? esc(d.year) : ''}"></div>
  <div class="fg"><span class="lb">Your rating</span>${starsHtml('rating', d.rating || 0)}</div>
  <div class="fg"><span class="lb">Projection</span>${starsHtml('proj', d.proj || 0, true)}</div>
@@ -3463,6 +3616,8 @@ function openSheet(id, pre) {
         },
         pre || {}
       );
+  if (!p && D.shelf !== 'wish' && D.bought == null && (+S.settings.budget > 0 || (S.settings.nb && S.settings.nb.start)))
+    D.bought = Date.now();
   ui.pyrEdit = false;
   MODAL = 'sheet';
   openModal(sheetHtml());
@@ -3493,6 +3648,12 @@ function readSheet() {
   set('target', 'f-target');
   set('where', 'f-where');
   set('spm', 'f-spm');
+  const bo = g('f-bought');
+  if (bo !== undefined) {
+    if (!bo) delete D.bought;
+    else if (!(+D.bought > 0) || bo !== dkey(+D.bought))
+      D.bought = bo === dkey(Date.now()) ? Date.now() : new Date(bo + 'T12:00:00').getTime();
+  }
   if (ui.pyrEdit && $('#py-top')) D._pyr = readPyrForm();
 }
 function refreshBt() {
@@ -3524,7 +3685,8 @@ function suggest() {
 }
 function commitSheet() {
   readSheet();
-  const d = D;
+  const d = D,
+    lb0 = lastBuy();
   d.name = String(d.name || '').trim();
   d.brand = String(d.brand || '').trim();
   if (!d.name || !d.brand) {
@@ -3564,6 +3726,7 @@ function commitSheet() {
       S.perfumes[i] = d;
     }
   }
+  nbCheck(lb0);
   save();
   return true;
 }
@@ -4271,7 +4434,8 @@ function exportCsv(kind) {
         'Sprays',
         'Last worn',
         'Rating',
-        'Added'
+        'Added',
+        'Bought'
       ]
     ].concat(
       S.perfumes.map(p => [
@@ -4291,7 +4455,8 @@ function exportCsv(kind) {
         p.sprays || 0,
         d(lastWorn(p.id)),
         p.rating || '',
-        d(p.created)
+        d(p.created),
+        +p.bought > 0 ? d(p.bought) : ''
       ])
     );
   } else if (kind === 'template') {
@@ -4544,6 +4709,63 @@ function openPrices() {
   openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Add prices</h2><p class="muted" style="margin:6px 0 14px">What you paid for each bottle${cur() ? ' (' + esc(cur()) + ')' : ''}. Leave a field empty to skip it.</p>
  ${miss.map(p => `<div class="prow"><div class="th">${bt(p, p.maxMl ? p.ml / p.maxMl : 1)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)} \u00b7 ${mlf(p.maxMl)} ml</div></div><input type="number" min="0" step="0.5" inputmode="decimal" data-pid="${p.id}" aria-label="Price for ${esc(p.name)}"></div>`).join('')}
  <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="pricesSave">Save prices</button></div>`);
+}
+/* Purchases: a bottle counts from the day it was bought (Bought on, or "I bought it" on the wishlist). */
+const buys = () => owned().filter(p => +p.bought > 0);
+const lastBuy = () => buys().reduce((a, p) => Math.max(a, +p.bought), 0);
+function nbDays() {
+  const nb = S.settings.nb;
+  if (!nb || !nb.start) return 0;
+  return Math.max(0, Math.floor((sod(Date.now()) - sod(Math.max(nb.start, lastBuy()))) / DAY));
+}
+/* Called after a save that may add a purchase: a purchase during a no-buy run ends that run. */
+function nbCheck(lb0) {
+  const nb = S.settings.nb,
+    lb = lastBuy();
+  if (!nb || !nb.start || lb <= lb0 || lb < nb.start) return;
+  const run = Math.max(0, Math.floor((sod(lb) - sod(Math.max(nb.start, lb0))) / DAY));
+  nb.best = Math.max(nb.best || 0, run);
+  if (!run) return;
+  setTimeout(() => toast(`No-buy run ended after ${run} ${run === 1 ? 'day' : 'days'}. It starts again from today.`), 400);
+}
+function buyHtml() {
+  const B = buys(),
+    s = S.settings,
+    bud = +s.budget > 0 ? +s.budget : 0,
+    m0 = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime(),
+    mon = B.filter(p => +p.bought >= m0).sort((a, b) => b.bought - a.bought),
+    spent = mon.reduce((a, p) => a + (+p.price || 0), 0),
+    pct = bud ? Math.min(100, Math.round((spent / bud) * 100)) : 0;
+  const M = [];
+  for (let i = 5; i >= 0; i--) {
+    const a = new Date(new Date().getFullYear(), new Date().getMonth() - i, 1),
+      b = new Date(a.getFullYear(), a.getMonth() + 1, 1).getTime(),
+      L = B.filter(p => +p.bought >= a.getTime() && +p.bought < b);
+    M.push({ l: MON[a.getMonth()].slice(0, 3), v: L.reduce((x, p) => x + (+p.price || 0), 0), n: L.length });
+  }
+  const mx = Math.max(1, bud, ...M.map(x => x.v)),
+    nb = s.nb && s.nb.start ? s.nb : null,
+    run = nbDays(),
+    goal = +s.nbGoal > 0 ? +s.nbGoal : 30,
+    best = Math.max((s.nb && s.nb.best) || 0, run);
+  const wishSum = S.perfumes.filter(p => p.shelf === 'wish').reduce((a, p) => a + (+p.seen > 0 ? +p.seen : 0), 0);
+  return `<div class="card" id="buyCard"><div class="ch"><h3>Purchases</h3><button class="btn ghost sm" data-act="budget">${bud ? 'Budget' : 'Set a budget'}</button></div>
+ <div class="vbig"><b>${money(spent)}</b><span>${bud ? (spent > bud ? `spent this month \u00b7 <em class="over">${money(spent - bud)} over</em> the ${money(bud)} budget` : `spent this month \u00b7 ${money(bud - spent)} left of ${money(bud)}`) : 'spent this month'}</span></div>
+ ${bud ? `<div class="vbar${spent > bud ? ' over' : ''}" role="img" aria-label="${pct}% of the budget spent"><b style="width:${pct}%"></b></div>` : ''}
+ ${mon.length ? mon.map(p => `<div class="row" data-act="open" data-id="${p.id}"><div class="th">${bt(p, p.maxMl ? p.ml / p.maxMl : 0)}</div><div class="mid"><div class="t1">${esc(p.name)}</div><div class="t2">${esc(p.brand)} \u00b7 ${new Date(+p.bought).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</div></div><div class="rt">${hasPrice(p) ? money(+p.price) : 'no price'}</div></div>`).join('') : '<p class="muted" style="margin-top:10px;font-size:13.5px">Nothing bought this month.</p>'}
+ <div class="bars sm">${M.map((x, i) => `<div class="bar${x.v ? '' : ' z'}${bud && x.v > bud ? ' over' : ''}" title="${esc(x.l)}: ${esc(money(x.v))} \u00b7 ${x.n} ${x.n === 1 ? 'bottle' : 'bottles'}" style="height:${x.v ? Math.max(6, (x.v / mx) * 100) : 2}%;animation-delay:${i * 30}ms"></div>`).join('')}</div><div class="axis">${M.map(x => `<span>${x.l}</span>`).join('')}</div>
+ <div class="nb"><div class="nb-t"><b>${nb ? `${run} ${run === 1 ? 'day' : 'days'} without buying` : 'No-buy challenge'}</b><small>${nb ? `Goal ${goal} days${best > run ? ` \u00b7 best ${best}` : ''}${run >= goal ? ' \u00b7 goal reached' : ''}` : `Count the days without a new bottle. Goal ${goal} days.`}</small></div><button class="btn ${nb ? 'ghost ' : ''}sm" data-act="${nb ? 'nbStop' : 'nbStart'}">${nb ? 'Stop' : 'Start'}</button></div>
+ ${nb ? `<div class="vbar" role="img" aria-label="${run} of ${goal} days"><b style="width:${Math.min(100, Math.round((run / goal) * 100))}%"></b></div>` : ''}
+ ${wishSum ? `<p class="muted" style="margin-top:12px;font-size:13px">The wishlist would cost ${money(wishSum)} at the prices seen.</p>` : ''}</div>`;
+}
+function openBudget() {
+  const s = S.settings;
+  MODAL = 'budget';
+  openModal(`<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Budget</h2><p class="muted" style="margin:6px 0 14px">How much you allow yourself for new bottles each month${cur() ? ' (' + esc(cur()) + ')' : ''}. Leave it empty for no budget.</p>
+ <div class="fg"><label for="b-amt">Monthly budget</label><input id="b-amt" type="number" min="0" step="1" inputmode="decimal" value="${+s.budget > 0 ? esc(s.budget) : ''}"></div>
+ <div class="fg"><label for="b-goal">No-buy goal (days)</label><input id="b-goal" type="number" min="1" max="999" step="1" inputmode="numeric" value="${+s.nbGoal > 0 ? esc(s.nbGoal) : 30}"></div>
+ <p class="muted" style="font-size:13px">A bottle counts as a purchase from its Bought on date. "I bought it" on the wishlist fills that in.</p>
+ <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-act="budgetSave">Save</button></div>`);
 }
 function forgottenHtml() {
   const L = owned()
@@ -6014,6 +6236,32 @@ const ACT = {
     closeModal();
     render();
   },
+  budget: () => openBudget(),
+  budgetSave: () => {
+    const a = +$('#b-amt').value,
+      g = Math.round(+$('#b-goal').value);
+    S.settings.budget = a > 0 ? a : 0;
+    S.settings.nbGoal = g > 0 ? clamp(g, 1, 999) : 30;
+    save();
+    closeModal();
+    render();
+    toast('Saved');
+  },
+  nbStart: () => {
+    S.settings.nb = { start: Date.now(), best: (S.settings.nb && S.settings.nb.best) || 0 };
+    save();
+    render();
+    toast('No-buy challenge started');
+  },
+  nbStop: () => {
+    const run = nbDays();
+    askConfirm('Stop the challenge?', `You are at ${run} ${run === 1 ? 'day' : 'days'} without buying.`, 'Stop').then(ok => {
+      if (!ok) return;
+      S.settings.nb = { start: 0, best: Math.max(S.settings.nb.best || 0, run) };
+      save();
+      render();
+    });
+  },
   bought: () => {
     readSheet();
     if (+D.seen > 0) D.price = +D.seen;
@@ -6257,13 +6505,27 @@ const ACT = {
     render();
   },
   jprev: () => {
-    ui.jm--;
+    if (ui.jy) ui.jyo = (ui.jyo || 0) - 1;
+    else ui.jm--;
     render();
   },
   jnext: () => {
-    ui.jm++;
+    if (ui.jy) ui.jyo = (ui.jyo || 0) + 1;
+    else ui.jm++;
     render();
   },
+  jview: a => {
+    ui.jy = a.dataset.v === 'y';
+    if (ui.jy) ui.jyo = new Date(new Date().getFullYear(), new Date().getMonth() + ui.jm, 1).getFullYear() - new Date().getFullYear();
+    render();
+  },
+  jmon: a => {
+    const n = new Date();
+    ui.jy = false;
+    ui.jm = (+a.dataset.y - n.getFullYear()) * 12 + (+a.dataset.m - n.getMonth());
+    render();
+  },
+  jday: a => openDay(a.dataset.k),
   jmore: () => {
     ui.jlim += 40;
     render();
