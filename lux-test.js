@@ -94,6 +94,12 @@
   }
   const elapsed = s => (s.fadedAt || Date.now()) - s.t0;
   const pv = s => (s.pid && byId(s.pid)) || { id: 't' + s.id, name: s.name, brand: s.brand, fam: s.fam || '' };
+  const spotsText = s => (s.spots || []).map(c => (SPOTS.find(x => x[0] === c) || [0, c])[1]).join(' + ');
+  /* What was sprayed in a test, for the rating sheet and a repeat start on the same day. */
+  const sprayLine = s =>
+    [spotsText(s), s.sprays + (s.sprays === 1 ? ' spray' : ' sprays'), 'sprayed ' + clock(s.t0) + ' (' + relStr(Date.now() - s.t0) + ' ago)']
+      .filter(Boolean)
+      .join(' \u00b7 ');
   function spotsLabel(s) {
     if (Date.now() - s.t0 > 24 * H || !s.spots || !s.spots.length) return '';
     return s.spots.map(c => (SPOTS.find(x => x[0] === c) || [0, c])[1]).join(' + ');
@@ -526,9 +532,23 @@
       pre || {}
     );
   }
+  /* A test of the picked fragrance on the chosen day: starting again continues it. */
+  function sameDayTest() {
+    if (!ST.name) return null;
+    const day = dkey(ST.earlier ? ST.t : Date.now()),
+      k = keyOf({ pid: ST.pid, name: ST.name, brand: ST.brand });
+    return tt().sessions.find(x => dkey(x.t0) === day && keyOf(x) === k) || null;
+  }
   function startHtml() {
     const c = ST.city,
-      cab = ST.pid && byId(ST.pid);
+      cab = ST.pid && byId(ST.pid),
+      same = sameDayTest();
+    if (same)
+      return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Start a test</h2>
+  <div class="fg" style="margin-top:16px"><label>Fragrance</label><div class="tt-pick"><span><b>${esc(ST.name)}</b> <small>${esc(ST.brand)}</small></span><button data-ta="tclear">Change</button></div></div>
+  <div class="card" style="margin:0 0 16px;padding:14px 16px"><b>Already tested ${ST.earlier ? 'that day' : 'today'}</b><p class="muted" style="margin:6px 0 0;font-size:14px">${esc(sprayLine(same))}</p><p class="muted" style="margin:6px 0 0;font-size:13px">The same sprays continue: add impressions or rate it again. Use New spray in the test if you spray more.</p></div>
+  <div class="fg"><label class="tt-chk" style="margin:0"><input type="checkbox" id="ts-early" data-tc="tearly"${ST.earlier ? ' checked' : ''}> I sprayed earlier</label>${ST.earlier ? `<input type="datetime-local" id="ts-t" value="${toLocalInput(ST.t)}" max="${toLocalInput(Date.now())}" style="margin-top:8px">` : ''}</div>
+  <div class="foot"><button class="btn ghost" data-act="close">Cancel</button><button class="btn" data-ta="tgo">Continue ${ST.earlier ? 'that' : 'today\u2019s'} test</button></div>`;
     return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Start a test</h2>
   <div class="fg" style="margin-top:16px"><label>Fragrance</label>${ST.name ? `<div class="tt-pick"><span><b>${esc(ST.name)}</b> <small>${esc(ST.brand)}${cab ? (cab.shelf === 'wish' ? ' \u00b7 on your wishlist' : ' \u00b7 in cabinet') : ''}</small></span><button data-ta="tclear">Change</button></div>` : `<input id="ts-q" data-ti="tsq" placeholder="Search your cabinet or library" autocomplete="off" value="${esc(ST.q)}"><div class="sugg" id="ts-sugg"></div>`}</div>
   <div class="fg"><span class="lb">Where on the body</span><div class="chips">${SPOTS.map(([k, l]) => `<button type="button" class="chip${ST.spots.includes(k) ? ' on' : ''}" data-ta="tspot" data-v="${k}">${l}</button>`).join('')}</div></div>
@@ -683,7 +703,7 @@
     const s = tt().sessions.find(x => x.id === RT.sid),
       hrs = s.fadedAt ? (s.fadedAt - s.t0) / H : null;
     const nr = (s.ratings || (s.rating ? [s.rating] : [])).length;
-    return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Rate this test</h2><p class="muted" style="margin:4px 0 16px">${esc(s.name)} \u00b7 ${esc(s.brand)}${hrs != null ? ' \u00b7 lasted ' + relStr(hrs * H) : ''}${nr ? ` \u00b7 rating ${nr + 1}; it is averaged with the ${nr === 1 ? 'earlier one' : nr + ' earlier ones'} (now ${r1(score(s))})` : ''}</p>
+    return `<button class="x" data-act="close" aria-label="Close">\u00d7</button><h2>Rate this test</h2><p class="muted" style="margin:4px 0 16px">${esc(s.name)} \u00b7 ${esc(s.brand)}${hrs != null ? ' \u00b7 lasted ' + relStr(hrs * H) : ''}${nr ? ` \u00b7 rating ${nr + 1}; it is averaged with the ${nr === 1 ? 'earlier one' : nr + ' earlier ones'} (now ${r1(score(s))})` : ''}</p><div class="tt-kv" style="margin:-6px 0 14px"><span>Sprayed</span><span>${esc(sprayLine(s))}</span></div>
   ${rangeRow('longevity', 'Longevity' + (hrs != null && !s.rating ? ' (suggested from the time it faded)' : ''), RT.v.longevity, 1)}${rangeRow('sillage', 'Sillage and aura', RT.v.sillage, 1)}${rangeRow('skin', 'Scent on skin', RT.v.skin, 1)}${rangeRow('value', 'Value for the price (optional, 0 to skip)', RT.v.value, 0)}
   <div class="fg"><span class="lb">Would you buy it</span><div class="chips">${[
     ['yes', 'Yes'],
@@ -1060,6 +1080,13 @@
       const g = findGroup(a.dataset.k);
       if (!g) return;
       closeAll();
+      const k = keyOf(g),
+        today = tt().sessions.find(x => dkey(x.t0) === dkey(Date.now()) && keyOf(x) === k);
+      if (today) {
+        toast('Continuing today\u2019s test of ' + today.name);
+        openDetail(today.id);
+        return;
+      }
       openStart({ pid: g.pid, name: g.name, brand: g.brand, fam: g.fam });
     },
     gwish: a => {
