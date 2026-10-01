@@ -8,7 +8,7 @@
 <!-- Android bridge this page needs; the app only takes silent content updates it supports (android/.../Ota.java). -->
 <meta name="lux-native" content="3">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Lux">
+<meta name="apple-mobile-web-app-title" content="Lux Cabinet">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -1886,7 +1886,7 @@ select.mini {
 </svg>
 <div class="app">
 <aside class="rail">
-<div class="brand"><div class="mark">Lux</div><div class="msub">Perfume cabinet</div></div>
+<div class="brand"><div class="mark">Lux</div><div class="msub">Perfume Cabinet</div></div>
 <nav class="nav" id="nav">
 <button class="nb" data-act="tab" data-t="shelf"><svg><use href="#i-shelf"/></svg>Collection</button>
 <button class="nb" data-act="tab" data-t="journal"><svg><use href="#i-book"/></svg>Journal</button>
@@ -3175,7 +3175,7 @@ function vSet() {
  <input type="file" id="photoMany" accept="image/*" multiple>
  <div class="set-row"><div>Imported library<small>${fmt(IMPORTED.length)} entries. Your own entries are kept.</small></div><button class="btn ghost sm" data-act="clrImp">Clear imported</button></div>
  <div class="set-row"><div>Erase everything<small>Removes the collection, journal, photos and own entries</small></div><button class="btn danger sm" data-act="reset">Erase all</button></div></div>
- <div class="card"><h3>About</h3><div class="set-row"><div>Developed by<small>Ivan S. - Epicurus001, Oslo</small></div></div></div>`;
+ <div class="card"><h3>About</h3><div class="set-row"><div>Lux · Perfume Cabinet<small>A private cabinet for your fragrances, wears and tests</small></div></div><div class="set-row"><div>Made by<small>Ivan S. · Epicurus001 · Srbija / Norge</small></div></div></div>`;
 }
 
 /* ================= render ================= */
@@ -5787,7 +5787,7 @@ async function drawShare() {
   x.fillRect(84, 1238, W - 168, 1.5);
   x.fillStyle = TX3;
   x.font = `400 22px ${SAN}`;
-  x.fillText('Made with Lux', 84, 1278);
+  x.fillText('Made with Lux · Perfume Cabinet', 84, 1278);
   x.textAlign = 'right';
   x.fillText(
     new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }),
