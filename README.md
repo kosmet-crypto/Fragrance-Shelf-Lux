@@ -70,6 +70,10 @@ Settings → **Backup and restore**: download a backup file, copy it as text, or
 A backup holds the collection, journal, tests, settings, photos and your own library entries.
 Lux also keeps a few automatic snapshots and reminds you when the last backup is older than 14 days.
 
+## Name and icon
+The app is called **Lux · Perfume Cabinet** (under the icon on the phone: *Lux Cabinet*). The icon is a rendered,
+photo-like picture of a fictional Lux bottle. Made by Ivan S. · Epicurus001 · Srbija / Norge.
+
 ## Install as an app (PWA)
 * **Android / Chrome:** open the GitHub Pages link, then menu → *Install app* (or *Add to Home screen*).
 * **iPhone / Safari:** open the link, tap *Share* → *Add to Home Screen*.

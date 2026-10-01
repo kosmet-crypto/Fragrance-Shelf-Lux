@@ -128,7 +128,7 @@ final class Widgets {
         File f = imageFile(ctx, id);
         Bitmap bm = !id.isEmpty() && f.isFile() ? BitmapFactory.decodeFile(f.getPath()) : null;
         if (bm != null) v.setImageViewBitmap(R.id.w_img, bm);
-        else v.setImageViewResource(R.id.w_img, R.mipmap.ic_launcher_foreground);
+        else v.setImageViewResource(R.id.w_img, R.mipmap.ic_launcher_background);
         v.setContentDescription(R.id.w_img, p == null ? "Lux" : "Today's pick: " + p.optString("t"));
         v.setInt(R.id.w_img, "setImageAlpha", 225);
     }

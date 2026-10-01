@@ -19,7 +19,7 @@
             android:layout_height="match_parent"
             android:layout_margin="4dp"
             android:scaleType="fitCenter"
-            android:src="@mipmap/ic_launcher_foreground" />
+            android:src="@mipmap/ic_launcher_background" />
 
         <TextView
             android:id="@+id/w_next"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Foreground and background are rendered PNGs (glass, glow and gold need blur and gradients
-     that vector drawables cannot do); they match icons/*.png of the web app. -->
+<!-- The background is a rendered, photo-like picture of a fictional Lux bottle (the same as icons/*.png
+     of the web app); the bottle stays inside the safe zone, so the foreground is left empty. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@mipmap/ic_launcher_background" />
     <foreground android:drawable="@mipmap/ic_launcher_foreground" />
