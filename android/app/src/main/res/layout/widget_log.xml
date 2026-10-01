@@ -17,6 +17,19 @@
         android:src="@mipmap/ic_launcher_foreground" />
 
     <TextView
+        android:id="@+id/w_next"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="top|start"
+        android:background="@drawable/widget_btn_ghost"
+        android:contentDescription="Next suggestion"
+        android:gravity="center"
+        android:text="›"
+        android:textColor="#F5F0E4"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/w_done"
         android:layout_width="24dp"
         android:layout_height="24dp"
