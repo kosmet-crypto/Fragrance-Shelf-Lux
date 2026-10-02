@@ -2506,26 +2506,41 @@ function splitNotes(t) {
     .slice(0, 24);
 }
 /* Reads notes pasted from Fragrantica or any shop page: "Top notes are A, B and C; middle notes are ..."
-   or a pyramid with one note per line under Top / Middle / Base. Without those words it is one list. */
+   or a pyramid under Top / Heart / Base headings ("Top notes", "Heart:", "Base -" or a heading alone on
+   its line). Without headings it is one list. */
 function parseNotes(t) {
   t = String(t || '').replace(/\r/g, '');
   const o = { top: [], mid: [], base: [] },
     marks = [];
-  const re = /\b(top|head|opening|middle|heart|base|bottom)[ \t]+notes?\b(?:[ \t]+(?:are|is))?[ \t]*:?/gi;
+  const re =
+    /\b(top|head|opening|middle|heart|base|bottom|dry[ -]?down)(?:([ \t]+notes?\b(?:[ \t]+(?:are|is))?[ \t]*[:\u2013\u2014-]?)|[ \t]*[:\u2013\u2014]|[ \t]+-(?=\s)|(?=[ \t]*(?:\n|$)))/gi;
   let m;
-  while ((m = re.exec(t)))
+  while ((m = re.exec(t))) {
+    /* without the word "notes" or a colon, a heading must stand alone on its line ("Heart") */
+    if (!m[2] && !/[:\u2013\u2014-]/.test(m[0]) && t.slice(t.lastIndexOf('\n', m.index - 1) + 1, m.index).trim())
+      continue;
     marks.push({
       k: /top|head|open/i.test(m[1]) ? 'top' : /mid|heart/i.test(m[1]) ? 'mid' : 'base',
       s: m.index,
       e: m.index + m[0].length
     });
+  }
   if (!marks.length) {
     o.mid = splitNotes(t);
     return o;
   }
   marks.forEach((x, i) => {
-    let seg = t.slice(x.e, i + 1 < marks.length ? marks[i + 1].s : t.length);
-    seg = seg.split(/\.(?:\s|$)|\n\s*\n/)[0];
+    const last = i + 1 === marks.length;
+    let seg = t.slice(x.e, last ? t.length : marks[i + 1].s).replace(/^\s+/, '');
+    seg = seg.split(/\.(?:\s|$)/)[0];
+    /* the last section ends at a blank line, unless its notes are one per line with blank lines between */
+    if (last) {
+      const B = seg.split(/\n\s*\n/),
+        one = b => !/\n/.test(b.trim()) && b.trim().length <= 40;
+      let k = 1;
+      if (one(B[0])) while (k < B.length && one(B[k])) k++;
+      seg = B.slice(0, k).join('\n');
+    }
     o[x.k] = splitNotes(o[x.k].join(',') + ',' + seg);
   });
   return o;
